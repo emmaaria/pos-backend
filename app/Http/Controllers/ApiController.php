@@ -100,6 +100,25 @@ class ApiController extends Controller
             return response()->json(compact('status'));
         }
     }
+    public function deleteCategory($id)
+    {
+        if(!empty($id)){
+            $deleted = Category::where('id', $id)->delete();
+            if ($deleted){
+                $status = false;
+                $message = 'Category deleted';
+                return response()->json(compact('status', 'message'));
+            }else{
+                $status = false;
+                $error = 'Category not found';
+                return response()->json(compact('status', 'error'));
+            }
+        }else{
+            $status = false;
+            $error = 'Category not found';
+            return response()->json(compact('status', 'error'));
+        }
+    }
     /*
     |--------------------------------------------------------------------------
     | Category Routes End

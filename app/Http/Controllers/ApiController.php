@@ -100,8 +100,9 @@ class ApiController extends Controller
             return response()->json(compact('status'));
         }
     }
-    public function deleteCategory($id)
+    public function deleteCategory(Request $request)
     {
+        $id = $request->id;
         if(!empty($id)){
             $deleted = Category::where('id', $id)->delete();
             if ($deleted){

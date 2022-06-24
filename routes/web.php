@@ -12,7 +12,11 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
-
+Route::get('/migrate', function () {
+    $output = [];
+    \Artisan::call('migrate', $output);
+    dd('Done');
+});
 Route::get('/', function () {
     return view('welcome');
 });

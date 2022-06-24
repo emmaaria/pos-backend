@@ -61,7 +61,7 @@ class ApiController extends Controller
     */
     public function getCategories()
     {
-        $categories = Category::select('id', 'name')->paginate(request()->all());
+        $categories = Category::select('id', 'name')->paginate(1);
         $status = true;
         return response()->json(compact('status', 'categories'));
     }

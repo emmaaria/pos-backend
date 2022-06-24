@@ -106,7 +106,7 @@ class ApiController extends Controller
         if(!empty($id)){
             $deleted = Category::where('id', $id)->delete();
             if ($deleted){
-                $status = false;
+                $status = true;
                 $message = 'Category deleted';
                 return response()->json(compact('status', 'message'));
             }else{

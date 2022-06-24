@@ -20,6 +20,6 @@ Route::group(['middleware' => 'api'], function ($router) {
     Route::get('/category', [\App\Http\Controllers\ApiController::class, 'getCategories']);
     Route::get('/category/{id}', [\App\Http\Controllers\ApiController::class, 'getCategory']);
     Route::post('/category/store', [\App\Http\Controllers\ApiController::class, 'storeCategory']);
-    Route::post('/category/update', [\App\Http\Controllers\ApiController::class, 'storeCategory']);
+    Route::post('/category/update', [\App\Http\Controllers\ApiController::class, 'updateCategory']);
     Route::post('/category/delete', [\App\Http\Controllers\ApiController::class, 'deleteCategory']);
 });

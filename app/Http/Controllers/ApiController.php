@@ -100,6 +100,26 @@ class ApiController extends Controller
             return response()->json(compact('status'));
         }
     }
+    public function updateCategory(Request $request)
+    {
+        $validator = Validator::make($request->all(),
+            [
+                'id' => 'required',
+                'name' => 'required',
+            ]
+        );
+        if ($validator->fails()) {
+            $status = false;
+            $errors = $validator->errors();
+            return response()->json(compact('status', 'errors'));
+        }
+        $category = Category::where('id', $request->id)->first();
+        $category->name = $request->name;
+        $category->save();
+        $status = true;
+        $message = 'Updated';
+        return response()->json(compact('status', 'message'));
+    }
     public function deleteCategory(Request $request)
     {
         $id = $request->id;

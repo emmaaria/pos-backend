@@ -59,11 +59,18 @@ class ApiController extends Controller
     | Category Routes Start
     |--------------------------------------------------------------------------
     */
-    public function getCategories()
+    public function getCategories(Request $request)
     {
-        $categories = Category::select('id', 'name')->paginate(1);
-        $status = true;
-        return response()->json(compact('status', 'categories'));
+        $name = $request->name;
+        if (empty($name)){
+            $categories = Category::select('id', 'name')->paginate(50);
+            $status = true;
+            return response()->json(compact('status', 'categories'));
+        }else{
+            $categories = Category::select('id', 'name')->where('name', 'like', '%' . $name . '%')->paginate(50);
+            $status = true;
+            return response()->json(compact('status', 'categories'));
+        }
     }
 
     public function getCategory($id)

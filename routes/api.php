@@ -28,4 +28,10 @@ Route::group(['middleware' => 'api'], function ($router) {
     Route::post('/unit/store', [\App\Http\Controllers\ApiController::class, 'storeUnit']);
     Route::post('/unit/update', [\App\Http\Controllers\ApiController::class, 'updateUnit']);
     Route::post('/unit/delete', [\App\Http\Controllers\ApiController::class, 'deleteUnit']);
+
+    Route::get('/customer', [\App\Http\Controllers\ApiController::class, 'getCustomers']);
+    Route::get('/customer/{id}', [\App\Http\Controllers\ApiController::class, 'getCustomer']);
+    Route::post('/customer/store', [\App\Http\Controllers\ApiController::class, 'storeCustomer']);
+    Route::post('/customer/update', [\App\Http\Controllers\ApiController::class, 'updateCustomer']);
+    Route::post('/customer/delete', [\App\Http\Controllers\ApiController::class, 'deleteCustomer']);
 });

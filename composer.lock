@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "10e06f47f1c8b775ae8c13082d5393af",
+    "content-hash": "9af97f4b0ef0d84666b3e2ff1e51bb7f",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -3052,6 +3052,63 @@
                 }
             ],
             "time": "2021-09-25T23:10:38+00:00"
+        },
+        {
+            "name": "skycoder/invoice-number-generator",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/skycoder026/invoice-number-generator.git",
+                "reference": "812cb04e78787736cbbfb1d35576d93588936571"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/skycoder026/invoice-number-generator/zipball/812cb04e78787736cbbfb1d35576d93588936571",
+                "reference": "812cb04e78787736cbbfb1d35576d93588936571",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.2.5"
+            },
+            "default-branch": true,
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.x-dev"
+                },
+                "laravel": {
+                    "providers": [
+                        "Skycoder\\InvoiceNumberGenerator\\InvoiceNumberGeneratorServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Skycoder\\InvoiceNumberGenerator\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Skycoder",
+                    "email": "akashcseuu026@gmail.com"
+                }
+            ],
+            "description": "More flexible and unique invoice number generator",
+            "keywords": [
+                "akashcsem",
+                "asmakash",
+                "invoice-number-generator",
+                "skycoder"
+            ],
+            "support": {
+                "issues": "https://github.com/skycoder026/invoice-number-generator/issues",
+                "source": "https://github.com/skycoder026/invoice-number-generator/tree/master"
+            },
+            "time": "2021-12-16T00:00:00+00:00"
         },
         {
             "name": "swiftmailer/swiftmailer",
@@ -8256,7 +8313,9 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": [],
+    "stability-flags": {
+        "skycoder/invoice-number-generator": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\Customer;
+use App\Models\CustomerLedger;
 use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -236,6 +238,101 @@ class ApiController extends Controller
     /*
     |--------------------------------------------------------------------------
     | Unit End
+    |--------------------------------------------------------------------------
+    */
+
+    /*
+    |--------------------------------------------------------------------------
+    | Customer Start
+    |--------------------------------------------------------------------------
+    */
+    public function getCustomers(Request $request)
+    {
+        $name = $request->name;
+        if (empty($name)){
+            $customers = Customer::select('id', 'name')->paginate(50);
+            $status = true;
+            return response()->json(compact('status', 'customers'));
+        }else{
+            $customers = Customer::select('id', 'name')->where('name', 'like', '%' . $name . '%')->paginate(50);
+            $status = true;
+            return response()->json(compact('status', 'customers'));
+        }
+    }
+
+    public function getCustomer($id)
+    {
+        $customer = Customer::where('id', $id)->first();
+        $status = true;
+        return response()->json(compact('status', 'customer'));
+    }
+    public function storeCustomer(Request $request)
+    {
+        $validator = Validator::make($request->all(),
+            [
+                'name' => 'required',
+            ]
+        );
+        if ($validator->fails()) {
+            $status = false;
+            $errors = $validator->errors();
+            return response()->json(compact('status', 'errors'));
+        }
+        $customerId = Unit::insertGetId(['name'=>$request->name,'mobile' => $request->mobile, 'address' => $request->address]);
+        if ($customerId){
+            if (!empty($request->due)){
+                CustomerLedger::create();
+            }
+            $status = true;
+            return response()->json(compact('status'));
+        }else{
+            $status = false;
+            return response()->json(compact('status'));
+        }
+    }
+    public function updateCustomer(Request $request)
+    {
+        $validator = Validator::make($request->all(),
+            [
+                'id' => 'required',
+                'name' => 'required',
+            ]
+        );
+        if ($validator->fails()) {
+            $status = false;
+            $errors = $validator->errors();
+            return response()->json(compact('status', 'errors'));
+        }
+        $unit = Unit::where('id', $request->id)->first();
+        $unit->name = $request->name;
+        $unit->save();
+        $status = true;
+        $message = 'Updated';
+        return response()->json(compact('status', 'message'));
+    }
+    public function deleteCustomer(Request $request)
+    {
+        $id = $request->id;
+        if(!empty($id)){
+            $deleted = Unit::where('id', $id)->delete();
+            if ($deleted){
+                $status = true;
+                $message = 'Unit deleted';
+                return response()->json(compact('status', 'message'));
+            }else{
+                $status = false;
+                $error = 'Unit not found';
+                return response()->json(compact('status', 'error'));
+            }
+        }else{
+            $status = false;
+            $error = 'Unit not found';
+            return response()->json(compact('status', 'error'));
+        }
+    }
+    /*
+    |--------------------------------------------------------------------------
+    | Customer End
     |--------------------------------------------------------------------------
     */
 }

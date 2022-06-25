@@ -9,5 +9,5 @@ class CustomerLedger extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['customer_id', 'transaction_id', 'type', 'amount', 'date', 'comment'];
+    protected $fillable = ['customer_id', 'transaction_id', 'type', 'due', 'date', 'comment','deposit'];
 }

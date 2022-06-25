@@ -17,7 +17,7 @@ class ApiController extends Controller
 {
     public function __construct()
     {
-//        $this->middleware('auth.custom:api', ['except' => ['login']]);
+        $this->middleware('auth.custom:api', ['except' => ['login']]);
     }
 
     protected function guard()
@@ -258,16 +258,9 @@ class ApiController extends Controller
     {
         $name = $request->name;
         if (empty($name)) {
-            $customersObjects = DB::table('customers')
+            $customers = DB::table('customers')
                         ->select('id', 'name', 'mobile' , 'address')
                         ->paginate(50);
-            dd($customersObjects);
-            $customers = $customersObjects['links'];
-//            foreach ($customersObjects as $customersObject){
-//                $customers[] = array(
-//                    'link'
-//                );
-//            }
             $status = true;
             return response()->json(compact('status', 'customers'));
         } else {
@@ -310,7 +303,8 @@ class ApiController extends Controller
                     'customer_id' => $customerId,
                     'transaction_id' => $txId,
                     'type' => 'due',
-                    'amount' => $request->due,
+                    'due' => $request->due,
+                    'deposit' => 0,
                     'date' => date('Y-m-d'),
                     'comment' => 'Previous Due'
                 ));

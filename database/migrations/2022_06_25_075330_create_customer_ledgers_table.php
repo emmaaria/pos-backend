@@ -18,7 +18,8 @@ class CreateCustomerLedgersTable extends Migration
             $table->string('customer_id');
             $table->string('transaction_id');
             $table->string('type');
-            $table->string('amount');
+            $table->string('due');
+            $table->string('deposit');
             $table->string('date');
             $table->string('comment');
             $table->timestamps();

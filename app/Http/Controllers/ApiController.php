@@ -286,7 +286,7 @@ class ApiController extends Controller
             $errors = $validator->errors();
             return response()->json(compact('status', 'errors'));
         }
-        $customerId = Unit::insertGetId(['name' => $request->name, 'mobile' => $request->mobile, 'address' => $request->address]);
+        $customerId = Customer::insertGetId(['name' => $request->name, 'mobile' => $request->mobile, 'address' => $request->address]);
 
         if ($customerId) {
             if (!empty($request->due)) {

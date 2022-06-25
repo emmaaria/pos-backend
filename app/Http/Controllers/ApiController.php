@@ -261,7 +261,7 @@ class ApiController extends Controller
             $customersObjects = DB::table('customers')
                         ->select('id', 'name', 'mobile' , 'address')
                         ->paginate(50);
-            $customers = $customersObjects->links;
+            $customers = $customersObjects['links'];
 //            foreach ($customersObjects as $customersObject){
 //                $customers[] = array(
 //                    'link'

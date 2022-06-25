@@ -17,7 +17,7 @@ class ApiController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth.custom:api', ['except' => ['login']]);
+//        $this->middleware('auth.custom:api', ['except' => ['login']]);
     }
 
     protected function guard()

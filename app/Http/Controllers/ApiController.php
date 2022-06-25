@@ -261,7 +261,6 @@ class ApiController extends Controller
             $customers = DB::table('customers')
                         ->select('customers.id', 'customers.name', 'customers.mobile' , 'customers.address', DB::raw('SUM(SUM(due) - SUM(deposit)) as balance'))
                         ->join('customer_ledgers', 'customer_ledgers.customer_id', '=' , 'customers.id')
-                        ->groupBy('customers.id', 'customers.name', 'customers.mobile' , 'customers.address')
                         ->paginate(50);
             $status = true;
             return response()->json(compact('status', 'customers'));

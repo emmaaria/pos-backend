@@ -431,7 +431,7 @@ class ApiController extends Controller
                 $txIdGenerator = new InvoiceNumberGeneratorService();
                 $txId = $txIdGenerator->currentYear()->prefix('')->setCompanyId(1)->startAt(1)->getInvoiceNumber('Due');
                 SupplierLedger::create(array(
-                    'customer_id' => $supplierId,
+                    'supplier_id' => $supplierId,
                     'transaction_id' => $txId,
                     'type' => 'due',
                     'due' => $request->due,

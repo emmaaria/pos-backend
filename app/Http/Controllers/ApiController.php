@@ -268,6 +268,7 @@ class ApiController extends Controller
         } else {
             $customers = DB::table('customers')
                         ->select('customers.id', 'customers.name', 'customers.mobile' , 'customers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
+                        ->join('customer_ledgers', 'customer_ledgers.customer_id', '=' , 'customers.id')
                         ->where('customers.name', 'like', '%' . $name . '%')
                         ->orWhere('customers.mobile', 'like', '%' . $name . '%')
                         ->orWhere('customers.address', 'like', '%' . $name . '%')

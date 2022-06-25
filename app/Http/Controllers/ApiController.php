@@ -266,10 +266,12 @@ class ApiController extends Controller
             $status = true;
             return response()->json(compact('status', 'customers'));
         } else {
-            $customers = Customer::select('id', 'name', 'mobile' , 'address')
+            $customers = DB::table('customers')
+                        ->select('customers.id', 'customers.name', 'customers.mobile' , 'customers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
                         ->where('name', 'like', '%' . $name . '%')
                         ->orWhere('mobile', 'like', '%' . $name . '%')
                         ->orWhere('address', 'like', '%' . $name . '%')
+                        ->groupBy('customers.id', 'customers.name', 'customers.mobile' , 'customers.address')
                         ->paginate(50);
             $status = true;
             return response()->json(compact('status', 'customers'));

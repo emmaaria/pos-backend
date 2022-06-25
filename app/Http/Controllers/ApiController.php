@@ -9,6 +9,7 @@ use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Skycoder\InvoiceNumberGenerator\InvoiceNumberGeneratorService;
 
@@ -257,11 +258,19 @@ class ApiController extends Controller
     {
         $name = $request->name;
         if (empty($name)) {
-            $customers = Customer::select('id', 'name')->paginate(50);
+            $customers = DB::table('customers')
+                        ->select('customers.id', 'customers.name', 'customers.mobile' , 'customers.address', DB::raw('SUM(amount) as total_debit'))
+                        ->join('customer_ledgers','customer_ledgers.customer_id' , '=', 'customers.id')
+                        ->groupBy('customer_ledgers.type')
+                        ->paginate(50);
             $status = true;
             return response()->json(compact('status', 'customers'));
         } else {
-            $customers = Customer::select('id', 'name')->where('name', 'like', '%' . $name . '%')->paginate(50);
+            $customers = Customer::select('id', 'name', 'mobile' , 'address')
+                        ->where('name', 'like', '%' . $name . '%')
+                        ->orWhere('mobile', 'like', '%' . $name . '%')
+                        ->orWhere('address', 'like', '%' . $name . '%')
+                        ->paginate(50);
             $status = true;
             return response()->json(compact('status', 'customers'));
         }

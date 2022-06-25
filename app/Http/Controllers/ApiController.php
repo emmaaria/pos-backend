@@ -258,11 +258,17 @@ class ApiController extends Controller
     {
         $name = $request->name;
         if (empty($name)) {
-            $customers = DB::table('customers')
-                        ->select('customers.id', 'customers.name', 'customers.mobile' , 'customers.address', DB::raw('SUM(amount) as total_debit'))
-                        ->join('customer_ledgers','customer_ledgers.customer_id' , '=', 'customers.id')
-                        ->groupBy('customer_ledgers.type')
+            $customersObjects = DB::table('customers')
+                        ->select('id', 'name', 'mobile' , 'address')
                         ->paginate(50);
+            $customers = array(
+                'links' => $customersObjects->links,
+            );
+//            foreach ($customersObjects as $customersObject){
+//                $customers[] = array(
+//                    'link'
+//                );
+//            }
             $status = true;
             return response()->json(compact('status', 'customers'));
         } else {

@@ -10,6 +10,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Skycoder\InvoiceNumberGenerator\InvoiceNumberGeneratorService;
 
 class ApiController extends Controller
 {
@@ -42,7 +43,7 @@ class ApiController extends Controller
             return response()->json(compact('status', 'errors'));
         }
         $status = true;
-        $user = User::select('id','name','email','role')->where('email',$request->email)->first();
+        $user = User::select('id', 'name', 'email', 'role')->where('email', $request->email)->first();
         return response()->json(compact('status', 'user', 'token'));
     }
 
@@ -65,11 +66,11 @@ class ApiController extends Controller
     public function getCategories(Request $request)
     {
         $name = $request->name;
-        if (empty($name)){
+        if (empty($name)) {
             $categories = Category::select('id', 'name')->paginate(50);
             $status = true;
             return response()->json(compact('status', 'categories'));
-        }else{
+        } else {
             $categories = Category::select('id', 'name')->where('name', 'like', '%' . $name . '%')->paginate(50);
             $status = true;
             return response()->json(compact('status', 'categories'));
@@ -82,6 +83,7 @@ class ApiController extends Controller
         $status = true;
         return response()->json(compact('status', 'category'));
     }
+
     public function storeCategory(Request $request)
     {
         $validator = Validator::make($request->all(),
@@ -94,15 +96,16 @@ class ApiController extends Controller
             $errors = $validator->errors();
             return response()->json(compact('status', 'errors'));
         }
-        $categoty = Category::create(['name'=>$request->name]);
-        if ($categoty){
+        $categoty = Category::create(['name' => $request->name]);
+        if ($categoty) {
             $status = true;
             return response()->json(compact('status'));
-        }else{
+        } else {
             $status = false;
             return response()->json(compact('status'));
         }
     }
+
     public function updateCategory(Request $request)
     {
         $validator = Validator::make($request->all(),
@@ -123,21 +126,22 @@ class ApiController extends Controller
         $message = 'Updated';
         return response()->json(compact('status', 'message'));
     }
+
     public function deleteCategory(Request $request)
     {
         $id = $request->id;
-        if(!empty($id)){
+        if (!empty($id)) {
             $deleted = Category::where('id', $id)->delete();
-            if ($deleted){
+            if ($deleted) {
                 $status = true;
                 $message = 'Category deleted';
                 return response()->json(compact('status', 'message'));
-            }else{
+            } else {
                 $status = false;
                 $error = 'Category not found';
                 return response()->json(compact('status', 'error'));
             }
-        }else{
+        } else {
             $status = false;
             $error = 'Category not found';
             return response()->json(compact('status', 'error'));
@@ -157,11 +161,11 @@ class ApiController extends Controller
     public function getUnits(Request $request)
     {
         $name = $request->name;
-        if (empty($name)){
+        if (empty($name)) {
             $units = Unit::select('id', 'name')->paginate(50);
             $status = true;
             return response()->json(compact('status', 'units'));
-        }else{
+        } else {
             $units = Unit::select('id', 'name')->where('name', 'like', '%' . $name . '%')->paginate(50);
             $status = true;
             return response()->json(compact('status', 'units'));
@@ -174,6 +178,7 @@ class ApiController extends Controller
         $status = true;
         return response()->json(compact('status', 'unit'));
     }
+
     public function storeUnit(Request $request)
     {
         $validator = Validator::make($request->all(),
@@ -186,15 +191,16 @@ class ApiController extends Controller
             $errors = $validator->errors();
             return response()->json(compact('status', 'errors'));
         }
-        $unit = Unit::create(['name'=>$request->name]);
-        if ($unit){
+        $unit = Unit::create(['name' => $request->name]);
+        if ($unit) {
             $status = true;
             return response()->json(compact('status'));
-        }else{
+        } else {
             $status = false;
             return response()->json(compact('status'));
         }
     }
+
     public function updateUnit(Request $request)
     {
         $validator = Validator::make($request->all(),
@@ -215,21 +221,22 @@ class ApiController extends Controller
         $message = 'Updated';
         return response()->json(compact('status', 'message'));
     }
+
     public function deleteUnit(Request $request)
     {
         $id = $request->id;
-        if(!empty($id)){
+        if (!empty($id)) {
             $deleted = Unit::where('id', $id)->delete();
-            if ($deleted){
+            if ($deleted) {
                 $status = true;
                 $message = 'Unit deleted';
                 return response()->json(compact('status', 'message'));
-            }else{
+            } else {
                 $status = false;
                 $error = 'Unit not found';
                 return response()->json(compact('status', 'error'));
             }
-        }else{
+        } else {
             $status = false;
             $error = 'Unit not found';
             return response()->json(compact('status', 'error'));
@@ -249,11 +256,11 @@ class ApiController extends Controller
     public function getCustomers(Request $request)
     {
         $name = $request->name;
-        if (empty($name)){
+        if (empty($name)) {
             $customers = Customer::select('id', 'name')->paginate(50);
             $status = true;
             return response()->json(compact('status', 'customers'));
-        }else{
+        } else {
             $customers = Customer::select('id', 'name')->where('name', 'like', '%' . $name . '%')->paginate(50);
             $status = true;
             return response()->json(compact('status', 'customers'));
@@ -266,6 +273,7 @@ class ApiController extends Controller
         $status = true;
         return response()->json(compact('status', 'customer'));
     }
+
     public function storeCustomer(Request $request)
     {
         $validator = Validator::make($request->all(),
@@ -278,18 +286,30 @@ class ApiController extends Controller
             $errors = $validator->errors();
             return response()->json(compact('status', 'errors'));
         }
-        $customerId = Unit::insertGetId(['name'=>$request->name,'mobile' => $request->mobile, 'address' => $request->address]);
-        if ($customerId){
-            if (!empty($request->due)){
-                CustomerLedger::create();
+        $customerId = Unit::insertGetId(['name' => $request->name, 'mobile' => $request->mobile, 'address' => $request->address]);
+
+        if ($customerId) {
+            if (!empty($request->due)) {
+                $txIdGenerator = new InvoiceNumberGeneratorService();
+                $txId = $txIdGenerator->currentYear()->prefix('previous-due')->setCompanyId(1)->startAt(1)->getInvoiceNumber('Due');
+                CustomerLedger::create(array(
+                    'customer_id' => $customerId,
+                    'transaction_id' => $txId,
+                    'type' => 'due',
+                    'amount' => $request->due,
+                    'date' => date('Y-m-d'),
+                    'comment' => 'Previous Due'
+                ));
+                $txIdGenerator->setNextInvoiceNo();
             }
             $status = true;
             return response()->json(compact('status'));
-        }else{
+        } else {
             $status = false;
             return response()->json(compact('status'));
         }
     }
+
     public function updateCustomer(Request $request)
     {
         $validator = Validator::make($request->all(),
@@ -310,21 +330,22 @@ class ApiController extends Controller
         $message = 'Updated';
         return response()->json(compact('status', 'message'));
     }
+
     public function deleteCustomer(Request $request)
     {
         $id = $request->id;
-        if(!empty($id)){
+        if (!empty($id)) {
             $deleted = Unit::where('id', $id)->delete();
-            if ($deleted){
+            if ($deleted) {
                 $status = true;
                 $message = 'Unit deleted';
                 return response()->json(compact('status', 'message'));
-            }else{
+            } else {
                 $status = false;
                 $error = 'Unit not found';
                 return response()->json(compact('status', 'error'));
             }
-        }else{
+        } else {
             $status = false;
             $error = 'Unit not found';
             return response()->json(compact('status', 'error'));

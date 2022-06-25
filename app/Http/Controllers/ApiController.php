@@ -395,9 +395,9 @@ class ApiController extends Controller
             $suppliers = DB::table('suppliers')
                 ->select('suppliers.id', 'suppliers.name', 'suppliers.mobile' , 'suppliers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
                 ->join('supplier_ledgers', 'supplier_ledgers.customer_id', '=' , 'suppliers.id')
-                ->where('customers.name', 'like', '%' . $name . '%')
-                ->orWhere('customers.mobile', 'like', '%' . $name . '%')
-                ->orWhere('customers.address', 'like', '%' . $name . '%')
+                ->where('suppliers.name', 'like', '%' . $name . '%')
+                ->orWhere('suppliers.mobile', 'like', '%' . $name . '%')
+                ->orWhere('suppliers.address', 'like', '%' . $name . '%')
                 ->groupBy('suppliers.id', 'suppliers.name', 'suppliers.mobile' , 'suppliers.address')
                 ->paginate(50);
             $status = true;

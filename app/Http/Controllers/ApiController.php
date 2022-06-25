@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -56,7 +57,7 @@ class ApiController extends Controller
 
     /*
     |--------------------------------------------------------------------------
-    | Category Routes Start
+    | Category Start
     |--------------------------------------------------------------------------
     */
     public function getCategories(Request $request)
@@ -142,7 +143,99 @@ class ApiController extends Controller
     }
     /*
     |--------------------------------------------------------------------------
-    | Category Routes End
+    | Category End
+    |--------------------------------------------------------------------------
+    */
+
+    /*
+    |--------------------------------------------------------------------------
+    | Unit Start
+    |--------------------------------------------------------------------------
+    */
+    public function getUnits(Request $request)
+    {
+        $name = $request->name;
+        if (empty($name)){
+            $units = Unit::select('id', 'name')->paginate(50);
+            $status = true;
+            return response()->json(compact('status', 'units'));
+        }else{
+            $units = Unit::select('id', 'name')->where('name', 'like', '%' . $name . '%')->paginate(50);
+            $status = true;
+            return response()->json(compact('status', 'units'));
+        }
+    }
+
+    public function getUnit($id)
+    {
+        $unit = Unit::where('id', $id)->first();
+        $status = true;
+        return response()->json(compact('status', 'unit'));
+    }
+    public function storeUnit(Request $request)
+    {
+        $validator = Validator::make($request->all(),
+            [
+                'name' => 'required',
+            ]
+        );
+        if ($validator->fails()) {
+            $status = false;
+            $errors = $validator->errors();
+            return response()->json(compact('status', 'errors'));
+        }
+        $unit = Unit::create(['name'=>$request->name]);
+        if ($unit){
+            $status = true;
+            return response()->json(compact('status'));
+        }else{
+            $status = false;
+            return response()->json(compact('status'));
+        }
+    }
+    public function updateUnit(Request $request)
+    {
+        $validator = Validator::make($request->all(),
+            [
+                'id' => 'required',
+                'name' => 'required',
+            ]
+        );
+        if ($validator->fails()) {
+            $status = false;
+            $errors = $validator->errors();
+            return response()->json(compact('status', 'errors'));
+        }
+        $unit = Unit::where('id', $request->id)->first();
+        $unit->name = $request->name;
+        $unit->save();
+        $status = true;
+        $message = 'Updated';
+        return response()->json(compact('status', 'message'));
+    }
+    public function deleteUnit(Request $request)
+    {
+        $id = $request->id;
+        if(!empty($id)){
+            $deleted = Unit::where('id', $id)->delete();
+            if ($deleted){
+                $status = true;
+                $message = 'Unit deleted';
+                return response()->json(compact('status', 'message'));
+            }else{
+                $status = false;
+                $error = 'Unit not found';
+                return response()->json(compact('status', 'error'));
+            }
+        }else{
+            $status = false;
+            $error = 'Unit not found';
+            return response()->json(compact('status', 'error'));
+        }
+    }
+    /*
+    |--------------------------------------------------------------------------
+    | Unit End
     |--------------------------------------------------------------------------
     */
 }

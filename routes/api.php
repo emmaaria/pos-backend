@@ -22,4 +22,10 @@ Route::group(['middleware' => 'api'], function ($router) {
     Route::post('/category/store', [\App\Http\Controllers\ApiController::class, 'storeCategory']);
     Route::post('/category/update', [\App\Http\Controllers\ApiController::class, 'updateCategory']);
     Route::post('/category/delete', [\App\Http\Controllers\ApiController::class, 'deleteCategory']);
+
+    Route::get('/unit', [\App\Http\Controllers\ApiController::class, 'getUnits']);
+    Route::get('/unit/{id}', [\App\Http\Controllers\ApiController::class, 'getUnit']);
+    Route::post('/unit/store', [\App\Http\Controllers\ApiController::class, 'storeUnit']);
+    Route::post('/unit/update', [\App\Http\Controllers\ApiController::class, 'updateUnit']);
+    Route::post('/unit/delete', [\App\Http\Controllers\ApiController::class, 'deleteUnit']);
 });

@@ -17,6 +17,11 @@ Route::get('/migrate', function () {
     \Artisan::call('migrate', $output);
     dd('Done');
 });
+Route::get('/clear', function () {
+    $output = [];
+    \Artisan::call('optimize:clear', $output);
+    dd('Done');
+});
 Route::get('/', function () {
     return view('welcome');
 });

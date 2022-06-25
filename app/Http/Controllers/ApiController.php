@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Customer;
 use App\Models\CustomerLedger;
+use App\Models\Supplier;
+use App\Models\SupplierLedger;
 use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -350,7 +352,8 @@ class ApiController extends Controller
     {
         $id = $request->id;
         if (!empty($id)) {
-            $deleted = Unit::where('id', $id)->delete();
+            $deleted = Customer::where('id', $id)->delete();
+            CustomerLedger::where('customer_id', $id)->delete();
             if ($deleted) {
                 $status = true;
                 $message = 'Unit deleted';
@@ -369,6 +372,130 @@ class ApiController extends Controller
     /*
     |--------------------------------------------------------------------------
     | Customer End
+    |--------------------------------------------------------------------------
+    */
+
+    /*
+    |--------------------------------------------------------------------------
+    | Supplier Start
+    |--------------------------------------------------------------------------
+    */
+    public function getSuppliers(Request $request)
+    {
+        $name = $request->name;
+        if (empty($name)) {
+            $customers = DB::table('suppliers')
+                ->select('suppliers.id', 'suppliers.name', 'suppliers.mobile' , 'suppliers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
+                ->join('supplier_ledgers', 'supplier_ledgers.customer_id', '=' , 'suppliers.id')
+                ->groupBy('suppliers.id', 'suppliers.name', 'suppliers.mobile' , 'suppliers.address')
+                ->paginate(50);
+            $status = true;
+            return response()->json(compact('status', 'customers'));
+        } else {
+            $customers = DB::table('suppliers')
+                ->select('suppliers.id', 'suppliers.name', 'suppliers.mobile' , 'suppliers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
+                ->join('supplier_ledgers', 'supplier_ledgers.customer_id', '=' , 'suppliers.id')
+                ->where('customers.name', 'like', '%' . $name . '%')
+                ->orWhere('customers.mobile', 'like', '%' . $name . '%')
+                ->orWhere('customers.address', 'like', '%' . $name . '%')
+                ->groupBy('suppliers.id', 'suppliers.name', 'suppliers.mobile' , 'suppliers.address')
+                ->paginate(50);
+            $status = true;
+            return response()->json(compact('status', 'customers'));
+        }
+    }
+
+    public function getSupplier($id)
+    {
+        $supplier = Supplier::where('id', $id)->first();
+        $status = true;
+        return response()->json(compact('status', 'supplier'));
+    }
+
+    public function storeSupplier(Request $request)
+    {
+        $validator = Validator::make($request->all(),
+            [
+                'name' => 'required',
+            ]
+        );
+        if ($validator->fails()) {
+            $status = false;
+            $errors = $validator->errors();
+            return response()->json(compact('status', 'errors'));
+        }
+        $supplierId = Supplier::insertGetId(['name' => $request->name, 'mobile' => $request->mobile, 'address' => $request->address]);
+
+        if ($supplierId) {
+            if (!empty($request->due)) {
+                $txIdGenerator = new InvoiceNumberGeneratorService();
+                $txId = $txIdGenerator->currentYear()->prefix('')->setCompanyId(1)->startAt(1)->getInvoiceNumber('Due');
+                SupplierLedger::create(array(
+                    'customer_id' => $supplierId,
+                    'transaction_id' => $txId,
+                    'type' => 'due',
+                    'due' => $request->due,
+                    'deposit' => 0,
+                    'date' => date('Y-m-d'),
+                    'comment' => 'Previous Due'
+                ));
+                $txIdGenerator->setNextInvoiceNo();
+            }
+            $status = true;
+            return response()->json(compact('status'));
+        } else {
+            $status = false;
+            return response()->json(compact('status'));
+        }
+    }
+
+    public function updateSupplier(Request $request)
+    {
+        $validator = Validator::make($request->all(),
+            [
+                'id' => 'required',
+                'name' => 'required',
+            ]
+        );
+        if ($validator->fails()) {
+            $status = false;
+            $errors = $validator->errors();
+            return response()->json(compact('status', 'errors'));
+        }
+        $supplier = Supplier::where('id', $request->id)->first();
+        $supplier->name = $request->name;
+        $supplier->mobile = $request->mobile;
+        $supplier->address = $request->address;
+        $supplier->save();
+        $status = true;
+        $message = 'Updated';
+        return response()->json(compact('status', 'message'));
+    }
+
+    public function deleteSupplier(Request $request)
+    {
+        $id = $request->id;
+        if (!empty($id)) {
+            $deleted = Supplier::where('id', $id)->delete();
+            SupplierLedger::where('supplier_id', $id)->delete();
+            if ($deleted) {
+                $status = true;
+                $message = 'Supplier deleted';
+                return response()->json(compact('status', 'message'));
+            } else {
+                $status = false;
+                $error = 'Supplier not found';
+                return response()->json(compact('status', 'error'));
+            }
+        } else {
+            $status = false;
+            $error = 'Supplier not found';
+            return response()->json(compact('status', 'error'));
+        }
+    }
+    /*
+    |--------------------------------------------------------------------------
+    | Supplier End
     |--------------------------------------------------------------------------
     */
 }

@@ -336,9 +336,11 @@ class ApiController extends Controller
             $errors = $validator->errors();
             return response()->json(compact('status', 'errors'));
         }
-        $unit = Unit::where('id', $request->id)->first();
-        $unit->name = $request->name;
-        $unit->save();
+        $customer = Customer::where('id', $request->id)->first();
+        $customer->name = $request->name;
+        $customer->mobile = $request->mobile;
+        $customer->address = $request->address;
+        $customer->save();
         $status = true;
         $message = 'Updated';
         return response()->json(compact('status', 'message'));

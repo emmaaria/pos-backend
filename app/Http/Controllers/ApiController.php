@@ -71,17 +71,17 @@ class ApiController extends Controller
     {
         $name = $request->name;
         $all = $request->allData;
-        if (empty($name)) {
+        if (empty($name) && empty($all)) {
             $categories = Category::select('id', 'name')->paginate(50);
-            $status = 'nam';
+            $status = true;
             return response()->json(compact('status', 'categories'));
         } elseif (!empty($all)) {
             $categories = Category::all();
-            $status = 'all';
+            $status = true;
             return response()->json(compact('status', 'categories'));
         }else{
             $categories = Category::select('id', 'name')->where('name', 'like', '%' . $name . '%')->paginate(50);
-            $status = 'no search';
+            $status = true;
             return response()->json(compact('status', 'categories'));
         }
     }
@@ -171,7 +171,7 @@ class ApiController extends Controller
     {
         $name = $request->name;
         $all = $request->allData;
-        if (empty($name)) {
+        if (empty($name) && empty($all)) {
             $units = Unit::select('id', 'name')->paginate(50);
             $status = true;
             return response()->json(compact('status', 'units'));

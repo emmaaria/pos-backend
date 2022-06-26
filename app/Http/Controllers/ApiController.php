@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Customer;
 use App\Models\CustomerLedger;
+use App\Models\Product;
 use App\Models\Supplier;
 use App\Models\SupplierLedger;
 use App\Models\Unit;
@@ -620,6 +621,116 @@ class ApiController extends Controller
     /*
     |--------------------------------------------------------------------------
     | Purchase End
+    |--------------------------------------------------------------------------
+    */
+
+    /*
+    |--------------------------------------------------------------------------
+    | Product Start
+    |--------------------------------------------------------------------------
+    */
+    public function getProducts(Request $request)
+    {
+        $name = $request->name;
+        if (empty($name)) {
+            $products = Product::select('*')->paginate(50);
+            $status = true;
+            return response()->json(compact('status', 'products'));
+        } else {
+            $products = Product::select('*')->where('name', 'like', '%' . $name . '%')->paginate(50);
+            $status = true;
+            return response()->json(compact('status', 'products'));
+        }
+    }
+
+    public function getProduct($id)
+    {
+        $product = Product::where('id', $id)->first();
+        $status = true;
+        return response()->json(compact('status', 'product'));
+    }
+
+    public function storeProduct(Request $request)
+    {
+        $validator = Validator::make($request->all(),
+            [
+                'name' => 'required',
+            ]
+        );
+        if ($validator->fails()) {
+            $status = false;
+            $errors = $validator->errors();
+            return response()->json(compact('status', 'errors'));
+        }
+        $productIdGenerator = new InvoiceNumberGeneratorService();
+        $productId = $productIdGenerator->prefix('')->setCompanyId(1)->startAt(100000)->getInvoiceNumber('Product');
+        $product = Product::create(array(
+            'name' => $request->name,
+            'product_id' => $productId,
+            'category' => $request->category,
+            'unit' => $request->unit,
+            'price' => $request->price,
+            'purchase_price' => $request->purchase_price,
+        ));
+        if ($product) {
+            $productIdGenerator->setNextInvoiceNo();
+            $status = true;
+            return response()->json(compact('status'));
+        } else {
+            $status = false;
+            return response()->json(compact('status'));
+        }
+    }
+
+    public function updateProduct(Request $request)
+    {
+        $validator = Validator::make($request->all(),
+            [
+                'id' => 'required',
+                'name' => 'required',
+            ]
+        );
+        if ($validator->fails()) {
+            $status = false;
+            $errors = $validator->errors();
+            return response()->json(compact('status', 'errors'));
+        }
+        $product = Product::where('id', $request->id)->first();
+        $product->name = $request->name;
+        $product->category = $request->category;
+        $product->unit = $request->unit;
+        $product->unit = $request->unit;
+        $product->price = $request->price;
+        $product->purchase_price = $request->purchase_price;
+        $product->save();
+        $status = true;
+        $message = 'Updated';
+        return response()->json(compact('status', 'message'));
+    }
+
+    public function deleteProduct(Request $request)
+    {
+        $id = $request->id;
+        if (!empty($id)) {
+            $deleted = Product::where('id', $id)->delete();
+            if ($deleted) {
+                $status = true;
+                $message = 'Product deleted';
+                return response()->json(compact('status', 'message'));
+            } else {
+                $status = false;
+                $error = 'Product not found';
+                return response()->json(compact('status', 'error'));
+            }
+        } else {
+            $status = false;
+            $error = 'Product not found';
+            return response()->json(compact('status', 'error'));
+        }
+    }
+    /*
+    |--------------------------------------------------------------------------
+    | Product End
     |--------------------------------------------------------------------------
     */
 }

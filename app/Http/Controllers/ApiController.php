@@ -73,7 +73,7 @@ class ApiController extends Controller
         $all = $request->allData;
         if (empty($name)) {
             $categories = Category::select('id', 'name')->paginate(50);
-            $status = true;
+            $status = 'nam';
             return response()->json(compact('status', 'categories'));
         } elseif (!empty($all)) {
             $categories = Category::all();

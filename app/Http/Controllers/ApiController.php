@@ -78,7 +78,8 @@ class ApiController extends Controller
         } elseif (!empty($all)) {
             $categories = Category::all();
             $status = true;
-            return response()->json(compact('status', 'categories'));
+            $test = true;
+            return response()->json(compact('status', 'categories', 'test'));
         }else{
             $categories = Category::select('id', 'name')->where('name', 'like', '%' . $name . '%')->paginate(50);
             $status = true;

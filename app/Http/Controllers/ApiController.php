@@ -170,15 +170,15 @@ class ApiController extends Controller
         $name = $request->name;
         $all = $request->allData;
         if (empty($name) && empty($all)) {
-            $units = Unit::select('id', 'name')->paginate(50);
+            $units = DB::table('units')->select('id', 'name')->paginate(50);
             $status = true;
             return response()->json(compact('status', 'units'));
         } elseif (!empty($all)) {
-            $units = Unit::all();
+            $units = DB::table('units')->get();
             $status = true;
             return response()->json(compact('status', 'units'));
         } else {
-            $units = Unit::select('id', 'name')->where('name', 'like', '%' . $name . '%')->paginate(50);
+            $units = DB::table('units')->select('id', 'name')->where('name', 'like', '%' . $name . '%')->paginate(50);
             $status = true;
             return response()->json(compact('status', 'units'));
         }
@@ -186,7 +186,7 @@ class ApiController extends Controller
 
     public function getUnit($id)
     {
-        $unit = Unit::where('id', $id)->first();
+        $unit = DB::table('units')->where('id', $id)->first();
         $status = true;
         return response()->json(compact('status', 'unit'));
     }
@@ -203,7 +203,7 @@ class ApiController extends Controller
             $errors = $validator->errors();
             return response()->json(compact('status', 'errors'));
         }
-        $unit = Unit::create(['name' => $request->name]);
+        $unit = DB::table('units')->insert(['name' => $request->name]);
         if ($unit) {
             $status = true;
             return response()->json(compact('status'));
@@ -226,9 +226,7 @@ class ApiController extends Controller
             $errors = $validator->errors();
             return response()->json(compact('status', 'errors'));
         }
-        $unit = Unit::where('id', $request->id)->first();
-        $unit->name = $request->name;
-        $unit->save();
+        DB::table('units')->where('id', $request->id)->update(['name' => $request->name]);
         $status = true;
         $message = 'Updated';
         return response()->json(compact('status', 'message'));
@@ -238,7 +236,7 @@ class ApiController extends Controller
     {
         $id = $request->id;
         if (!empty($id)) {
-            $deleted = Unit::where('id', $id)->delete();
+            $deleted = DB::table('units')->where('id', $id)->delete();
             if ($deleted) {
                 $status = true;
                 $message = 'Unit deleted';
@@ -292,7 +290,7 @@ class ApiController extends Controller
 
     public function getCustomer($id)
     {
-        $customer = Customer::where('id', $id)->first();
+        $customer = DB::table('customers')->where('id', $id)->first();
         $status = true;
         return response()->json(compact('status', 'customer'));
     }
@@ -309,13 +307,13 @@ class ApiController extends Controller
             $errors = $validator->errors();
             return response()->json(compact('status', 'errors'));
         }
-        $customerId = Customer::insertGetId(['name' => $request->name, 'mobile' => $request->mobile, 'address' => $request->address]);
+        $customerId = DB::table('customers')->insertGetId(['name' => $request->name, 'mobile' => $request->mobile, 'address' => $request->address]);
 
         if ($customerId) {
             if (!empty($request->due)) {
                 $txIdGenerator = new InvoiceNumberGeneratorService();
                 $txId = $txIdGenerator->currentYear()->prefix('')->setCompanyId(1)->startAt(1)->getInvoiceNumber('Due');
-                CustomerLedger::create(array(
+                DB::table('customer_ledgers')->insert(array(
                     'customer_id' => $customerId,
                     'transaction_id' => $txId,
                     'type' => 'due',
@@ -347,11 +345,7 @@ class ApiController extends Controller
             $errors = $validator->errors();
             return response()->json(compact('status', 'errors'));
         }
-        $customer = Customer::where('id', $request->id)->first();
-        $customer->name = $request->name;
-        $customer->mobile = $request->mobile;
-        $customer->address = $request->address;
-        $customer->save();
+        DB::table('customers')->where('id', $request->id)->update(['name' => $request->name, 'mobile' => $request->mobile, 'address' => $request->address]);
         $status = true;
         $message = 'Updated';
         return response()->json(compact('status', 'message'));

@@ -721,7 +721,7 @@ class ApiController extends Controller
             return response()->json(compact('status', 'errors'));
         }
         $productIdGenerator = new InvoiceNumberGeneratorService();
-        $productId = $productIdGenerator->prefix('')->setCompanyId(1)->startAt(100000)->getInvoiceNumber('Product');
+        $productId = $productIdGenerator->prefix('')->setCompanyId(1)->startAt(100000)->getInvoiceNumber('product');
         $product = Product::create(array(
             'name' => $request->name,
             'product_id' => $productId,
@@ -756,7 +756,6 @@ class ApiController extends Controller
         $product = Product::where('id', $request->id)->first();
         $product->name = $request->name;
         $product->category = $request->category;
-        $product->unit = $request->unit;
         $product->unit = $request->unit;
         $product->price = $request->price;
         $product->purchase_price = $request->purchase_price;

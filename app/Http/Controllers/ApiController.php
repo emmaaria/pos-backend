@@ -559,7 +559,7 @@ class ApiController extends Controller
             $txGenerator = new InvoiceNumberGeneratorService();
             $txId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('transaction');
             $txGenerator->setNextInvoiceNo();
-            DB::table('purchases')->insert(
+            $pId = DB::table('purchases')->insertGetId(
                 [
                     'supplier_id' => $request->supplier_id,
                     'amount' => $request->total,
@@ -584,26 +584,43 @@ class ApiController extends Controller
                     ]);
                 }
             }
+            $supplierDueTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('transaction');
             DB::table('supplier_ledgers')->insert(array(
                 'supplier_id' => $request->supplier_id,
-                'transaction_id' => $txId,
+                'transaction_id' => $supplierDueTxId,
+                'reference_no' => $pId,
                 'type' => 'due',
                 'due' => $request->total,
                 'deposit' => 0,
                 'date' => $request->date,
                 'comment' => "Due for Purchase id ($txId)"
             ));
+            $txGenerator->setNextInvoiceNo();
 
             if (!empty($request->paid)){
+                $supplierPaidTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('transaction');
                 DB::table('supplier_ledgers')->insert(array(
                     'supplier_id' => $request->supplier_id,
-                    'transaction_id' => $txId,
+                    'reference_no' => $pId,
+                    'transaction_id' => $supplierPaidTxId,
                     'type' => 'deposit',
                     'due' => 0,
                     'deposit' => $request->paid,
                     'date' => $request->date,
                     'comment' => "Deposit for Purchase id ($txId)"
                 ));
+                $txGenerator->setNextInvoiceNo();
+
+                $cashTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('transaction');
+                DB::table('cash_books')->insert(array(
+                    'transaction_id' => $cashTxId,
+                    'reference_no' => $pId,
+                    'type' => 'payment',
+                    'payment' => $request->paid,
+                    'date' => $request->date,
+                    'comment' => "Paid for Purchase id ($txId)"
+                ));
+                $txGenerator->setNextInvoiceNo();
             }
             $status = true;
             $message = 'Purchase saved';

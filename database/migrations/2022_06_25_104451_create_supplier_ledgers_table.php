@@ -17,6 +17,7 @@ class CreateSupplierLedgersTable extends Migration
             $table->id();
             $table->string('supplier_id');
             $table->string('transaction_id');
+            $table->string('reference_no')->nullable();
             $table->string('type');
             $table->string('due')->default(0);
             $table->string('deposit')->default(0);

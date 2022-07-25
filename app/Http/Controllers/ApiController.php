@@ -584,6 +584,7 @@ class ApiController extends Controller
                     ]);
                 }
             }
+            $txGenerator = new InvoiceNumberGeneratorService();
             $supplierDueTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('transaction');
             DB::table('supplier_ledgers')->insert(array(
                 'supplier_id' => $request->supplier_id,
@@ -598,6 +599,7 @@ class ApiController extends Controller
             $txGenerator->setNextInvoiceNo();
 
             if (!empty($request->paid)){
+                $txGenerator = new InvoiceNumberGeneratorService();
                 $supplierPaidTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('transaction');
                 DB::table('supplier_ledgers')->insert(array(
                     'supplier_id' => $request->supplier_id,
@@ -610,7 +612,7 @@ class ApiController extends Controller
                     'comment' => "Deposit for Purchase id ($txId)"
                 ));
                 $txGenerator->setNextInvoiceNo();
-
+                $txGenerator = new InvoiceNumberGeneratorService();
                 $cashTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('transaction');
                 DB::table('cash_books')->insert(array(
                     'transaction_id' => $cashTxId,

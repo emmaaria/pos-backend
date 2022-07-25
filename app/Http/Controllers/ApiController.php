@@ -507,13 +507,13 @@ class ApiController extends Controller
     {
         $name = $request->name;
         if (empty($name)) {
-            $suppliers = DB::table('suppliers')
+            $purchases = DB::table('purchases')
                 ->select('suppliers.id', 'suppliers.name', 'suppliers.mobile', 'suppliers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
                 ->join('supplier_ledgers', 'supplier_ledgers.supplier_id', '=', 'suppliers.id')
                 ->groupBy('suppliers.id', 'suppliers.name', 'suppliers.mobile', 'suppliers.address')
                 ->paginate(50);
             $status = true;
-            return response()->json(compact('status', 'suppliers'));
+            return response()->json(compact('status', 'purchases'));
         } else {
             $suppliers = DB::table('suppliers')
                 ->select('suppliers.id', 'suppliers.name', 'suppliers.mobile', 'suppliers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
@@ -556,8 +556,9 @@ class ApiController extends Controller
         $quantities = $request->productQuantities;
         $prices = $request->productPrices;
         if (count($products) > 0) {
-            $purchaseIdGenerator = new InvoiceNumberGeneratorService();
-            $txId = $purchaseIdGenerator->currentYear()->prefix('')->setCompanyId(1)->startAt(1)->getInvoiceNumber('Purchase');
+            $txGenerator = new InvoiceNumberGeneratorService();
+            $txId = $txGenerator->currentYear()->prefix('')->setCompanyId(1)->startAt(1)->getInvoiceNumber('Purchase');
+            $txGenerator->setNextInvoiceNo();
             DB::table('purchases')->insert(
                 [
                     'supplier_id' => $request->supplier_id,
@@ -582,6 +583,31 @@ class ApiController extends Controller
                         'total' => $quantity*$price,
                     ]);
                 }
+            }
+            $supplierDueTxId = $txGenerator->currentYear()->prefix('')->setCompanyId(1)->startAt(1)->getInvoiceNumber('Due');
+            DB::table('supplier_ledgers')->insert(array(
+                'supplier_id' => $request->supplier_id,
+                'transaction_id' => $supplierDueTxId,
+                'type' => 'due',
+                'due' => $request->total,
+                'deposit' => 0,
+                'date' => $request->date,
+                'comment' => "Due for Purchase id ($txId)"
+            ));
+            $txGenerator->setNextInvoiceNo();
+
+            if (!empty($request->paid)){
+                $supplierPaidTxId = $txGenerator->currentYear()->prefix('')->setCompanyId(1)->startAt(1)->getInvoiceNumber('Deposit');
+                DB::table('supplier_ledgers')->insert(array(
+                    'supplier_id' => $request->supplier_id,
+                    'transaction_id' => $supplierPaidTxId,
+                    'type' => 'deposit',
+                    'due' => 0,
+                    'deposit' => $request->paid,
+                    'date' => $request->date,
+                    'comment' => "Deposit for Purchase id ($txId)"
+                ));
+                $txGenerator->setNextInvoiceNo();
             }
             $status = true;
             $message = 'Purchase saved';

@@ -72,15 +72,15 @@ class ApiController extends Controller
         $name = $request->name;
         $all = $request->allData;
         if (empty($name) && empty($all)) {
-            $categories = Category::select('id', 'name')->paginate(50);
+            $categories = DB::table('categories')->select('id', 'name')->paginate(50);
             $status = true;
             return response()->json(compact('status', 'categories'));
         } elseif (!empty($all)) {
-            $categories = Category::all();
+            $categories = DB::table('categories')->get();
             $status = true;
             return response()->json(compact('status', 'categories'));
         } else {
-            $categories = Category::select('id', 'name')->where('name', 'like', '%' . $name . '%')->paginate(50);
+            $categories = DB::table('categories')->select('id', 'name')->where('name', 'like', '%' . $name . '%')->paginate(50);
             $status = true;
             return response()->json(compact('status', 'categories'));
         }
@@ -88,7 +88,7 @@ class ApiController extends Controller
 
     public function getCategory($id)
     {
-        $category = Category::where('id', $id)->first();
+        $category = DB::table('categories')->where('id', $id)->first();
         $status = true;
         return response()->json(compact('status', 'category'));
     }
@@ -105,7 +105,7 @@ class ApiController extends Controller
             $errors = $validator->errors();
             return response()->json(compact('status', 'errors'));
         }
-        $categoty = Category::create(['name' => $request->name]);
+        $categoty = DB::table('categories')->insert(['name' => $request->name]);
         if ($categoty) {
             $status = true;
             return response()->json(compact('status'));
@@ -128,9 +128,7 @@ class ApiController extends Controller
             $errors = $validator->errors();
             return response()->json(compact('status', 'errors'));
         }
-        $category = Category::where('id', $request->id)->first();
-        $category->name = $request->name;
-        $category->save();
+        DB::table('categories')->where('id', $request->id)->update(['name' => $request->name]);
         $status = true;
         $message = 'Updated';
         return response()->json(compact('status', 'message'));
@@ -140,7 +138,7 @@ class ApiController extends Controller
     {
         $id = $request->id;
         if (!empty($id)) {
-            $deleted = Category::where('id', $id)->delete();
+            $deleted = DB::table('categories')->where('id', $id)->delete();
             if ($deleted) {
                 $status = true;
                 $message = 'Category deleted';
@@ -564,6 +562,11 @@ class ApiController extends Controller
             return response()->json(compact('status', 'errors'));
         }
         $products = $request->productIds;
+        $quantities = $request->productQuantities;
+        $prices = $request->productPrices;
+        if (count($products) > 0) {
+
+        }
         $supplierId = Supplier::insertGetId(['name' => $request->name, 'mobile' => $request->mobile, 'address' => $request->address]);
 
         if ($supplierId) {

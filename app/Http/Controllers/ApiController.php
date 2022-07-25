@@ -269,7 +269,7 @@ class ApiController extends Controller
         if (empty($name)) {
             $customers = DB::table('customers')
                 ->select('customers.id', 'customers.name', 'customers.mobile', 'customers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
-                ->join('customer_ledgers', 'customer_ledgers.customer_id', '=', 'customers.id')
+                ->rightJoin('customer_ledgers', 'customer_ledgers.customer_id', '=', 'customers.id')
                 ->groupBy('customers.id', 'customers.name', 'customers.mobile', 'customers.address')
                 ->paginate(50);
             $status = true;

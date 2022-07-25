@@ -79,7 +79,7 @@ class ApiController extends Controller
             $categories = Category::all();
             $status = true;
             return response()->json(compact('status', 'categories'));
-        }else{
+        } else {
             $categories = Category::select('id', 'name')->where('name', 'like', '%' . $name . '%')->paginate(50);
             $status = true;
             return response()->json(compact('status', 'categories'));
@@ -175,7 +175,7 @@ class ApiController extends Controller
             $units = Unit::select('id', 'name')->paginate(50);
             $status = true;
             return response()->json(compact('status', 'units'));
-        }elseif (!empty($all)){
+        } elseif (!empty($all)) {
             $units = Unit::all();
             $status = true;
             return response()->json(compact('status', 'units'));
@@ -272,21 +272,21 @@ class ApiController extends Controller
         $name = $request->name;
         if (empty($name)) {
             $customers = DB::table('customers')
-                        ->select('customers.id', 'customers.name', 'customers.mobile' , 'customers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
-                        ->join('customer_ledgers', 'customer_ledgers.customer_id', '=' , 'customers.id')
-                        ->groupBy('customers.id', 'customers.name', 'customers.mobile' , 'customers.address')
-                        ->paginate(50);
+                ->select('customers.id', 'customers.name', 'customers.mobile', 'customers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
+                ->join('customer_ledgers', 'customer_ledgers.customer_id', '=', 'customers.id')
+                ->groupBy('customers.id', 'customers.name', 'customers.mobile', 'customers.address')
+                ->paginate(50);
             $status = true;
             return response()->json(compact('status', 'customers'));
         } else {
             $customers = DB::table('customers')
-                        ->select('customers.id', 'customers.name', 'customers.mobile' , 'customers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
-                        ->join('customer_ledgers', 'customer_ledgers.customer_id', '=' , 'customers.id')
-                        ->where('customers.name', 'like', '%' . $name . '%')
-                        ->orWhere('customers.mobile', 'like', '%' . $name . '%')
-                        ->orWhere('customers.address', 'like', '%' . $name . '%')
-                        ->groupBy('customers.id', 'customers.name', 'customers.mobile' , 'customers.address')
-                        ->paginate(50);
+                ->select('customers.id', 'customers.name', 'customers.mobile', 'customers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
+                ->join('customer_ledgers', 'customer_ledgers.customer_id', '=', 'customers.id')
+                ->where('customers.name', 'like', '%' . $name . '%')
+                ->orWhere('customers.mobile', 'like', '%' . $name . '%')
+                ->orWhere('customers.address', 'like', '%' . $name . '%')
+                ->groupBy('customers.id', 'customers.name', 'customers.mobile', 'customers.address')
+                ->paginate(50);
             $status = true;
             return response()->json(compact('status', 'customers'));
         }
@@ -396,20 +396,20 @@ class ApiController extends Controller
         $name = $request->name;
         if (empty($name)) {
             $suppliers = DB::table('suppliers')
-                ->select('suppliers.id', 'suppliers.name', 'suppliers.mobile' , 'suppliers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
-                ->join('supplier_ledgers', 'supplier_ledgers.supplier_id', '=' , 'suppliers.id')
-                ->groupBy('suppliers.id', 'suppliers.name', 'suppliers.mobile' , 'suppliers.address')
+                ->select('suppliers.id', 'suppliers.name', 'suppliers.mobile', 'suppliers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
+                ->join('supplier_ledgers', 'supplier_ledgers.supplier_id', '=', 'suppliers.id')
+                ->groupBy('suppliers.id', 'suppliers.name', 'suppliers.mobile', 'suppliers.address')
                 ->paginate(50);
             $status = true;
             return response()->json(compact('status', 'suppliers'));
         } else {
             $suppliers = DB::table('suppliers')
-                ->select('suppliers.id', 'suppliers.name', 'suppliers.mobile' , 'suppliers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
-                ->join('supplier_ledgers', 'supplier_ledgers.supplier_id', '=' , 'suppliers.id')
+                ->select('suppliers.id', 'suppliers.name', 'suppliers.mobile', 'suppliers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
+                ->join('supplier_ledgers', 'supplier_ledgers.supplier_id', '=', 'suppliers.id')
                 ->where('suppliers.name', 'like', '%' . $name . '%')
                 ->orWhere('suppliers.mobile', 'like', '%' . $name . '%')
                 ->orWhere('suppliers.address', 'like', '%' . $name . '%')
-                ->groupBy('suppliers.id', 'suppliers.name', 'suppliers.mobile' , 'suppliers.address')
+                ->groupBy('suppliers.id', 'suppliers.name', 'suppliers.mobile', 'suppliers.address')
                 ->paginate(50);
             $status = true;
             return response()->json(compact('status', 'suppliers'));
@@ -520,20 +520,20 @@ class ApiController extends Controller
         $name = $request->name;
         if (empty($name)) {
             $suppliers = DB::table('suppliers')
-                ->select('suppliers.id', 'suppliers.name', 'suppliers.mobile' , 'suppliers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
-                ->join('supplier_ledgers', 'supplier_ledgers.supplier_id', '=' , 'suppliers.id')
-                ->groupBy('suppliers.id', 'suppliers.name', 'suppliers.mobile' , 'suppliers.address')
+                ->select('suppliers.id', 'suppliers.name', 'suppliers.mobile', 'suppliers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
+                ->join('supplier_ledgers', 'supplier_ledgers.supplier_id', '=', 'suppliers.id')
+                ->groupBy('suppliers.id', 'suppliers.name', 'suppliers.mobile', 'suppliers.address')
                 ->paginate(50);
             $status = true;
             return response()->json(compact('status', 'suppliers'));
         } else {
             $suppliers = DB::table('suppliers')
-                ->select('suppliers.id', 'suppliers.name', 'suppliers.mobile' , 'suppliers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
-                ->join('supplier_ledgers', 'supplier_ledgers.customer_id', '=' , 'suppliers.id')
+                ->select('suppliers.id', 'suppliers.name', 'suppliers.mobile', 'suppliers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
+                ->join('supplier_ledgers', 'supplier_ledgers.customer_id', '=', 'suppliers.id')
                 ->where('customers.name', 'like', '%' . $name . '%')
                 ->orWhere('customers.mobile', 'like', '%' . $name . '%')
                 ->orWhere('customers.address', 'like', '%' . $name . '%')
-                ->groupBy('suppliers.id', 'suppliers.name', 'suppliers.mobile' , 'suppliers.address')
+                ->groupBy('suppliers.id', 'suppliers.name', 'suppliers.mobile', 'suppliers.address')
                 ->paginate(50);
             $status = true;
             return response()->json(compact('status', 'suppliers'));
@@ -551,7 +551,11 @@ class ApiController extends Controller
     {
         $validator = Validator::make($request->all(),
             [
-                'name' => 'required',
+                'supplier_id' => 'required',
+                'date' => 'required',
+                'productIds' => 'required',
+                'productQuantities' => 'required',
+                'productPrices' => 'required',
             ]
         );
         if ($validator->fails()) {
@@ -559,6 +563,7 @@ class ApiController extends Controller
             $errors = $validator->errors();
             return response()->json(compact('status', 'errors'));
         }
+        $products = $request->productIds;
         $supplierId = Supplier::insertGetId(['name' => $request->name, 'mobile' => $request->mobile, 'address' => $request->address]);
 
         if ($supplierId) {

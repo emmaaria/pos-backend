@@ -8,5 +8,5 @@ use Illuminate\Database\Eloquent\Model;
 class CashBook extends Model
 {
     use HasFactory;
-    protected $fillable = ['transaction_id','type','payment','receive','date','reference_no'];
+    protected $fillable = ['transaction_id','type','payment','receive','date','reference_no','comment'];
 }

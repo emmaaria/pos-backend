@@ -17,6 +17,7 @@ class CreateCashBooksTable extends Migration
             $table->id();
             $table->string('transaction_id');
             $table->string('reference_no')->nullable();
+            $table->string('comment')->nullable();
             $table->string('type');
             $table->string('payment')->default(0);
             $table->string('receive')->default(0);

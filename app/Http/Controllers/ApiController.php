@@ -277,7 +277,7 @@ class ApiController extends Controller
         } else {
             $customers = DB::table('customers')
                 ->select('customers.id', 'customers.name', 'customers.mobile', 'customers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
-                ->join('customer_ledgers', 'customer_ledgers.customer_id', '=', 'customers.id')
+                ->leftJoin('customer_ledgers', 'customer_ledgers.customer_id', '=', 'customers.id')
                 ->where('customers.name', 'like', '%' . $name . '%')
                 ->orWhere('customers.mobile', 'like', '%' . $name . '%')
                 ->orWhere('customers.address', 'like', '%' . $name . '%')
@@ -389,7 +389,7 @@ class ApiController extends Controller
         if (empty($name)) {
             $suppliers = DB::table('suppliers')
                 ->select('suppliers.id', 'suppliers.name', 'suppliers.mobile', 'suppliers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
-                ->join('supplier_ledgers', 'supplier_ledgers.supplier_id', '=', 'suppliers.id')
+                ->leftJoin('supplier_ledgers', 'supplier_ledgers.supplier_id', '=', 'suppliers.id')
                 ->groupBy('suppliers.id', 'suppliers.name', 'suppliers.mobile', 'suppliers.address')
                 ->paginate(50);
             $status = true;
@@ -397,7 +397,7 @@ class ApiController extends Controller
         } else {
             $suppliers = DB::table('suppliers')
                 ->select('suppliers.id', 'suppliers.name', 'suppliers.mobile', 'suppliers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
-                ->join('supplier_ledgers', 'supplier_ledgers.supplier_id', '=', 'suppliers.id')
+                ->leftJoin('supplier_ledgers', 'supplier_ledgers.supplier_id', '=', 'suppliers.id')
                 ->where('suppliers.name', 'like', '%' . $name . '%')
                 ->orWhere('suppliers.mobile', 'like', '%' . $name . '%')
                 ->orWhere('suppliers.address', 'like', '%' . $name . '%')
@@ -432,7 +432,7 @@ class ApiController extends Controller
         if ($supplierId) {
             if (!empty($request->due)) {
                 $txIdGenerator = new InvoiceNumberGeneratorService();
-                $txId = $txIdGenerator->currentYear()->prefix('')->setCompanyId(1)->startAt(1)->getInvoiceNumber('Due');
+                $txId = $txIdGenerator->currentYear()->prefix('s-due-')->setCompanyId(1)->startAt(1)->getInvoiceNumber('supplier_due');
                 DB::table('supplier_ledgers')->insert(array(
                     'supplier_id' => $supplierId,
                     'transaction_id' => $txId,

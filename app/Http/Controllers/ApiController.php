@@ -355,8 +355,8 @@ class ApiController extends Controller
     {
         $id = $request->id;
         if (!empty($id)) {
-            $deleted = Customer::where('id', $id)->delete();
-            CustomerLedger::where('customer_id', $id)->delete();
+            $deleted = DB::table('customers')->where('id', $id)->delete();
+            DB::table('customer_ledgers')->where('customer_id', $id)->delete();
             if ($deleted) {
                 $status = true;
                 $message = 'Unit deleted';
@@ -410,7 +410,7 @@ class ApiController extends Controller
 
     public function getSupplier($id)
     {
-        $supplier = Supplier::where('id', $id)->first();
+        $supplier = DB::table('suppliers')->where('id', $id)->first();
         $status = true;
         return response()->json(compact('status', 'supplier'));
     }
@@ -427,13 +427,13 @@ class ApiController extends Controller
             $errors = $validator->errors();
             return response()->json(compact('status', 'errors'));
         }
-        $supplierId = Supplier::insertGetId(['name' => $request->name, 'mobile' => $request->mobile, 'address' => $request->address]);
+        $supplierId = DB::table('suppliers')->insertGetId(['name' => $request->name, 'mobile' => $request->mobile, 'address' => $request->address]);
 
         if ($supplierId) {
             if (!empty($request->due)) {
                 $txIdGenerator = new InvoiceNumberGeneratorService();
                 $txId = $txIdGenerator->currentYear()->prefix('')->setCompanyId(1)->startAt(1)->getInvoiceNumber('Due');
-                SupplierLedger::create(array(
+                DB::table('supplier_ledgers')->insert(array(
                     'supplier_id' => $supplierId,
                     'transaction_id' => $txId,
                     'type' => 'due',
@@ -465,11 +465,7 @@ class ApiController extends Controller
             $errors = $validator->errors();
             return response()->json(compact('status', 'errors'));
         }
-        $supplier = Supplier::where('id', $request->id)->first();
-        $supplier->name = $request->name;
-        $supplier->mobile = $request->mobile;
-        $supplier->address = $request->address;
-        $supplier->save();
+        DB::table('suppliers')->where('id', $request->id)->update(['name' => $request->name, 'mobile' => $request->mobile, 'address' => $request->address]);
         $status = true;
         $message = 'Updated';
         return response()->json(compact('status', 'message'));
@@ -479,8 +475,8 @@ class ApiController extends Controller
     {
         $id = $request->id;
         if (!empty($id)) {
-            $deleted = Supplier::where('id', $id)->delete();
-            SupplierLedger::where('supplier_id', $id)->delete();
+            $deleted = DB::table('suppliers')->where('id', $id)->delete();
+            DB::table('supplier_ledgers')->where('supplier_id', $id)->delete();
             if ($deleted) {
                 $status = true;
                 $message = 'Supplier deleted';
@@ -548,6 +544,7 @@ class ApiController extends Controller
                 'productIds' => 'required',
                 'productQuantities' => 'required',
                 'productPrices' => 'required',
+                'total' => 'required',
             ]
         );
         if ($validator->fails()) {
@@ -559,30 +556,37 @@ class ApiController extends Controller
         $quantities = $request->productQuantities;
         $prices = $request->productPrices;
         if (count($products) > 0) {
-
-        }
-        $supplierId = Supplier::insertGetId(['name' => $request->name, 'mobile' => $request->mobile, 'address' => $request->address]);
-
-        if ($supplierId) {
-            if (!empty($request->due)) {
-                $txIdGenerator = new InvoiceNumberGeneratorService();
-                $txId = $txIdGenerator->currentYear()->prefix('')->setCompanyId(1)->startAt(1)->getInvoiceNumber('Due');
-                SupplierLedger::create(array(
-                    'supplier_id' => $supplierId,
-                    'transaction_id' => $txId,
-                    'type' => 'due',
-                    'due' => $request->due,
-                    'deposit' => 0,
-                    'date' => date('Y-m-d'),
-                    'comment' => 'Previous Due'
-                ));
-                $txIdGenerator->setNextInvoiceNo();
+            $purchaseIdGenerator = new InvoiceNumberGeneratorService();
+            $txId = $purchaseIdGenerator->currentYear()->prefix('')->setCompanyId(1)->startAt(1)->getInvoiceNumber('Purchase');
+            DB::table('purchases')->insert(
+                [
+                    'supplier_id' => $request->supplier_id,
+                    'amount' => $request->total,
+                    'paid' => $request->paid,
+                    'comment' => $request->comment,
+                    'purchase_id' => $txId,
+                    'date' => $request->date,
+                ]
+            );
+            for ($i = 0, $n = count($products); $i < $n; $i++){
+                $productID = $products[$i];
+                $quantity = $quantities[$i];
+                $price = $prices[$i];
+                if ($quantity > 0){
+                    DB::table('purchase_items')->insert([
+                        'purchase_id' => $txId,
+                        'product_id' => $productID,
+                        'price' => $price,
+                        'quantity' => $quantity,
+                        'date' => $request->date,
+                        'total' => $quantity*$price,
+                    ]);
+                }
             }
-            $status = true;
-            return response()->json(compact('status'));
-        } else {
+        }else{
             $status = false;
-            return response()->json(compact('status'));
+            $error = 'Please add at least one product';
+            return response()->json(compact('status', 'error'));
         }
     }
 

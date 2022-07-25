@@ -557,7 +557,7 @@ class ApiController extends Controller
         $prices = $request->productPrices;
         if (count($products) > 0) {
             $txGenerator = new InvoiceNumberGeneratorService();
-            $txId = $txGenerator->currentYear()->prefix('')->setCompanyId(1)->startAt(1)->getInvoiceNumber('Purchase');
+            $txId = $txGenerator->currentYear()->prefix('pur-')->setCompanyId(1)->startAt(1)->getInvoiceNumber('purchase');
             $txGenerator->setNextInvoiceNo();
             DB::table('purchases')->insert(
                 [
@@ -584,7 +584,7 @@ class ApiController extends Controller
                     ]);
                 }
             }
-            $supplierDueTxId = $txGenerator->currentYear()->prefix('')->setCompanyId(1)->startAt(1)->getInvoiceNumber('Due');
+            $supplierDueTxId = $txGenerator->currentYear()->prefix('s-due-')->setCompanyId(1)->startAt(1)->getInvoiceNumber('supplier_due');
             DB::table('supplier_ledgers')->insert(array(
                 'supplier_id' => $request->supplier_id,
                 'transaction_id' => $supplierDueTxId,
@@ -597,7 +597,7 @@ class ApiController extends Controller
             $txGenerator->setNextInvoiceNo();
 
             if (!empty($request->paid)){
-                $supplierPaidTxId = $txGenerator->currentYear()->prefix('')->setCompanyId(1)->startAt(1)->getInvoiceNumber('Deposit');
+                $supplierPaidTxId = $txGenerator->currentYear()->prefix('s-dep-')->setCompanyId(1)->startAt(1)->getInvoiceNumber('supplier_deposit');
                 DB::table('supplier_ledgers')->insert(array(
                     'supplier_id' => $request->supplier_id,
                     'transaction_id' => $supplierPaidTxId,

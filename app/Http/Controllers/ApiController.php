@@ -312,7 +312,7 @@ class ApiController extends Controller
         if ($customerId) {
             if (!empty($request->due)) {
                 $txIdGenerator = new InvoiceNumberGeneratorService();
-                $txId = $txIdGenerator->currentYear()->prefix('')->setCompanyId(1)->startAt(1)->getInvoiceNumber('Due');
+                $txId = $txIdGenerator->currentYear()->prefix('cus')->setCompanyId(1)->startAt(1)->getInvoiceNumber('Due');
                 DB::table('customer_ledgers')->insert(array(
                     'customer_id' => $customerId,
                     'transaction_id' => $txId,

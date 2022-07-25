@@ -583,6 +583,9 @@ class ApiController extends Controller
                     ]);
                 }
             }
+            $status = true;
+            $message = 'Purchase saved';
+            return response()->json(compact('status', 'message'));
         }else{
             $status = false;
             $error = 'Please add at least one product';

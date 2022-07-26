@@ -508,9 +508,8 @@ class ApiController extends Controller
         $name = $request->name;
         if (empty($name)) {
             $purchases = DB::table('purchases')
-                ->select('suppliers.id', 'suppliers.name', 'suppliers.mobile', 'suppliers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
-                ->join('supplier_ledgers', 'supplier_ledgers.supplier_id', '=', 'suppliers.id')
-                ->groupBy('suppliers.id', 'suppliers.name', 'suppliers.mobile', 'suppliers.address')
+                ->select('suppliers.name', 'suppliers.mobile', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id')
+                ->leftJoin('suppliers', 'suppliers.id', '=', 'purchases.supplier')
                 ->paginate(50);
             $status = true;
             return response()->json(compact('status', 'purchases'));
@@ -569,18 +568,18 @@ class ApiController extends Controller
                     'date' => $request->date,
                 ]
             );
-            for ($i = 0, $n = count($products); $i < $n; $i++){
+            for ($i = 0, $n = count($products); $i < $n; $i++) {
                 $productID = $products[$i];
                 $quantity = $quantities[$i];
                 $price = $prices[$i];
-                if ($quantity > 0){
+                if ($quantity > 0) {
                     DB::table('purchase_items')->insert([
                         'purchase_id' => $txId,
                         'product_id' => $productID,
                         'price' => $price,
                         'quantity' => $quantity,
                         'date' => $request->date,
-                        'total' => $quantity*$price,
+                        'total' => $quantity * $price,
                     ]);
                 }
             }
@@ -597,7 +596,7 @@ class ApiController extends Controller
             ));
             $txGenerator->setNextInvoiceNo();
 
-            if (!empty($request->paid)){
+            if (!empty($request->paid)) {
                 $supplierPaidTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('transaction');
                 DB::table('supplier_ledgers')->insert(array(
                     'supplier_id' => $request->supplier_id,
@@ -625,7 +624,7 @@ class ApiController extends Controller
             $status = true;
             $message = 'Purchase saved';
             return response()->json(compact('status', 'message'));
-        }else{
+        } else {
             $status = false;
             $error = 'Please add at least one product';
             return response()->json(compact('status', 'error'));

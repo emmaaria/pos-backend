@@ -530,7 +530,7 @@ class ApiController extends Controller
             ->where('purchases.id', $id)
             ->first();
         $purchaseItems = DB::table('purchase_items')
-            ->select('products.name AS product_name', 'purchase_items.price', 'purchase_items.total', 'purchase_items.quantity')
+            ->select('products.name AS product_name', 'purchase_items.price', 'purchase_items.total', 'purchase_items.quantity', 'products.id')
             ->join('products', 'products.id', '=', 'purchase_items.product_id')
             ->where('purchase_items.purchase_id', $purchaseData->purchase_id)
             ->get();

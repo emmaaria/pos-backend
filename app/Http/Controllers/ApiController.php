@@ -529,7 +529,7 @@ class ApiController extends Controller
     public function getPurchase($id)
     {
         $purchase = DB::table('purchases')
-            ->select('suppliers.name AS supplier_name', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id')
+            ->select('suppliers.name AS supplier_name', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id', 'purchases.date')
             ->join('suppliers', 'suppliers.id', '=', 'purchases.supplier_id')
             ->where('id', $id)->first();
         $status = true;

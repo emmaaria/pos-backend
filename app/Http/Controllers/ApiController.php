@@ -2,13 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
-use App\Models\Customer;
-use App\Models\CustomerLedger;
 use App\Models\Product;
 use App\Models\Supplier;
 use App\Models\SupplierLedger;
-use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -529,9 +525,9 @@ class ApiController extends Controller
     public function getPurchase($id)
     {
         $purchase = DB::table('purchases')
-            ->select('suppliers.name AS supplier_name', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id', 'purchases.date', 'purchases.id')
+            ->select('suppliers.name AS supplier_name', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id', 'purchases.date')
             ->join('suppliers', 'suppliers.id', '=', 'purchases.supplier_id')
-            ->where('id', $id)
+            ->where('purchases.id', $id)
             ->first();
         $status = true;
         return response()->json(compact('status', 'purchase'));

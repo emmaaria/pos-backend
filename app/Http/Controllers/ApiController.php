@@ -534,7 +534,10 @@ class ApiController extends Controller
             ->join('products', 'products.id', '=', 'purchase_items.product_id')
             ->where('purchase_items.purchase_id', $purchaseData->purchase_id)
             ->get();
-        $purchase = [$purchaseData, $purchaseItems];
+        $purchase = array(
+            'purchaseData' => $purchaseData,
+            'purchaseItems' => $purchaseItems,
+        );
         $status = true;
         return response()->json(compact('status', 'purchase'));
     }

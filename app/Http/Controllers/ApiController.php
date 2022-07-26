@@ -529,9 +529,10 @@ class ApiController extends Controller
     public function getPurchase($id)
     {
         $purchase = DB::table('purchases')
-            ->select('suppliers.name AS supplier_name', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id', 'purchases.date')
+            ->select('suppliers.name AS supplier_name', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id', 'purchases.date', 'purchases.id')
             ->join('suppliers', 'suppliers.id', '=', 'purchases.supplier_id')
-            ->where('id', $id)->first();
+            ->where('id', $id)
+            ->first();
         $status = true;
         return response()->json(compact('status', 'purchase'));
     }

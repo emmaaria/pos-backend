@@ -515,16 +515,14 @@ class ApiController extends Controller
             $status = true;
             return response()->json(compact('status', 'purchases'));
         } else {
-            $suppliers = DB::table('suppliers')
-                ->select('suppliers.id', 'suppliers.name', 'suppliers.mobile', 'suppliers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
-                ->join('supplier_ledgers', 'supplier_ledgers.customer_id', '=', 'suppliers.id')
-                ->where('customers.name', 'like', '%' . $name . '%')
-                ->orWhere('customers.mobile', 'like', '%' . $name . '%')
-                ->orWhere('customers.address', 'like', '%' . $name . '%')
-                ->groupBy('suppliers.id', 'suppliers.name', 'suppliers.mobile', 'suppliers.address')
+            $purchases = DB::table('purchases')
+                ->select('suppliers.name AS supplier_name', 'suppliers.mobile', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id')
+                ->join('suppliers', 'suppliers.id', '=', 'purchases.supplier_id')
+                ->where('purchases.purchase_id', 'like', '%' . $name . '%')
+                ->orWhere('suppliers.name', 'like', '%' . $name . '%')
                 ->paginate(50);
             $status = true;
-            return response()->json(compact('status', 'suppliers'));
+            return response()->json(compact('status', 'purchases'));
         }
     }
 

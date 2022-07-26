@@ -508,7 +508,7 @@ class ApiController extends Controller
         $name = $request->name;
         if (empty($name)) {
             $purchases = DB::table('purchases')
-                ->select('suppliers.name', 'suppliers.mobile', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id')
+                ->select('suppliers.name AS supplier_name', 'suppliers.mobile', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id')
                 ->leftJoin('suppliers', 'suppliers.id', '=', 'purchases.supplier_id')
                 ->orderBy('id', 'desc')
                 ->paginate(50);

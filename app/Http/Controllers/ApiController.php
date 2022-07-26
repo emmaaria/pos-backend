@@ -509,7 +509,8 @@ class ApiController extends Controller
         if (empty($name)) {
             $purchases = DB::table('purchases')
                 ->select('suppliers.name', 'suppliers.mobile', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id')
-                ->leftJoin('suppliers', 'suppliers.id', '=', 'purchases.supplier')
+                ->leftJoin('suppliers', 'suppliers.id', '=', 'purchases.supplier_id')
+                ->orderBy('id', 'desc')
                 ->paginate(50);
             $status = true;
             return response()->json(compact('status', 'purchases'));

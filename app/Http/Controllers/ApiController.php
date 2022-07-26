@@ -528,9 +528,9 @@ class ApiController extends Controller
 
     public function getPurchase($id)
     {
-        $supplier = Supplier::where('id', $id)->first();
+        $purchase = DB::table('purchases')->where('id', $id)->first();
         $status = true;
-        return response()->json(compact('status', 'supplier'));
+        return response()->json(compact('status', 'purchase'));
     }
 
     public function storePurchase(Request $request)

@@ -508,7 +508,7 @@ class ApiController extends Controller
         $name = $request->name;
         if (empty($name)) {
             $purchases = DB::table('purchases')
-                ->select('suppliers.name AS supplier_name', 'suppliers.mobile', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id')
+                ->select('suppliers.name AS supplier_name', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id')
                 ->leftJoin('suppliers', 'suppliers.id', '=', 'purchases.supplier_id')
                 ->orderBy('id', 'desc')
                 ->paginate(50);
@@ -516,7 +516,7 @@ class ApiController extends Controller
             return response()->json(compact('status', 'purchases'));
         } else {
             $purchases = DB::table('purchases')
-                ->select('suppliers.name AS supplier_name', 'suppliers.mobile', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id')
+                ->select('suppliers.name AS supplier_name', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id')
                 ->join('suppliers', 'suppliers.id', '=', 'purchases.supplier_id')
                 ->where('purchases.purchase_id', 'like', '%' . $name . '%')
                 ->orWhere('suppliers.name', 'like', '%' . $name . '%')
@@ -528,7 +528,10 @@ class ApiController extends Controller
 
     public function getPurchase($id)
     {
-        $purchase = DB::table('purchases')->where('id', $id)->first();
+        $purchase = DB::table('purchases')
+            ->select('suppliers.name AS supplier_name', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id')
+            ->join('suppliers', 'suppliers.id', '=', 'purchases.supplier_id')
+            ->where('id', $id)->first();
         $status = true;
         return response()->json(compact('status', 'purchase'));
     }

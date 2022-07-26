@@ -524,12 +524,17 @@ class ApiController extends Controller
 
     public function getPurchase($id)
     {
-        $purchase = DB::table('purchases')
-            ->select('suppliers.name AS supplier_name', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id', 'purchases.date', 'purchase_items.product_id')
+        $purchaseData = DB::table('purchases')
+            ->select('suppliers.name AS supplier_name', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id', 'purchases.date')
             ->join('suppliers', 'suppliers.id', '=', 'purchases.supplier_id')
-            ->join('purchase_items', 'purchase_items.purchase_id', '=', 'purchases.purchase_id')
             ->where('purchases.id', $id)
+            ->first();
+        $purchaseItems = DB::table('purchase_items')
+            ->select('products.name AS product_name', 'purchase_items.price', 'purchase_items.total', 'purchase_items.quantity')
+            ->join('products', 'products.id', '=', 'purchase_items.product_id')
+            ->where('purchase_items.purchase_id', $purchaseData->purchase_id)
             ->get();
+        $purchase = [$purchaseData, $purchaseItems];
         $status = true;
         return response()->json(compact('status', 'purchase'));
     }

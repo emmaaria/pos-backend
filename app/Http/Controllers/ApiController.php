@@ -529,7 +529,7 @@ class ApiController extends Controller
             ->join('suppliers', 'suppliers.id', '=', 'purchases.supplier_id')
             ->join('purchase_items', 'purchase_items.purchase_id', '=', 'purchases.purchase_id')
             ->where('purchases.id', $id)
-            ->first();
+            ->get();
         $status = true;
         return response()->json(compact('status', 'purchase'));
     }

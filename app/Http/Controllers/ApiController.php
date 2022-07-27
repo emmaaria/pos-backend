@@ -525,7 +525,7 @@ class ApiController extends Controller
     public function getPurchase($id)
     {
         $purchaseData = DB::table('purchases')
-            ->select('suppliers.name AS supplier_name','suppliers.id AS supplier_id', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id', 'purchases.date', 'purchases.paid')
+            ->select('suppliers.name AS supplier_name', 'suppliers.id AS supplier_id', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id', 'purchases.date', 'purchases.paid')
             ->join('suppliers', 'suppliers.id', '=', 'purchases.supplier_id')
             ->where('purchases.id', $id)
             ->first();
@@ -688,21 +688,21 @@ class ApiController extends Controller
                 }
             }
             DB::table('supplier_ledgers')
-                ->where('reference_no',$request->id)
-                ->where('type','due')
+                ->where('reference_no', $request->id)
+                ->where('type', 'due')
                 ->update(array(
-                'supplier_id' => $request->supplier_id,
-                'due' => $request->total,
-                'deposit' => 0,
-                'date' => $request->date
-            ));
+                    'supplier_id' => $request->supplier_id,
+                    'due' => $request->total,
+                    'deposit' => 0,
+                    'date' => $request->date
+                ));
             DB::table('supplier_ledgers')
-                ->where('reference_no',$request->id)
-                ->where('type','deposit')
+                ->where('reference_no', $request->id)
+                ->where('type', 'deposit')
                 ->delete();
             DB::table('cash_books')
-                ->where('reference_no',$request->id)
-                ->where('type','payment')
+                ->where('reference_no', $request->id)
+                ->where('type', 'payment')
                 ->delete();
 
             if (!empty($request->paid)) {
@@ -745,8 +745,15 @@ class ApiController extends Controller
     {
         $id = $request->id;
         if (!empty($id)) {
-            $deleted = Supplier::where('id', $id)->delete();
-            SupplierLedger::where('supplier_id', $id)->delete();
+            $purchase = DB::table('purchases')->where('id', $request->id)->first();
+            $deleted = DB::table('purchase_items')->where('purchase_id', $purchase->purchase_id)->delete();
+            $deleted = DB::table('supplier_ledgers')
+                ->where('reference_no', $request->id)
+                ->delete();
+            $deleted = DB::table('cash_books')
+                ->where('reference_no', $request->id)
+                ->delete();
+            $deleted = Db::table('purchases')->where('id', $id)->delete();
             if ($deleted) {
                 $status = true;
                 $message = 'Supplier deleted';

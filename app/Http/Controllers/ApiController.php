@@ -643,7 +643,7 @@ class ApiController extends Controller
     {
         $validator = Validator::make($request->all(),
             [
-                'purchae_id' => 'required',
+                'purchase_id' => 'required',
                 'supplier_id' => 'required',
                 'date' => 'required',
                 'productIds' => 'required',

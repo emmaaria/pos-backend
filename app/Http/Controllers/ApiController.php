@@ -643,8 +643,13 @@ class ApiController extends Controller
     {
         $validator = Validator::make($request->all(),
             [
-                'id' => 'required',
-                'name' => 'required',
+                'purchae_id' => 'required',
+                'supplier_id' => 'required',
+                'date' => 'required',
+                'productIds' => 'required',
+                'productQuantities' => 'required',
+                'productPrices' => 'required',
+                'total' => 'required',
             ]
         );
         if ($validator->fails()) {
@@ -652,14 +657,88 @@ class ApiController extends Controller
             $errors = $validator->errors();
             return response()->json(compact('status', 'errors'));
         }
-        $supplier = Supplier::where('id', $request->id)->first();
-        $supplier->name = $request->name;
-        $supplier->mobile = $request->mobile;
-        $supplier->address = $request->address;
-        $supplier->save();
-        $status = true;
-        $message = 'Updated';
-        return response()->json(compact('status', 'message'));
+        $products = $request->productIds;
+        $quantities = $request->productQuantities;
+        $prices = $request->productPrices;
+        if (count($products) > 0) {
+            $purchase = DB::table('purchases')->where('id', $request->purchase_id)->first();
+            DB::table('purchases')->where('id', $request->purchase_id)->update(
+                [
+                    'supplier_id' => $request->supplier_id,
+                    'amount' => $request->total,
+                    'paid' => $request->paid,
+                    'comment' => $request->comment,
+                    'date' => $request->date,
+                ]
+            );
+            DB::table('purchase_items')->where('purchase_id', $purchase->purchase_id)->delete();
+            for ($i = 0, $n = count($products); $i < $n; $i++) {
+                $productID = $products[$i];
+                $quantity = $quantities[$i];
+                $price = $prices[$i];
+                if ($quantity > 0) {
+                    DB::table('purchase_items')->insert([
+                        'purchase_id' => $purchase->purchase_id,
+                        'product_id' => $productID,
+                        'price' => $price,
+                        'quantity' => $quantity,
+                        'date' => $request->date,
+                        'total' => $quantity * $price,
+                    ]);
+                }
+            }
+            DB::table('supplier_ledgers')
+                ->where('reference_no',$request->id)
+                ->where('type','due')
+                ->update(array(
+                'supplier_id' => $request->supplier_id,
+                'due' => $request->total,
+                'deposit' => 0,
+                'date' => $request->date
+            ));
+            DB::table('supplier_ledgers')
+                ->where('reference_no',$request->id)
+                ->where('type','deposit')
+                ->delete();
+            DB::table('cash_books')
+                ->where('reference_no',$request->id)
+                ->where('type','payment')
+                ->delete();
+
+            if (!empty($request->paid)) {
+                $txGenerator = new InvoiceNumberGeneratorService();
+                $supplierPaidTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('transaction');
+                DB::table('supplier_ledgers')->insert(array(
+                    'supplier_id' => $request->supplier_id,
+                    'reference_no' => $request->id,
+                    'transaction_id' => $supplierPaidTxId,
+                    'type' => 'deposit',
+                    'due' => 0,
+                    'deposit' => $request->paid,
+                    'date' => $request->date,
+                    'comment' => "Deposit for Purchase id ($purchase->purchase_id)"
+                ));
+                $txGenerator->setNextInvoiceNo();
+
+                $cashTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('transaction');
+                DB::table('cash_books')->insert(array(
+                    'transaction_id' => $cashTxId,
+                    'reference_no' => $request->id,
+                    'type' => 'payment',
+                    'payment' => $request->paid,
+                    'date' => $request->date,
+                    'comment' => "Paid for Purchase id ($purchase->purchase_id)"
+                ));
+                $txGenerator->setNextInvoiceNo();
+            }
+            $status = true;
+            $message = 'Purchase saved';
+            return response()->json(compact('status', 'message'));
+        } else {
+            $status = false;
+            $error = 'Please add at least one product';
+            return response()->json(compact('status', 'error'));
+        }
     }
 
     public function deletePurchase(Request $request)

@@ -756,16 +756,16 @@ class ApiController extends Controller
             $deleted = Db::table('purchases')->where('id', $id)->delete();
             if ($deleted) {
                 $status = true;
-                $message = 'Supplier deleted';
+                $message = 'Purchase deleted';
                 return response()->json(compact('status', 'message'));
             } else {
                 $status = false;
-                $error = 'Supplier not found';
+                $error = 'Purchase not found';
                 return response()->json(compact('status', 'error'));
             }
         } else {
             $status = false;
-            $error = 'Supplier not found';
+            $error = 'Purchase not found';
             return response()->json(compact('status', 'error'));
         }
     }

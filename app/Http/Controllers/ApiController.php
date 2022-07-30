@@ -801,11 +801,17 @@ class ApiController extends Controller
         return response()->json(compact('status', 'product'));
     }
 
-    public function getProductByBarcode($id)
+    public function getProductByBarcode(Request $request)
     {
-        $product = Product::where('product_id', $id)->first();
-        $status = true;
-        return response()->json(compact('status', 'product'));
+        $product = Product::where('product_id', $request->id)->first();
+        if (!empty($product)){
+            $status = true;
+            return response()->json(compact('status', 'product'));
+        }else{
+            $status = false;
+            $message = 'No product fround';
+            return response()->json(compact('status', 'message'));
+        }
     }
 
     public function storeProduct(Request $request)

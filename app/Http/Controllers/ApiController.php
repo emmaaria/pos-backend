@@ -801,6 +801,13 @@ class ApiController extends Controller
         return response()->json(compact('status', 'product'));
     }
 
+    public function getProductByBarcode($id)
+    {
+        $product = Product::where('product_id', $id)->first();
+        $status = true;
+        return response()->json(compact('status', 'product'));
+    }
+
     public function storeProduct(Request $request)
     {
         $validator = Validator::make($request->all(),

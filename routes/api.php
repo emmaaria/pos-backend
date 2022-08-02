@@ -47,6 +47,12 @@ Route::group(['middleware' => 'api'], function ($router) {
     Route::post('/purchase/update', [\App\Http\Controllers\ApiController::class, 'updatePurchase']);
     Route::post('/purchase/delete', [\App\Http\Controllers\ApiController::class, 'deletePurchase']);
 
+    Route::get('/invoice', [\App\Http\Controllers\ApiController::class, 'getInvoices']);
+    Route::get('/invoice/{id}', [\App\Http\Controllers\ApiController::class, 'getInvoice']);
+    Route::post('/invoice/store', [\App\Http\Controllers\ApiController::class, 'storeInvoice']);
+    Route::post('/invoice/update', [\App\Http\Controllers\ApiController::class, 'updateInvoice']);
+    Route::post('/invoice/delete', [\App\Http\Controllers\ApiController::class, 'deleteInvoice']);
+
     Route::get('/product', [\App\Http\Controllers\ApiController::class, 'getProducts']);
     Route::get('/product/{id}', [\App\Http\Controllers\ApiController::class, 'getProduct']);
     Route::post('/product/store', [\App\Http\Controllers\ApiController::class, 'storeProduct']);

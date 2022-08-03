@@ -18,10 +18,11 @@ class CreateInvoicesTable extends Migration
             $table->string('customer_id');
             $table->string('invoice_id');
             $table->string('total');
-            $table->string('comment');
+            $table->string('comment')->nullable();
             $table->string('date');
-            $table->string('discount');
-            $table->string('discountAmount');
+            $table->string('discount')->nullable();
+            $table->string('discountAmount')->nullable();
+            $table->string('discountType')->nullable();
             $table->timestamps();
         });
     }

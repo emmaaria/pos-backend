@@ -949,12 +949,10 @@ class ApiController extends Controller
     {
         $validator = Validator::make($request->all(),
             [
-                'supplier_id' => 'required',
                 'date' => 'required',
                 'productIds' => 'required',
                 'productQuantities' => 'required',
                 'productPrices' => 'required',
-                'total' => 'required',
             ]
         );
         if ($validator->fails()) {
@@ -965,18 +963,22 @@ class ApiController extends Controller
         $products = $request->productIds;
         $quantities = $request->productQuantities;
         $prices = $request->productPrices;
+        if (!empty($request->customer_id)){
+            $customerId = $request->customer_id;
+        }else{
+            $customerId = DB::table('customers')->where('name', 'Walking Customer')->first()->id;
+        }
         if (count($products) > 0) {
             $txGenerator = new InvoiceNumberGeneratorService();
-            $txId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('transaction');
+            $invoiceId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('transaction');
             $txGenerator->setNextInvoiceNo();
-            $pId = DB::table('purchases')->insertGetId(
+            $pId = DB::table('invoices')->insertGetId(
                 [
-                    'supplier_id' => $request->supplier_id,
-                    'amount' => $request->total,
-                    'paid' => $request->paid,
+                    'customer_id' => $customerId,
+                    'invoice_id' => $invoiceId,
                     'comment' => $request->comment,
-                    'purchase_id' => $txId,
                     'date' => $request->date,
+                    'discount' => $request->discount,
                 ]
             );
             for ($i = 0, $n = count($products); $i < $n; $i++) {

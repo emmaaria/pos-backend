@@ -19,7 +19,7 @@ class CreatePurchasesTable extends Migration
             $table->string('purchase_id');
             $table->string('amount');
             $table->string('paid')->default(0);
-            $table->string('comment');
+            $table->string('comment')->nullable();
             $table->string('date');
             $table->timestamps();
         });

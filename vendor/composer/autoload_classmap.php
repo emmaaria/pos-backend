@@ -34,6 +34,7 @@ return array(
     'App\\Models\\Customer' => $baseDir . '/app/Models/Customer.php',
     'App\\Models\\CustomerLedger' => $baseDir . '/app/Models/CustomerLedger.php',
     'App\\Models\\Invoice' => $baseDir . '/app/Models/Invoice.php',
+    'App\\Models\\InvoiceItem' => $baseDir . '/app/Models/InvoiceItem.php',
     'App\\Models\\NagadTransaction' => $baseDir . '/app/Models/NagadTransaction.php',
     'App\\Models\\Product' => $baseDir . '/app/Models/Product.php',
     'App\\Models\\Purchase' => $baseDir . '/app/Models/Purchase.php',

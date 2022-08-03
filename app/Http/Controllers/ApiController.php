@@ -564,15 +564,15 @@ class ApiController extends Controller
         $prices = $request->productPrices;
         if (count($products) > 0) {
             $txGenerator = new InvoiceNumberGeneratorService();
-            $txId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('transaction');
+            $purchaseId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('purchase');
             $txGenerator->setNextInvoiceNo();
-            $pId = DB::table('purchases')->insertGetId(
+            DB::table('purchases')->insertGetId(
                 [
                     'supplier_id' => $request->supplier_id,
                     'amount' => $request->total,
                     'paid' => $request->paid,
                     'comment' => $request->comment,
-                    'purchase_id' => $txId,
+                    'purchase_id' => $purchaseId,
                     'date' => $request->date,
                 ]
             );
@@ -582,7 +582,7 @@ class ApiController extends Controller
                 $price = $prices[$i];
                 if ($quantity > 0) {
                     DB::table('purchase_items')->insert([
-                        'purchase_id' => $txId,
+                        'purchase_id' => $purchaseId,
                         'product_id' => $productID,
                         'price' => $price,
                         'quantity' => $quantity,
@@ -591,41 +591,41 @@ class ApiController extends Controller
                     ]);
                 }
             }
-            $supplierDueTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('transaction');
+            $supplierDueTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('supplier_transaction');
             DB::table('supplier_ledgers')->insert(array(
                 'supplier_id' => $request->supplier_id,
                 'transaction_id' => $supplierDueTxId,
-                'reference_no' => $pId,
+                'reference_no' => 'pur-'.$purchaseId,
                 'type' => 'due',
                 'due' => $request->total,
                 'deposit' => 0,
                 'date' => $request->date,
-                'comment' => "Due for Purchase id ($txId)"
+                'comment' => "Due for Purchase id ($purchaseId)"
             ));
             $txGenerator->setNextInvoiceNo();
 
             if (!empty($request->paid)) {
-                $supplierPaidTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('transaction');
+                $supplierPaidTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('supplier_transaction');
                 DB::table('supplier_ledgers')->insert(array(
                     'supplier_id' => $request->supplier_id,
-                    'reference_no' => $pId,
+                    'reference_no' => 'pur-'.$purchaseId,
                     'transaction_id' => $supplierPaidTxId,
                     'type' => 'deposit',
                     'due' => 0,
                     'deposit' => $request->paid,
                     'date' => $request->date,
-                    'comment' => "Deposit for Purchase id ($txId)"
+                    'comment' => "Deposit for Purchase id ($purchaseId)"
                 ));
                 $txGenerator->setNextInvoiceNo();
 
-                $cashTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('transaction');
+                $cashTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('cash_transaction');
                 DB::table('cash_books')->insert(array(
                     'transaction_id' => $cashTxId,
-                    'reference_no' => $pId,
+                    'reference_no' => 'pur-'.$purchaseId,
                     'type' => 'payment',
                     'payment' => $request->paid,
                     'date' => $request->date,
-                    'comment' => "Paid for Purchase id ($txId)"
+                    'comment' => "Paid for Purchase id ($purchaseId)"
                 ));
                 $txGenerator->setNextInvoiceNo();
             }
@@ -688,7 +688,7 @@ class ApiController extends Controller
                 }
             }
             DB::table('supplier_ledgers')
-                ->where('reference_no', $request->id)
+                ->where('reference_no', "pur-$purchase->purchase_id")
                 ->where('type', 'due')
                 ->update(array(
                     'supplier_id' => $request->supplier_id,
@@ -697,20 +697,20 @@ class ApiController extends Controller
                     'date' => $request->date
                 ));
             DB::table('supplier_ledgers')
-                ->where('reference_no', $request->id)
+                ->where('reference_no', "pur-$purchase->purchase_id")
                 ->where('type', 'deposit')
                 ->delete();
             DB::table('cash_books')
-                ->where('reference_no', $request->id)
+                ->where('reference_no', "pur-$purchase->purchase_id")
                 ->where('type', 'payment')
                 ->delete();
 
             if (!empty($request->paid)) {
                 $txGenerator = new InvoiceNumberGeneratorService();
-                $supplierPaidTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('transaction');
+                $supplierPaidTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('supplier_transaction');
                 DB::table('supplier_ledgers')->insert(array(
                     'supplier_id' => $request->supplier_id,
-                    'reference_no' => $request->id,
+                    'reference_no' => "pur-$purchase->purchase_id",
                     'transaction_id' => $supplierPaidTxId,
                     'type' => 'deposit',
                     'due' => 0,
@@ -720,10 +720,10 @@ class ApiController extends Controller
                 ));
                 $txGenerator->setNextInvoiceNo();
 
-                $cashTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('transaction');
+                $cashTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('cash_transaction');
                 DB::table('cash_books')->insert(array(
                     'transaction_id' => $cashTxId,
-                    'reference_no' => $request->id,
+                    'reference_no' => "pur-$purchase->purchase_id",
                     'type' => 'payment',
                     'payment' => $request->paid,
                     'date' => $request->date,
@@ -748,10 +748,10 @@ class ApiController extends Controller
             $purchase = DB::table('purchases')->where('id', $request->id)->first();
             $deleted = DB::table('purchase_items')->where('purchase_id', $purchase->purchase_id)->delete();
             $deleted = DB::table('supplier_ledgers')
-                ->where('reference_no', $request->id)
+                ->where('reference_no', "pur-$purchase->purchase_id")
                 ->delete();
             $deleted = DB::table('cash_books')
-                ->where('reference_no', $request->id)
+                ->where('reference_no', "pur-$purchase->purchase_id")
                 ->delete();
             $deleted = Db::table('purchases')->where('id', $id)->delete();
             if ($deleted) {
@@ -972,22 +972,15 @@ class ApiController extends Controller
             $txGenerator = new InvoiceNumberGeneratorService();
             $invoiceId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('transaction');
             $txGenerator->setNextInvoiceNo();
-            $pId = DB::table('invoices')->insertGetId(
-                [
-                    'customer_id' => $customerId,
-                    'invoice_id' => $invoiceId,
-                    'comment' => $request->comment,
-                    'date' => $request->date,
-                    'discount' => $request->discount,
-                ]
-            );
+            $total = 0;
             for ($i = 0, $n = count($products); $i < $n; $i++) {
                 $productID = $products[$i];
                 $quantity = $quantities[$i];
                 $price = $prices[$i];
+                $total += $quantity * $price;
                 if ($quantity > 0) {
-                    DB::table('purchase_items')->insert([
-                        'purchase_id' => $txId,
+                    DB::table('invoice_items')->insert([
+                        'invoice_id' => $invoiceId,
                         'product_id' => $productID,
                         'price' => $price,
                         'quantity' => $quantity,
@@ -996,23 +989,37 @@ class ApiController extends Controller
                     ]);
                 }
             }
-            $supplierDueTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('transaction');
-            DB::table('supplier_ledgers')->insert(array(
-                'supplier_id' => $request->supplier_id,
-                'transaction_id' => $supplierDueTxId,
-                'reference_no' => $pId,
+            $invId = DB::table('invoices')->insertGetId(
+                [
+                    'customer_id' => $customerId,
+                    'invoice_id' => $invoiceId,
+                    'comment' => $request->comment,
+                    'date' => $request->date,
+                    'discount' => $request->discount,
+                    'discountAmount' => $request->discountAmount,
+                    'discountType' => $request->discountType,
+                    'total' => $total,
+                ]
+            );
+            $customerDueTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('transaction');
+            DB::table('customer_ledgers')->insert(array(
+                'customer_id' => $customerId,
+                'transaction_id' => $customerDueTxId,
+                'reference_no' => $invId,
                 'type' => 'due',
-                'due' => $request->total,
+                'due' => $total - $request->discountAmount,
                 'deposit' => 0,
                 'date' => $request->date,
-                'comment' => "Due for Purchase id ($txId)"
+                'comment' => "Due for Invoice ID ($invoiceId)"
             ));
             $txGenerator->setNextInvoiceNo();
 
-            if (!empty($request->paid)) {
+            $paid = $request->cash + $request->bcash + $request->nagad + $request->card;
+
+            if ($paid > 0) {
                 $supplierPaidTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('transaction');
-                DB::table('supplier_ledgers')->insert(array(
-                    'supplier_id' => $request->supplier_id,
+                DB::table('customer_ledgers')->insert(array(
+                    'customer_id' => $customerId,
                     'reference_no' => $pId,
                     'transaction_id' => $supplierPaidTxId,
                     'type' => 'deposit',

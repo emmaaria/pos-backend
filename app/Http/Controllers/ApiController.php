@@ -62,7 +62,7 @@ class ApiController extends Controller
 //            $error = $e->getMessage();
 //            return response()->json(compact('error'));
 //        }
-        $text = bcrypt('123456');
+        $text = encrypt('123456');
         try {
             $id = decrypt($text);
         } catch (\RuntimeException $e) {

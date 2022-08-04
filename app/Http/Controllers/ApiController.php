@@ -15,7 +15,7 @@ class ApiController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth.custom:api', ['except' => ['login']]);
+        $this->middleware('auth.custom:api', ['except' => ['login', 'jwt']]);
     }
 
     protected function guard()
@@ -53,6 +53,12 @@ class ApiController extends Controller
         $status = true;
         $user = User::select('id', 'name', 'email', 'role')->where('email', $request->email)->first();
         return response()->json(compact('status', 'user', 'token'));
+    }
+    public function jwt(){
+        $token = JWTAuth::getToken();
+        $apy = JWTAuth::getPayload($token)->toArray();
+        $user_id = decrypt($apy->user_id);
+        return response()->json(compact('user_id'));
     }
 
     public function profile()

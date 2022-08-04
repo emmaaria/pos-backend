@@ -63,6 +63,11 @@ class ApiController extends Controller
 //            return response()->json(compact('error'));
 //        }
         $text = bcrypt('123456');
+        try {
+            $id = decrypt($text);
+        } catch (\RuntimeException $e) {
+            dd($e->getMessage());
+        }
         $user_id = decrypt($text);
 //        $user_id = DB::table('users')->where('id',$id)->first();
         return response()->json(compact('user_id'));

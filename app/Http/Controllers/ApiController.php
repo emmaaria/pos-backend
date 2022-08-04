@@ -56,7 +56,8 @@ class ApiController extends Controller
     }
 
     public function jwt_decode(){
-        $apy = JWTAuth::getPayload('eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC9wb3MtYmFja2VuZC53ZWJ4Y29kZS54eXpcL2FwaVwvbG9naW4iLCJpYXQiOjE2NTk2MDQ2NjIsIm5iZiI6MTY1OTYwNDY2MiwianRpIjoiVFZ6NlNTWFBHNTJwUG9EZSIsInN1YiI6MSwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.k6n16VnIBIBRBHan-krXz2TtNp5sJ9keGBoX6gmUPWs')->toJson();
+        $token = JWTAuth::getToken();
+        $apy = JWTAuth::getPayload($token)->toArray();
         dd($apy);
     }
 

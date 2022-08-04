@@ -54,7 +54,7 @@ class ApiController extends Controller
         $user = User::select('id', 'name', 'email', 'role')->where('email', $request->email)->first();
         return response()->json(compact('status', 'user', 'token'));
     }
-    public function jwt(){
+    public function jwt_dec(){
         $token = JWTAuth::getToken();
         $apy = JWTAuth::getPayload($token)->toArray();
         $user_id = decrypt($apy->user_id);

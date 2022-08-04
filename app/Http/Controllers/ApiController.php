@@ -55,8 +55,8 @@ class ApiController extends Controller
         return response()->json(compact('status', 'user', 'token'));
     }
     public function jwt_dec(){
-        $user_id = auth()->payload()->toArray();
-//        $user_id = decrypt($payload->get('user_id'));
+        $payload = auth()->payload();
+        $user_id = $payload->get('user_id');
         return response()->json(compact('user_id'));
     }
 

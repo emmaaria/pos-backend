@@ -59,7 +59,8 @@ class ApiController extends Controller
         try {
             $id = decrypt($payload->get('user_id'));
         } catch (\RuntimeException $e) {
-            return response()->json(compact('e'));
+            $error = $e->getMessage();
+            return response()->json(compact('error'));
         }
         $user_id = DB::table('users')->where('id',$id)->first();
         return response()->json(compact('user_id'));

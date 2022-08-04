@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Skycoder\InvoiceNumberGenerator\InvoiceNumberGeneratorService;
-use Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Support\Facades\Crypt;
 
 class ApiController extends Controller
 {
@@ -40,7 +40,7 @@ class ApiController extends Controller
         $user = DB::table('users')->where('email', $request->email)->first();
         if (!empty($user)){
             $userData = array(
-                'user_id' => bcrypt($user->id),
+                'user_id' => Crypt::encryptString($user->id),
             );
         }else{
             $userData = null;
@@ -56,7 +56,7 @@ class ApiController extends Controller
     }
     public function jwt_dec(){
         $payload = auth()->payload();
-        $user_id = $payload->get('user_id');
+        $user_id = Crypt::decryptString($payload->get('user_id'));
         return response()->json(compact('user_id'));
     }
 

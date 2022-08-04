@@ -15,7 +15,7 @@ class ApiController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth.custom:api', ['except' => ['login', 'jwt_dec']]);
+        $this->middleware('auth.custom:api', ['except' => ['login']]);
     }
 
     protected function guard()

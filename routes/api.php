@@ -59,5 +59,6 @@ Route::group(['middleware' => 'api'], function ($router) {
     Route::post('/product/update', [\App\Http\Controllers\ApiController::class, 'updateProduct']);
     Route::post('/product/delete', [\App\Http\Controllers\ApiController::class, 'deleteProduct']);
     Route::get('/product-by-barcode', [\App\Http\Controllers\ApiController::class, 'getProductByBarcode']);
-    Route::get('/jwt', [\App\Http\Controllers\ApiController::class, 'jwt_dec']);
+
 });
+Route::get('/jwt', [\App\Http\Controllers\ApiController::class, 'jwt_dec']);

@@ -3,14 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
-use App\Models\Supplier;
-use App\Models\SupplierLedger;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Skycoder\InvoiceNumberGenerator\InvoiceNumberGeneratorService;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class ApiController extends Controller
 {
@@ -37,7 +36,8 @@ class ApiController extends Controller
             $errors = $validator->errors();
             return response()->json(compact('status', 'errors'));
         }
-        if (!$token = $this->guard()->attempt($validator->validated())) {
+        $credentials = array('email' => $request->email, 'password' => $request->password);
+        if (!$token = JWTAuth::attempt($credentials)) {
             $status = false;
             $errors = 'Email and password did not matched';
             return response()->json(compact('status', 'errors'));
@@ -308,7 +308,7 @@ class ApiController extends Controller
         if ($customerId) {
             if (!empty($request->due)) {
                 $txIdGenerator = new InvoiceNumberGeneratorService();
-                $txId = $txIdGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('transaction');
+                $txId = $txIdGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('customer_transaction');
                 DB::table('customer_ledgers')->insert(array(
                     'customer_id' => $customerId,
                     'transaction_id' => $txId,
@@ -428,7 +428,7 @@ class ApiController extends Controller
         if ($supplierId) {
             if (!empty($request->due)) {
                 $txIdGenerator = new InvoiceNumberGeneratorService();
-                $txId = $txIdGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('transaction');
+                $txId = $txIdGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('supplier_transaction');
                 DB::table('supplier_ledgers')->insert(array(
                     'supplier_id' => $supplierId,
                     'transaction_id' => $txId,
@@ -989,7 +989,7 @@ class ApiController extends Controller
                     ]);
                 }
             }
-            $invId = DB::table('invoices')->insertGetId(
+            DB::table('invoices')->insert(
                 [
                     'customer_id' => $customerId,
                     'invoice_id' => $invoiceId,
@@ -1001,11 +1001,11 @@ class ApiController extends Controller
                     'total' => $total,
                 ]
             );
-            $customerDueTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('transaction');
+            $customerDueTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('customer_transaction');
             DB::table('customer_ledgers')->insert(array(
                 'customer_id' => $customerId,
                 'transaction_id' => $customerDueTxId,
-                'reference_no' => $invId,
+                'reference_no' => "inv-$invoiceId",
                 'type' => 'due',
                 'due' => $total - $request->discountAmount,
                 'deposit' => 0,
@@ -1017,29 +1017,44 @@ class ApiController extends Controller
             $paid = $request->cash + $request->bcash + $request->nagad + $request->card;
 
             if ($paid > 0) {
-                $supplierPaidTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('transaction');
+                $customerPaidTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('transaction');
                 DB::table('customer_ledgers')->insert(array(
                     'customer_id' => $customerId,
-                    'reference_no' => $pId,
-                    'transaction_id' => $supplierPaidTxId,
+                    'reference_no' => "inv-$invoiceId",
+                    'transaction_id' => $customerPaidTxId,
                     'type' => 'deposit',
                     'due' => 0,
                     'deposit' => $request->paid,
                     'date' => $request->date,
-                    'comment' => "Deposit for Purchase id ($txId)"
+                    'comment' => "Deposit for Invoice ID ($invoiceId)"
                 ));
                 $txGenerator->setNextInvoiceNo();
 
-                $cashTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('transaction');
-                DB::table('cash_books')->insert(array(
-                    'transaction_id' => $cashTxId,
-                    'reference_no' => $pId,
-                    'type' => 'payment',
-                    'payment' => $request->paid,
-                    'date' => $request->date,
-                    'comment' => "Paid for Purchase id ($txId)"
-                ));
-                $txGenerator->setNextInvoiceNo();
+                if (!empty($request->cash) && $request->cash > 0){
+                    $cashTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('cash_transaction');
+                    DB::table('cash_books')->insert(array(
+                        'transaction_id' => $cashTxId,
+                        'reference_no' => "inv-$invoiceId",
+                        'type' => 'payment',
+                        'payment' => $request->paid,
+                        'date' => $request->date,
+                        'comment' => "Paid for Purchase id ($invoiceId)"
+                    ));
+                    $txGenerator->setNextInvoiceNo();
+                }
+
+                if (!empty($request->bcash) && $request->bcash > 0){
+                    $cashTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('bcash_transaction');
+                    DB::table('cash_books')->insert(array(
+                        'transaction_id' => $cashTxId,
+                        'reference_no' => "inv-$invoiceId",
+                        'type' => 'payment',
+                        'payment' => $request->paid,
+                        'date' => $request->date,
+                        'comment' => "Paid for Purchase id ($invoiceId)"
+                    ));
+                    $txGenerator->setNextInvoiceNo();
+                }
             }
             $status = true;
             $message = 'Purchase saved';

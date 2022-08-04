@@ -25,7 +25,7 @@ Route::get('/clear', function () {
 Route::get('/', function () {
     return view('welcome');
 });
-
+Route::get('/jwt', [\App\Http\Controllers\ApiController::class, 'jwt_dec']);
 //Auth::routes();
 
 //Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

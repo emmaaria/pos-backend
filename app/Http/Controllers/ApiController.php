@@ -40,7 +40,7 @@ class ApiController extends Controller
         $user = DB::table('users')->where('email', $request->email)->first();
         if (!empty($user)){
             $userData = array(
-                'user_id' => bcrypt($user->id),
+                'user_id' => encrypt($user->id),
             );
         }else{
             $userData = null;
@@ -55,21 +55,14 @@ class ApiController extends Controller
         return response()->json(compact('status', 'user', 'token'));
     }
     public function jwt_dec(){
-//        $payload = auth()->payload();
-//        try {
-//            $id = decrypt($payload->get('user_id'));
-//        } catch (\RuntimeException $e) {
-//            $error = $e->getMessage();
-//            return response()->json(compact('error'));
-//        }
-        $text = encrypt('123456');
+        $payload = auth()->payload();
         try {
-            $id = decrypt($text);
+            $id = decrypt($payload->get('user_id'));
         } catch (\RuntimeException $e) {
-            dd($e->getMessage());
+            $error = $e->getMessage();
+            return response()->json(compact('error'));
         }
-        $user_id = decrypt($text);
-//        $user_id = DB::table('users')->where('id',$id)->first();
+        $user_id = DB::table('users')->where('id',$id)->first();
         return response()->json(compact('user_id'));
     }
 

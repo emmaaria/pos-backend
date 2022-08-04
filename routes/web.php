@@ -20,6 +20,7 @@ Route::get('/migrate', function () {
 Route::get('/clear', function () {
     $output = [];
     \Artisan::call('optimize:clear', $output);
+    \Artisan::call('key:generate', $output);
     dd('Done');
 });
 Route::get('/', function () {

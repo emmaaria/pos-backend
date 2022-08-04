@@ -55,8 +55,8 @@ class ApiController extends Controller
         return response()->json(compact('status', 'user', 'token'));
     }
     public function jwt_dec(){
-        $token = JWTAuth::getToken();
-        $apy = JWTAuth::getPayload($token)->toArray();
+        $payload = auth()->payload();
+        $apy = $payload->toArray();
         $user_id = decrypt($apy->user_id);
         return response()->json(compact('user_id'));
     }
@@ -68,7 +68,7 @@ class ApiController extends Controller
 
     public function logout()
     {
-        $this->guard()->logout();
+        auth()->logout(true);
         return response()->json(['message' => 'Successfully logged out'], 200);
     }
 

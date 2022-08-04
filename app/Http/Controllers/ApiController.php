@@ -15,7 +15,7 @@ class ApiController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth.custom:api', ['except' => ['login', 'jwt_decode']]);
+        $this->middleware('auth.custom:api', ['except' => ['login']]);
     }
 
     protected function guard()
@@ -37,8 +37,15 @@ class ApiController extends Controller
             return response()->json(compact('status', 'errors'));
         }
         $credentials = array('email' => $request->email, 'password' => $request->password);
-        $user = User::first();
-        if (!$token = JWTAuth::fromUser($user)) {
+        $user = DB::table('users')->where('email', $request->email)->first();
+        if (!empty($user)){
+            $userData = array(
+                'user_id' => bcrypt($user->id),
+            );
+        }else{
+            $userData = null;
+        }
+        if (!$token = auth()->claims($userData)->attempt($credentials)) {
             $status = false;
             $errors = 'Email and password did not matched';
             return response()->json(compact('status', 'errors'));
@@ -46,12 +53,6 @@ class ApiController extends Controller
         $status = true;
         $user = User::select('id', 'name', 'email', 'role')->where('email', $request->email)->first();
         return response()->json(compact('status', 'user', 'token'));
-    }
-
-    public function jwt_decode(){
-        $token = JWTAuth::getToken();
-        $apy = JWTAuth::getPayload($token)->toJson();
-        return $apy;
     }
 
     public function profile()

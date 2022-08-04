@@ -57,7 +57,8 @@ class ApiController extends Controller
 
     public function jwt_decode(){
         $token = JWTAuth::getToken();
-        dd($token);
+        $apy = JWTAuth::getPayload($token)->toJson();
+        return $apy;
     }
 
     public function profile()

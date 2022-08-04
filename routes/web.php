@@ -20,13 +20,12 @@ Route::get('/migrate', function () {
 Route::get('/clear', function () {
     $output = [];
     \Artisan::call('optimize:clear', $output);
-    \Artisan::call('key:generate', $output);
     dd('Done');
 });
 Route::get('/', function () {
     return view('welcome');
 });
-Route::get('/jwt', [\App\Http\Controllers\ApiController::class, 'jwt_dec']);
+
 //Auth::routes();
 
 //Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

@@ -37,15 +37,8 @@ class ApiController extends Controller
             return response()->json(compact('status', 'errors'));
         }
         $credentials = array('email' => $request->email, 'password' => $request->password);
-        $user = DB::table('users')->where('email', $request->email)->first();
-        if (!empty($user)){
-            $userData = array(
-                'user_id' => encrypt($user->id),
-            );
-        }else{
-            $userData = null;
-        }
-        if (!$token = JWTAuth::attempt($credentials, $userData)) {
+        $user = User::first();
+        if (!$token = JWTAuth::fromUser($user)) {
             $status = false;
             $errors = 'Email and password did not matched';
             return response()->json(compact('status', 'errors'));

@@ -57,12 +57,12 @@ class ApiController extends Controller
     public function jwt_dec(){
         $payload = auth()->payload();
         try {
-            $id = decrypt($payload->get('user_id'));
+            $id = decrypt('eyJpdiI6ImJqeTR3bG5oWFU5L2JSSmUveHorNHc9PSIsInZhbHVlIjoiY2lOMjFrVXBWVnBkZlFMaldhUiszZz09IiwibWFjIjoiZjdkNDU4NmNiNzI1OWNiOGI5M2FmMmFhOWVkZjFhN2Q5MGE1MjkzMzM0MGE1MzY1N2RlZGRmZjA0NmQwOGFhMSIsInRhZyI6IiJ9');
         } catch (\RuntimeException $e) {
             $error = $e->getMessage();
             return response()->json(compact('error'));
         }
-        $user_id = DB::table('users')->where('id',$id)->first();
+        $user_id = $id;
         return response()->json(compact('user_id'));
     }
 

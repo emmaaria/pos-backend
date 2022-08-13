@@ -799,11 +799,16 @@ class ApiController extends Controller
     public function getProducts(Request $request)
     {
         $name = $request->name;
+        $all = $request->all;
         if (empty($name)) {
             $products = Product::select('*')->paginate(50);
             $status = true;
             return response()->json(compact('status', 'products'));
-        } else {
+        } elseif (!empty($all)) {
+            $products = Product::select('*')->get();
+            $status = true;
+            return response()->json(compact('status', 'products'));
+        }else{
             $products = Product::select('*')->where('name', 'like', '%' . $name . '%')->paginate(50);
             $status = true;
             return response()->json(compact('status', 'products'));

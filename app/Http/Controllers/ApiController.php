@@ -540,7 +540,7 @@ class ApiController extends Controller
             ->first();
         $purchaseItems = DB::table('purchase_items')
             ->select('products.name', 'purchase_items.price', 'purchase_items.total', 'purchase_items.quantity', 'products.id')
-            ->join('products', 'products.id', '=', 'purchase_items.product_id')
+            ->join('products', 'products.product_id', '=', 'purchase_items.product_id')
             ->where('purchase_items.purchase_id', $purchaseData->purchase_id)
             ->get();
         $purchase = array(
@@ -812,7 +812,7 @@ class ApiController extends Controller
 
     public function getProduct($id)
     {
-        $product = Product::where('id', $id)->first();
+        $product = Product::where('product_id', $id)->first();
         $status = true;
         return response()->json(compact('status', 'product'));
     }

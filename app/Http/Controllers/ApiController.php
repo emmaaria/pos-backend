@@ -701,6 +701,13 @@ class ApiController extends Controller
                         'date' => $request->date,
                         'total' => $quantity * $price,
                     ]);
+                    $averagePrice = DB::table('purchase_items')
+                        ->select(
+                            DB::raw('SUM(quantity) as totalQuantity'),
+                            DB::raw('SUM(total) as totalPrice')
+                        )->where('product_id', $productID)->first();
+                    DB::table('average_purchase_prices')->where('product_id', $productID)
+                        ->update(['price' => $averagePrice->totalPrice / $averagePrice->totalQuantity]);
                 }
             }
             DB::table('supplier_ledgers')
@@ -1000,6 +1007,7 @@ class ApiController extends Controller
             $invoiceId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('transaction');
             $txGenerator->setNextInvoiceNo();
             $total = 0;
+            $profit = 0;
             for ($i = 0, $n = count($products); $i < $n; $i++) {
                 $productID = $products[$i];
                 $quantity = $quantities[$i];

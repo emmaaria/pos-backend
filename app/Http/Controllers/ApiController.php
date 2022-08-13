@@ -800,7 +800,7 @@ class ApiController extends Controller
     {
         $name = $request->name;
         $all = $request->all;
-        if (empty($name)) {
+        if (empty($name) && empty($all)) {
             $products = Product::select('*')->paginate(50);
             $status = true;
             return response()->json(compact('status', 'products'));

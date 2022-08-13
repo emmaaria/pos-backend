@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AveragePurchasePrice;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -597,6 +598,13 @@ class ApiController extends Controller
                         'date' => $request->date,
                         'total' => $quantity * $price,
                     ]);
+                    $averagePrice = DB::table('purchase_items')
+                            ->select(
+                                DB::raw('SUM(quantity) as totalQuantity'),
+                                DB::raw('SUM(total) as totalPrice'),
+                                DB::raw('totalPrice / totalQuantity as averagePrice')
+                            )->first();
+                    DB::table('average_purchase_prices')->where('product_id', $productID)->update(['price' => $averagePrice]);
                 }
             }
             $supplierDueTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('supplier_transaction');
@@ -843,6 +851,10 @@ class ApiController extends Controller
             'unit' => $request->unit,
             'price' => $request->price,
             'purchase_price' => $request->purchase_price,
+        ));
+        AveragePurchasePrice::create(array(
+            'product_id' => $productId,
+            'price' => $request->purchase_price,
         ));
         if ($product) {
             $productIdGenerator->setNextInvoiceNo();

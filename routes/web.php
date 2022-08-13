@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,13 +15,13 @@ use Illuminate\Support\Facades\Route;
 */
 Route::get('/migrate', function () {
     $output = [];
-    \Artisan::call('migrate', $output);
-    dd('Done');
+    Artisan::call('migrate', $output);
+    dd(Artisan::output());
 });
 Route::get('/clear', function () {
     $output = [];
-    \Artisan::call('optimize:clear', $output);
-    dd('Done');
+    Artisan::call('optimize:clear', $output);
+    dd(Artisan::output());
 });
 Route::get('/', function () {
     return view('welcome');

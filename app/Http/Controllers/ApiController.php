@@ -39,11 +39,11 @@ class ApiController extends Controller
         }
         $credentials = array('email' => $request->email, 'password' => $request->password);
         $user = DB::table('users')->where('email', $request->email)->first();
-        if (!empty($user)){
+        if (!empty($user)) {
             $userData = array(
                 'user_id' => encrypt($user->id),
             );
-        }else{
+        } else {
             $userData = [];
         }
         if (!$token = auth()->attempt($credentials)) {
@@ -599,19 +599,19 @@ class ApiController extends Controller
                         'total' => $quantity * $price,
                     ]);
                     $averagePrice = DB::table('purchase_items')
-                            ->select(
-                                DB::raw('SUM(quantity) as totalQuantity'),
-                                DB::raw('SUM(total) as totalPrice'),
-                                DB::raw('SUM(totalPrice / totalQuantity) as averagePrice')
-                            )->where('product_id', $productID)->first();
-                    DB::table('average_purchase_prices')->where('product_id', $productID)->update(['price' => $averagePrice->averagePrice]);
+                        ->select(
+                            DB::raw('SUM(quantity) as totalQuantity'),
+                            DB::raw('SUM(total) as totalPrice')
+                        )->where('product_id', $productID)->first();
+                    DB::table('average_purchase_prices')->where('product_id', $productID)
+                        ->update(['price' => $averagePrice->totalPrice / $averagePrice->totalQuantity]);
                 }
             }
             $supplierDueTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('supplier_transaction');
             DB::table('supplier_ledgers')->insert(array(
                 'supplier_id' => $request->supplier_id,
                 'transaction_id' => $supplierDueTxId,
-                'reference_no' => 'pur-'.$purchaseId,
+                'reference_no' => 'pur-' . $purchaseId,
                 'type' => 'due',
                 'due' => $request->total,
                 'deposit' => 0,
@@ -624,7 +624,7 @@ class ApiController extends Controller
                 $supplierPaidTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('supplier_transaction');
                 DB::table('supplier_ledgers')->insert(array(
                     'supplier_id' => $request->supplier_id,
-                    'reference_no' => 'pur-'.$purchaseId,
+                    'reference_no' => 'pur-' . $purchaseId,
                     'transaction_id' => $supplierPaidTxId,
                     'type' => 'deposit',
                     'due' => 0,
@@ -637,7 +637,7 @@ class ApiController extends Controller
                 $cashTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('cash_transaction');
                 DB::table('cash_books')->insert(array(
                     'transaction_id' => $cashTxId,
-                    'reference_no' => 'pur-'.$purchaseId,
+                    'reference_no' => 'pur-' . $purchaseId,
                     'type' => 'payment',
                     'payment' => $request->paid,
                     'date' => $request->date,
@@ -820,10 +820,10 @@ class ApiController extends Controller
     public function getProductByBarcode(Request $request)
     {
         $product = Product::where('product_id', $request->id)->first();
-        if (!empty($product)){
+        if (!empty($product)) {
             $status = true;
             return response()->json(compact('status', 'product'));
-        }else{
+        } else {
             $status = false;
             $message = 'No product fround';
             return response()->json(compact('status', 'message'));
@@ -985,9 +985,9 @@ class ApiController extends Controller
         $products = $request->productIds;
         $quantities = $request->productQuantities;
         $prices = $request->productPrices;
-        if (!empty($request->customer_id)){
+        if (!empty($request->customer_id)) {
             $customerId = $request->customer_id;
-        }else{
+        } else {
             $customerId = DB::table('customers')->where('name', 'Walking Customer')->first()->id;
         }
         if (count($products) > 0) {
@@ -1052,7 +1052,7 @@ class ApiController extends Controller
                 ));
                 $txGenerator->setNextInvoiceNo();
 
-                if (!empty($request->cash) && $request->cash > 0){
+                if (!empty($request->cash) && $request->cash > 0) {
                     $cashTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('cash_transaction');
                     DB::table('cash_books')->insert(array(
                         'transaction_id' => $cashTxId,
@@ -1065,7 +1065,7 @@ class ApiController extends Controller
                     $txGenerator->setNextInvoiceNo();
                 }
 
-                if (!empty($request->bcash) && $request->bcash > 0){
+                if (!empty($request->bcash) && $request->bcash > 0) {
                     $cashTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('bcash_transaction');
                     DB::table('cash_books')->insert(array(
                         'transaction_id' => $cashTxId,

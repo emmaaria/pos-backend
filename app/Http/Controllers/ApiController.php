@@ -602,7 +602,7 @@ class ApiController extends Controller
                             ->select(
                                 DB::raw('SUM(quantity) as totalQuantity'),
                                 DB::raw('SUM(total) as totalPrice'),
-                                DB::raw('totalPrice / totalQuantity as averagePrice')
+                                DB::raw('SUM(totalPrice / totalQuantity) as averagePrice')
                             )->first();
                     DB::table('average_purchase_prices')->where('product_id', $productID)->update(['price' => $averagePrice]);
                 }

@@ -21,6 +21,7 @@ class CreateProductsTable extends Migration
             $table->string('unit')->nullable();
             $table->string('price')->nullable();
             $table->string('purchase_price')->nullable();
+            $table->string('weight')->nullable();
             $table->timestamps();
         });
     }

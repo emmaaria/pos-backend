@@ -851,6 +851,7 @@ class ApiController extends Controller
             'unit' => $request->unit,
             'price' => $request->price,
             'purchase_price' => $request->purchase_price,
+            'weight' => $request->weight,
         ));
         AveragePurchasePrice::create(array(
             'product_id' => $productId,
@@ -885,6 +886,7 @@ class ApiController extends Controller
         $product->unit = $request->unit;
         $product->price = $request->price;
         $product->purchase_price = $request->purchase_price;
+        $product->weight = $request->weight;
         $product->save();
         $status = true;
         $message = 'Updated';

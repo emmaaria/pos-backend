@@ -27,6 +27,7 @@ return array(
     'App\\Http\\Middleware\\TrustHosts' => $baseDir . '/app/Http/Middleware/TrustHosts.php',
     'App\\Http\\Middleware\\TrustProxies' => $baseDir . '/app/Http/Middleware/TrustProxies.php',
     'App\\Http\\Middleware\\VerifyCsrfToken' => $baseDir . '/app/Http/Middleware/VerifyCsrfToken.php',
+    'App\\Models\\AveragePurchasePrice' => $baseDir . '/app/Models/AveragePurchasePrice.php',
     'App\\Models\\BkashTransaction' => $baseDir . '/app/Models/BkashTransaction.php',
     'App\\Models\\CardTransaction' => $baseDir . '/app/Models/CardTransaction.php',
     'App\\Models\\CashBook' => $baseDir . '/app/Models/CashBook.php',

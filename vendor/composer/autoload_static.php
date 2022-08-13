@@ -567,6 +567,7 @@ class ComposerStaticInitdf8e0732c33bb66ed26c29372ec37aaf
         'App\\Http\\Middleware\\TrustHosts' => __DIR__ . '/../..' . '/app/Http/Middleware/TrustHosts.php',
         'App\\Http\\Middleware\\TrustProxies' => __DIR__ . '/../..' . '/app/Http/Middleware/TrustProxies.php',
         'App\\Http\\Middleware\\VerifyCsrfToken' => __DIR__ . '/../..' . '/app/Http/Middleware/VerifyCsrfToken.php',
+        'App\\Models\\AveragePurchasePrice' => __DIR__ . '/../..' . '/app/Models/AveragePurchasePrice.php',
         'App\\Models\\BkashTransaction' => __DIR__ . '/../..' . '/app/Models/BkashTransaction.php',
         'App\\Models\\CardTransaction' => __DIR__ . '/../..' . '/app/Models/CardTransaction.php',
         'App\\Models\\CashBook' => __DIR__ . '/../..' . '/app/Models/CashBook.php',

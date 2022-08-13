@@ -43,9 +43,9 @@ class ApiController extends Controller
                 'user_id' => encrypt($user->id),
             );
         }else{
-            $userData = null;
+            $userData = [];
         }
-        if (!$token = auth()->claims($userData)->attempt($credentials)) {
+        if (!$token = auth()->attempt($credentials)) {
             $status = false;
             $errors = 'Email and password did not matched';
             return response()->json(compact('status', 'errors'));

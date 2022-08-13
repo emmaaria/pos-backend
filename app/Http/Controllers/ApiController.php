@@ -604,7 +604,7 @@ class ApiController extends Controller
                             DB::raw('SUM(total) as totalPrice')
                         )->where('product_id', $productID)->first();
                     DB::table('average_purchase_prices')->where('product_id', $productID)
-                        ->update(['price' => $averagePrice->totalPrice / $averagePrice->totalQuantity]);
+                        ->update(['price' => number_format($averagePrice->totalPrice / $averagePrice->totalQuantity,2)]);
                 }
             }
             $supplierDueTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('supplier_transaction');
@@ -707,7 +707,7 @@ class ApiController extends Controller
                             DB::raw('SUM(total) as totalPrice')
                         )->where('product_id', $productID)->first();
                     DB::table('average_purchase_prices')->where('product_id', $productID)
-                        ->update(['price' => $averagePrice->totalPrice / $averagePrice->totalQuantity]);
+                        ->update(['price' => number_format($averagePrice->totalPrice / $averagePrice->totalQuantity,2)]);
                 }
             }
             DB::table('supplier_ledgers')

@@ -904,7 +904,7 @@ class ApiController extends Controller
             $errors = $validator->errors();
             return response()->json(compact('status', 'errors'));
         }
-        $product = Product::where('id', $request->id)->first();
+        $product = Product::where('product_id', $request->id)->first();
         $product->name = $request->name;
         $product->category = $request->category;
         $product->unit = $request->unit;

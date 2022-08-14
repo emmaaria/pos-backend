@@ -909,7 +909,7 @@ class ApiController extends Controller
     {
         $id = $request->id;
         if (!empty($id)) {
-            $deleted = Product::where('id', $id)->delete();
+            $deleted = Product::where('product_id', $id)->delete();
             if ($deleted) {
                 $status = true;
                 $message = 'Product deleted';

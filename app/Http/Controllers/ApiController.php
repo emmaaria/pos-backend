@@ -855,7 +855,7 @@ class ApiController extends Controller
             $errors = $validator->errors();
             return response()->json(compact('status', 'errors'));
         }
-        $barcode = $request->barcode;
+        $barcode = $request->product_id;
         $productIdGenerator = new InvoiceNumberGeneratorService();
         $productId = $barcode ?: $productIdGenerator->prefix('')->setCompanyId(1)->startAt(100000)->getInvoiceNumber('product');
         $product = Product::create(array(

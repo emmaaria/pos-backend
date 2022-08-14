@@ -848,6 +848,10 @@ class ApiController extends Controller
             [
                 'name' => 'required',
                 'product_id' => 'unique:products',
+            ],
+            [
+                'name.required' => 'Product name is required',
+                'product_id.unique' => 'This barcode already used for another product'
             ]
         );
         if ($validator->fails()) {

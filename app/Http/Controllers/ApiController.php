@@ -847,6 +847,7 @@ class ApiController extends Controller
         $validator = Validator::make($request->all(),
             [
                 'name' => 'required',
+                'product_id' => 'unique:products',
             ]
         );
         if ($validator->fails()) {
@@ -854,8 +855,9 @@ class ApiController extends Controller
             $errors = $validator->errors();
             return response()->json(compact('status', 'errors'));
         }
+        $barcode = $request->barcode;
         $productIdGenerator = new InvoiceNumberGeneratorService();
-        $productId = $productIdGenerator->prefix('')->setCompanyId(1)->startAt(100000)->getInvoiceNumber('product');
+        $productId = $barcode ?: $productIdGenerator->prefix('')->setCompanyId(1)->startAt(100000)->getInvoiceNumber('product');
         $product = Product::create(array(
             'name' => $request->name,
             'product_id' => $productId,

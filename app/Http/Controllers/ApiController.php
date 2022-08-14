@@ -872,7 +872,9 @@ class ApiController extends Controller
             'price' => $request->purchase_price,
         ));
         if ($product) {
-            $productIdGenerator->setNextInvoiceNo();
+            if (!empty($request->product_id)){
+                $productIdGenerator->setNextInvoiceNo();
+            }
             $status = true;
             return response()->json(compact('status'));
         } else {

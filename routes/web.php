@@ -18,6 +18,10 @@ Route::get('/migrate', function () {
     Artisan::call('migrate', $output);
     dd(Artisan::output());
 });
+Route::get('/pull', function () {
+    exec('git pull');
+    dd('Pulled');
+});
 Route::get('/clear', function () {
     $output = [];
     Artisan::call('optimize:clear', $output);

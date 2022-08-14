@@ -863,7 +863,7 @@ class ApiController extends Controller
             'unit' => $request->unit,
             'price' => $request->price,
             'purchase_price' => $request->purchase_price,
-            'weight' => $request->weight,
+            'weight' => $request->weight ?: 0,
         ));
         AveragePurchasePrice::create(array(
             'product_id' => $productId,

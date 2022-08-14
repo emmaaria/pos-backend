@@ -1034,6 +1034,8 @@ class ApiController extends Controller
                         'date' => $request->date,
                         'total' => $quantity * $price,
                     ]);
+                    $purchasePrice = DB::table('average_purchase_prices')->where('product_id', $productID)->first();
+                    $profit += ($quantity * $price) - ($quantity * $purchasePrice->price);
                 }
             }
             DB::table('invoices')->insert(
@@ -1046,6 +1048,7 @@ class ApiController extends Controller
                     'discountAmount' => $request->discountAmount,
                     'discountType' => $request->discountType,
                     'total' => $total,
+                    'profit' => $profit,
                 ]
             );
             $customerDueTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('customer_transaction');
@@ -1092,6 +1095,32 @@ class ApiController extends Controller
 
                 if (!empty($request->bcash) && $request->bcash > 0) {
                     $cashTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('bcash_transaction');
+                    DB::table('bkash_transactions')->insert(array(
+                        'transaction_id' => $cashTxId,
+                        'reference_no' => "inv-$invoiceId",
+                        'type' => 'payment',
+                        'payment' => $request->paid,
+                        'date' => $request->date,
+                        'comment' => "Paid for Purchase id ($invoiceId)"
+                    ));
+                    $txGenerator->setNextInvoiceNo();
+                }
+
+                if (!empty($request->nagad) && $request->nagad > 0) {
+                    $cashTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('nagad_transaction');
+                    DB::table('cash_books')->insert(array(
+                        'transaction_id' => $cashTxId,
+                        'reference_no' => "inv-$invoiceId",
+                        'type' => 'payment',
+                        'payment' => $request->paid,
+                        'date' => $request->date,
+                        'comment' => "Paid for Purchase id ($invoiceId)"
+                    ));
+                    $txGenerator->setNextInvoiceNo();
+                }
+
+                if (!empty($request->nagad) && $request->nagad > 0) {
+                    $cashTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('nagad_transaction');
                     DB::table('cash_books')->insert(array(
                         'transaction_id' => $cashTxId,
                         'reference_no' => "inv-$invoiceId",

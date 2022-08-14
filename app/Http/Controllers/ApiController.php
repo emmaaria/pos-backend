@@ -855,9 +855,13 @@ class ApiController extends Controller
             $errors = $validator->errors();
             return response()->json(compact('status', 'errors'));
         }
-        $barcode = $request->product_id;
-        $productIdGenerator = new InvoiceNumberGeneratorService();
-        $productId = $barcode ?: $productIdGenerator->prefix('')->setCompanyId(1)->startAt(100000)->getInvoiceNumber('product');
+
+        if (!empty($request->product_id)){
+            $productId = $request->product_id;
+        }else{
+            $productIdGenerator = new InvoiceNumberGeneratorService();
+            $productId = $productIdGenerator->prefix('')->setCompanyId(1)->startAt(100000)->getInvoiceNumber('product');
+        }
         $product = Product::create(array(
             'name' => $request->name,
             'product_id' => $productId,
@@ -872,7 +876,7 @@ class ApiController extends Controller
             'price' => $request->purchase_price,
         ));
         if ($product) {
-            if (!empty($request->product_id)){
+            if (empty($request->product_id)){
                 $productIdGenerator->setNextInvoiceNo();
             }
             $status = true;

@@ -1086,7 +1086,7 @@ class ApiController extends Controller
                         'transaction_id' => $cashTxId,
                         'reference_no' => "inv-$invoiceId",
                         'type' => 'receive',
-                        'receive' => $request->paid,
+                        'receive' => $request->cash,
                         'date' => $request->date,
                         'comment' => "Cash receive for Invoice No ($invoiceId)"
                     ));

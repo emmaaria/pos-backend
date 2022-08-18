@@ -1003,9 +1003,10 @@ class ApiController extends Controller
         $invoice = array(
             'invoiceData' => $purchaseData,
             'invoiceItems' => $purchaseItems,
+            'payments' => $payments
         );
         $status = true;
-        return response()->json(compact('status', 'invoice', 'payments'));
+        return response()->json(compact('status', 'invoice'));
     }
 
     public function storeInvoice(Request $request)

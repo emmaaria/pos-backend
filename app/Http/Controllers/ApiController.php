@@ -853,7 +853,7 @@ class ApiController extends Controller
         if (empty($name) && empty($all)) {
             $products = Product::select('*')->paginate(50);
             $status = true;
-            return response()->json(compact('status', 'products', 'userDetails'));
+            return response()->json(compact('status', 'products', 'companyId'));
         } elseif (!empty($all)) {
             $products = Product::select('*')->get();
             $status = true;

@@ -1288,7 +1288,7 @@ class ApiController extends Controller
         $name = $request->name;
         if (empty($name)) {
             $products = DB::table('products')
-                ->select('products.name AS product_name','products.product_id AS product_id', DB::raw('SUM(purchase_items.quantity) as totalPurchase'), DB::raw('SUM(invoice_items.quantity) as totalSale'), DB::raw('SUM(totalPurchase - deposit) as totalSale'))
+                ->select('products.name AS product_name','products.product_id AS product_id', DB::raw('SUM(purchase_items.quantity) as totalPurchase'), DB::raw('SUM(invoice_items.quantity) as totalSale'), DB::raw('SUM(totalPurchase - totalSale) as stock'))
                 ->leftJoin('invoice_items', 'invoice_items.product_id', '=', 'products.product_id')
                 ->leftJoin('purchase_items', 'purchase_items.product_id', '=', 'products.product_id')
                 ->groupBy('products.product_id')

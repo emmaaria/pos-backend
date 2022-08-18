@@ -31,6 +31,11 @@ class ApiController extends Controller
                 'email' => 'required',
                 'company_id' => 'required',
                 'password' => 'required',
+            ],
+            [
+                'email.required' => 'Mobile number required',
+                'company_id.required' => 'Company number required',
+                'password.required' => 'Password required',
             ]
         );
         if ($validator->fails()) {

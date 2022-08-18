@@ -513,7 +513,7 @@ class ApiController extends Controller
         $name = $request->name;
         if (empty($name)) {
             $purchases = DB::table('purchases')
-                ->select('suppliers.name AS supplier_name', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id')
+                ->select('suppliers.name AS supplier_name', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id', 'purchases.date')
                 ->leftJoin('suppliers', 'suppliers.id', '=', 'purchases.supplier_id')
                 ->orderBy('id', 'desc')
                 ->paginate(50);
@@ -521,7 +521,7 @@ class ApiController extends Controller
             return response()->json(compact('status', 'purchases'));
         } else {
             $purchases = DB::table('purchases')
-                ->select('suppliers.name AS supplier_name', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id')
+                ->select('suppliers.name AS supplier_name', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id', 'purchases.date')
                 ->join('suppliers', 'suppliers.id', '=', 'purchases.supplier_id')
                 ->where('purchases.purchase_id', 'like', '%' . $name . '%')
                 ->orWhere('suppliers.name', 'like', '%' . $name . '%')

@@ -1277,4 +1277,38 @@ class ApiController extends Controller
     | Purchase End
     |--------------------------------------------------------------------------
     */
+
+    /*
+    |--------------------------------------------------------------------------
+    | Report Start
+    |--------------------------------------------------------------------------
+    */
+    public function getStock(Request $request)
+    {
+        $name = $request->name;
+        if (empty($name)) {
+            $products = DB::table('products')
+                ->select('products.name AS product_name','products.product_id AS product_id', DB::raw('SUM(purchase_items.quantity) as totalPurchase'), DB::raw('SUM(invoice_items.quantity) as totalSale'), DB::raw('SUM(totalPurchase - deposit) as totalSale'))
+                ->leftJoin('invoice_items', 'invoice_items.product_id', '=', 'products.product_id')
+                ->leftJoin('purchase_items', 'purchase_items.product_id', '=', 'products.product_id')
+                ->groupBy('products.product_id')
+                ->paginate(50);
+            $status = true;
+            return response()->json(compact('status', 'products'));
+        } else {
+            $products = DB::table('purchases')
+                ->select('suppliers.name AS supplier_name', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id', 'purchases.date')
+                ->join('suppliers', 'suppliers.id', '=', 'purchases.supplier_id')
+                ->where('purchases.purchase_id', 'like', '%' . $name . '%')
+                ->orWhere('suppliers.name', 'like', '%' . $name . '%')
+                ->paginate(50);
+            $status = true;
+            return response()->json(compact('status', 'products'));
+        }
+    }
+    /*
+    |--------------------------------------------------------------------------
+    | Report End
+    |--------------------------------------------------------------------------
+    */
 }

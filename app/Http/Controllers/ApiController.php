@@ -979,24 +979,24 @@ class ApiController extends Controller
         $cash = DB::table('cash_books')
             ->where('reference_no', $id)
             ->where('type', 'receive')
-            ->first()->receive;
+            ->first();
         $bcash = DB::table('bcash_transactions')
             ->where('reference_no', $id)
             ->where('type', 'deposit')
-            ->first()->deposit;
+            ->first();
         $nagad = DB::table('nagad_transactions')
             ->where('reference_no', $id)
             ->where('type', 'deposit')
-            ->first()->deposit;
+            ->first();
         $card = DB::table('card_transactions')
             ->where('reference_no', $id)
             ->where('type', 'deposit')
-            ->first()->deposit;
+            ->first();
         $payments = array(
-            'cash' => $cash,
-            'bcash' => $bcash,
-            'nagad' => $nagad,
-            'card' => $card,
+            'cash' => $cash->receive,
+            'bcash' => $bcash->deposit,
+            'nagad' => $nagad->deposit,
+            'card' => $card->deposit,
         );
         $invoice = array(
             'invoiceData' => $purchaseData,

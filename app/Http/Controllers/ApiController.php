@@ -29,10 +29,9 @@ class ApiController extends Controller
         try {
             $token = JWTAuth::getToken();
             $token = JWTAuth::getPayload($token)->toArray();
-            return $token['company_id'];
-            if ($token->company_id){
+            if ($token['company_id']){
                 try {
-                    $companyId = decrypt($token->company_id);
+                    $companyId = decrypt($token['company_id']);
                     return $companyId;
                 }catch (\Exception $e){
                     return null;

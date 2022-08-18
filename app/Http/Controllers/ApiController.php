@@ -35,7 +35,7 @@ class ApiController extends Controller
         );
         if ($validator->fails()) {
             $status = false;
-            $errors = $validator->errors()->getMessages();
+            $errors = $validator->errors()->messages();
             return response()->json(compact('status', 'errors'));
         }
         $credentials = array('email' => $request->email, 'password' => $request->password);

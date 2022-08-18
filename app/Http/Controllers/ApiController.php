@@ -29,25 +29,20 @@ class ApiController extends Controller
         try {
             $token = JWTAuth::getToken();
             $token = JWTAuth::getPayload($token)->toArray();
+            return $token->company_id;
             if ($token->company_id){
                 try {
                     $companyId = decrypt($token->company_id);
                     return $companyId;
                 }catch (\Exception $e){
-                    $status = false;
-                    $errors = 'Your are not authorized';
-                    return response()->json(compact('status', 'errors'));
+                    return null;
                 }
             }else{
-                $status = false;
-                $errors = 'Your are not authorized';
-                return response()->json(compact('status', 'errors'));
+                return null;
             }
 
         }catch (\Exception $e){
-            $status = false;
-            $errors = 'Your are not authorized';
-            return response()->json(compact('status', 'errors'));
+            return null;
         }
     }
 

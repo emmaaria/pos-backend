@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Skycoder\InvoiceNumberGenerator\InvoiceNumberGeneratorService;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 
 class ApiController extends Controller
@@ -22,6 +23,18 @@ class ApiController extends Controller
     protected function guard()
     {
         return Auth::guard();
+    }
+
+    public function getCompanyId (){
+        try {
+            $token = JWTAuth::getToken();
+            $token = JWTAuth::getPayload($token)->toArray();
+            return $token;
+        }catch (\Exception $e){
+            $status = false;
+            $errors = 'Your are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
     }
 
     public function login(Request $request)
@@ -820,12 +833,13 @@ class ApiController extends Controller
     */
     public function getProducts(Request $request)
     {
+        $userDetails = $this->getCompanyId();
         $name = $request->name;
         $all = $request->all;
         if (empty($name) && empty($all)) {
             $products = Product::select('*')->paginate(50);
             $status = true;
-            return response()->json(compact('status', 'products'));
+            return response()->json(compact('status', 'products', 'userDetails'));
         } elseif (!empty($all)) {
             $products = Product::select('*')->get();
             $status = true;

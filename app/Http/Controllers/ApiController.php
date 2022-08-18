@@ -37,7 +37,7 @@ class ApiController extends Controller
             $status = false;
             $errors = '';
             foreach ($validator->errors()->all() as $message){
-                $errors .= $message.'</br>';
+                $errors .= $message;
             }
             return response()->json(compact('status', 'errors'));
         }

@@ -966,22 +966,22 @@ class ApiController extends Controller
 
     public function getInvoice($id)
     {
-        $purchaseData = DB::table('purchases')
-            ->select('suppliers.name AS supplier_name', 'suppliers.id AS supplier_id', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id', 'purchases.date', 'purchases.paid')
-            ->join('suppliers', 'suppliers.id', '=', 'purchases.supplier_id')
-            ->where('purchases.id', $id)
+        $purchaseData = DB::table('invoices')
+            ->select('customers.name AS customer_name', 'invoices.*')
+            ->leftJoin('customers', 'customers.id', '=', 'invoices.customer_id')
+            ->where('invoices.invoice_id', $id)
             ->first();
-        $purchaseItems = DB::table('purchase_items')
-            ->select('products.name', 'purchase_items.price', 'purchase_items.total', 'purchase_items.quantity', 'products.id')
-            ->join('products', 'products.id', '=', 'purchase_items.product_id')
-            ->where('purchase_items.purchase_id', $purchaseData->purchase_id)
+        $purchaseItems = DB::table('invoice_items')
+            ->select('products.name', 'invoice_items.*')
+            ->join('products', 'products.product_id', '=', 'invoice_items.product_id')
+            ->where('invoice_items.invoice_id', $id)
             ->get();
-        $purchase = array(
-            'purchaseData' => $purchaseData,
-            'purchaseItems' => $purchaseItems,
+        $invoice = array(
+            'invoiceData' => $purchaseData,
+            'invoiceItems' => $purchaseItems,
         );
         $status = true;
-        return response()->json(compact('status', 'purchase'));
+        return response()->json(compact('status', 'invoice'));
     }
 
     public function storeInvoice(Request $request)

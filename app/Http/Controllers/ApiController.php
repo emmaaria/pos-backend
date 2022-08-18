@@ -977,7 +977,7 @@ class ApiController extends Controller
             ->where('invoice_items.invoice_id', $id)
             ->get();
 
-        $cash = DB::table(' cash_books')
+        $cash = DB::table('cash_books')
             ->where('reference_no', "inv-$id")
             ->where('type', 'receive')
             ->first();

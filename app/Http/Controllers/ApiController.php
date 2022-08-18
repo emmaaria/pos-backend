@@ -29,6 +29,7 @@ class ApiController extends Controller
         $validator = Validator::make($request->all(),
             [
                 'email' => 'required',
+                'company_id' => 'required',
                 'password' => 'required',
             ]
         );
@@ -38,15 +39,28 @@ class ApiController extends Controller
             return response()->json(compact('status', 'errors'));
         }
         $credentials = array('email' => $request->email, 'password' => $request->password);
-        $user = DB::table('users')->where('email', $request->email)->first();
-        if (!$token = auth()->attempt($credentials)) {
+        $user = DB::table('users')->where('email', $request->email)->where('company_id', $request->company_id)->first();
+        if ($user){
+            if (!empty($user)){
+                $userData = array(
+                    'company_id' => encrypt($user->company_id),
+                );
+            }else{
+                $userData = null;
+            }
+            if (!$token = auth()->claims($userData)->attempt($credentials)) {
+                $status = false;
+                $errors = 'Email and password did not matched';
+                return response()->json(compact('status', 'errors'));
+            }
+            $status = true;
+            $user = User::select('id', 'name', 'email', 'role')->where('email', $request->email)->first();
+            return response()->json(compact('status', 'user', 'token'));
+        }else{
             $status = false;
-            $errors = 'Email and password did not matched';
+            $errors = 'Email, password and company id did not matched';
             return response()->json(compact('status', 'errors'));
         }
-        $status = true;
-        $user = User::select('id', 'name', 'email', 'role')->where('email', $request->email)->first();
-        return response()->json(compact('status', 'user', 'token'));
     }
 
     public function profile()
@@ -1327,7 +1341,7 @@ class ApiController extends Controller
             return response()->json(compact('status', 'message'));
         } else {
             $status = false;
-            $error = 'Purchase not found';
+            $error = 'Invoice not found';
             return response()->json(compact('status', 'error'));
         }
     }

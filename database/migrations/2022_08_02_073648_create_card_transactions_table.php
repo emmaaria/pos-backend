@@ -21,6 +21,7 @@ class CreateCardTransactionsTable extends Migration
             $table->string('type');
             $table->string('withdraw')->default(0);
             $table->string('deposit')->default(0);
+            $table->string('company_id')->nullable();
             $table->string('date');
             $table->timestamps();
         });

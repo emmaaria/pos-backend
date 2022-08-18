@@ -21,6 +21,7 @@ class CreatePurchaseItemsTable extends Migration
             $table->string('quantity');
             $table->string('total');
             $table->string('date');
+            $table->string('company_id')->nullable();
             $table->timestamps();
         });
     }

@@ -23,6 +23,7 @@ class CreateSupplierLedgersTable extends Migration
             $table->string('deposit')->default(0);
             $table->string('date');
             $table->string('comment');
+            $table->string('company_id')->nullable();
             $table->timestamps();
         });
     }

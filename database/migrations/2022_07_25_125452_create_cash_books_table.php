@@ -21,6 +21,7 @@ class CreateCashBooksTable extends Migration
             $table->string('type');
             $table->string('payment')->default(0);
             $table->string('receive')->default(0);
+            $table->string('company_id')->nullable();
             $table->string('date');
             $table->timestamps();
         });

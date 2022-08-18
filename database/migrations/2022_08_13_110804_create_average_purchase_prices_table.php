@@ -16,6 +16,7 @@ class CreateAveragePurchasePricesTable extends Migration
         Schema::create('average_purchase_prices', function (Blueprint $table) {
             $table->id();
             $table->string('product_id');
+            $table->string('company_id')->nullable();
             $table->string('price');
             $table->timestamps();
         });

@@ -842,20 +842,26 @@ class ApiController extends Controller
     public function getProducts(Request $request)
     {
         $companyId = $this->getCompanyId();
-        $name = $request->name;
-        $all = $request->all;
-        if (empty($name) && empty($all)) {
-            $products = Product::select('*')->paginate(50);
-            $status = true;
-            return response()->json(compact('status', 'products', 'companyId'));
-        } elseif (!empty($all)) {
-            $products = Product::select('*')->get();
-            $status = true;
-            return response()->json(compact('status', 'products'));
-        } else {
-            $products = Product::select('*')->where('name', 'like', '%' . $name . '%')->paginate(50);
-            $status = true;
-            return response()->json(compact('status', 'products'));
+        if ($companyId){
+            $name = $request->name;
+            $all = $request->all;
+            if (empty($name) && empty($all)) {
+                $products = DB::table('products')->select('*')->where('company_id', $companyId)->paginate(50);
+                $status = true;
+                return response()->json(compact('status', 'products', 'companyId'));
+            } elseif (!empty($all)) {
+                $products = DB::table('products')->select('*')->where('company_id', $companyId)->get();
+                $status = true;
+                return response()->json(compact('status', 'products'));
+            } else {
+                $products = DB::table('products')->select('*')->where('company_id', $companyId)->where('name', 'like', '%' . $name . '%')->paginate(50);
+                $status = true;
+                return response()->json(compact('status', 'products'));
+            }
+        }else{
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
         }
     }
 

@@ -950,24 +950,24 @@ class ApiController extends Controller
     */
     public function getInvoices(Request $request)
     {
-        $name = $request->name;
+        $name = $request->keyword;
         if (empty($name)) {
-            $purchases = DB::table('purchases')
-                ->select('suppliers.name AS supplier_name', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id')
-                ->leftJoin('suppliers', 'suppliers.id', '=', 'purchases.supplier_id')
+            $invoices = DB::table('invoices')
+                ->select('customers.name AS customer_name', 'invoices.invoice_id', 'invoices.amount', 'invoices.comment', 'invoices.id')
+                ->leftJoin('customers', 'customers.id', '=', 'invoices.customer_id')
                 ->orderBy('id', 'desc')
                 ->paginate(50);
             $status = true;
-            return response()->json(compact('status', 'purchases'));
+            return response()->json(compact('status', 'invoices'));
         } else {
-            $purchases = DB::table('purchases')
-                ->select('suppliers.name AS supplier_name', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id')
-                ->join('suppliers', 'suppliers.id', '=', 'purchases.supplier_id')
-                ->where('purchases.purchase_id', 'like', '%' . $name . '%')
-                ->orWhere('suppliers.name', 'like', '%' . $name . '%')
+            $invoices = DB::table('invoices')
+                ->select('customers.name AS customer_name', 'invoices.invoice_id', 'invoices.amount', 'invoices.comment', 'invoices.id')
+                ->leftJoin('customers', 'customers.id', '=', 'invoices.customer_id')
+                ->where('invoices.invoice_id', 'like', '%' . $name . '%')
+                ->orWhere('customers.name', 'like', '%' . $name . '%')
                 ->paginate(50);
             $status = true;
-            return response()->json(compact('status', 'purchases'));
+            return response()->json(compact('status', 'invoices'));
         }
     }
 

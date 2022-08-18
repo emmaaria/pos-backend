@@ -976,12 +976,34 @@ class ApiController extends Controller
             ->join('products', 'products.product_id', '=', 'invoice_items.product_id')
             ->where('invoice_items.invoice_id', $id)
             ->get();
+        $cash = DB::table('cash_books')
+            ->where('reference_no', $id)
+            ->where('type', 'receive')
+            ->first()->receive;
+        $bcash = DB::table('bcash_transactions')
+            ->where('reference_no', $id)
+            ->where('type', 'deposit')
+            ->first()->deposit;
+        $nagad = DB::table('nagad_transactions')
+            ->where('reference_no', $id)
+            ->where('type', 'deposit')
+            ->first()->deposit;
+        $card = DB::table('card_transactions')
+            ->where('reference_no', $id)
+            ->where('type', 'deposit')
+            ->first()->deposit;
+        $payments = array(
+            'cash' => $cash,
+            'bcash' => $bcash,
+            'nagad' => $nagad,
+            'card' => $card,
+        );
         $invoice = array(
             'invoiceData' => $purchaseData,
             'invoiceItems' => $purchaseItems,
         );
         $status = true;
-        return response()->json(compact('status', 'invoice'));
+        return response()->json(compact('status', 'invoice', 'payments'));
     }
 
     public function storeInvoice(Request $request)

@@ -977,18 +977,22 @@ class ApiController extends Controller
             ->where('invoice_items.invoice_id', $id)
             ->get();
         $cash = DB::table('cash_books')
+            ->select('*')
             ->where('reference_no', $id)
             ->where('type', 'receive')
             ->first();
-        $bcash = DB::table('bcash_transactions')
+        $bcash = DB::table('bkash_transactions')
+            ->select('*')
             ->where('reference_no', $id)
             ->where('type', 'deposit')
             ->first();
         $nagad = DB::table('nagad_transactions')
+            ->select('*')
             ->where('reference_no', $id)
             ->where('type', 'deposit')
             ->first();
         $card = DB::table('card_transactions')
+            ->select('*')
             ->where('reference_no', $id)
             ->where('type', 'deposit')
             ->first();

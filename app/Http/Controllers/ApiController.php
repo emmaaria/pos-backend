@@ -597,7 +597,7 @@ class ApiController extends Controller
                             DB::raw('SUM(total) as totalPrice')
                         )->where('product_id', $productID)->first();
                     DB::table('average_purchase_prices')->where('product_id', $productID)
-                        ->update(['price' => number_format($averagePrice->totalPrice / $averagePrice->totalQuantity,2,'.','')]);
+                        ->update(['price' => number_format($averagePrice->totalPrice / $averagePrice->totalQuantity, 2, '.', '')]);
                 }
             }
             $supplierDueTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('supplier_transaction');
@@ -700,7 +700,7 @@ class ApiController extends Controller
                             DB::raw('SUM(total) as totalPrice')
                         )->where('product_id', $productID)->first();
                     DB::table('average_purchase_prices')->where('product_id', $productID)
-                        ->update(['price' => number_format($averagePrice->totalPrice / $averagePrice->totalQuantity,2,'.','')]);
+                        ->update(['price' => number_format($averagePrice->totalPrice / $averagePrice->totalQuantity, 2, '.', '')]);
                 }
             }
             DB::table('supplier_ledgers')
@@ -808,7 +808,7 @@ class ApiController extends Controller
             $products = Product::select('*')->get();
             $status = true;
             return response()->json(compact('status', 'products'));
-        }else{
+        } else {
             $products = Product::select('*')->where('name', 'like', '%' . $name . '%')->paginate(50);
             $status = true;
             return response()->json(compact('status', 'products'));
@@ -853,9 +853,9 @@ class ApiController extends Controller
             return response()->json(compact('status', 'errors'));
         }
 
-        if (!empty($request->product_id)){
+        if (!empty($request->product_id)) {
             $productId = $request->product_id;
-        }else{
+        } else {
             $productIdGenerator = new InvoiceNumberGeneratorService();
             $productId = $productIdGenerator->prefix('')->setCompanyId(1)->startAt(100000)->getInvoiceNumber('product');
         }
@@ -873,7 +873,7 @@ class ApiController extends Controller
             'price' => $request->purchase_price,
         ));
         if ($product) {
-            if (empty($request->product_id)){
+            if (empty($request->product_id)) {
                 $productIdGenerator->setNextInvoiceNo();
             }
             $status = true;
@@ -946,7 +946,7 @@ class ApiController extends Controller
         $name = $request->keyword;
         if (empty($name)) {
             $invoices = DB::table('invoices')
-                ->select('customers.name AS customer_name', 'invoices.invoice_id', 'invoices.total','invoices.discountAmount', 'invoices.comment', 'invoices.id', 'invoices.date')
+                ->select('customers.name AS customer_name', 'invoices.invoice_id', 'invoices.total', 'invoices.discountAmount', 'invoices.comment', 'invoices.id', 'invoices.date')
                 ->leftJoin('customers', 'customers.id', '=', 'invoices.customer_id')
                 ->orderBy('id', 'desc')
                 ->paginate(50);
@@ -1066,7 +1066,7 @@ class ApiController extends Controller
                     'discountAmount' => $request->discountAmount,
                     'discountType' => $request->discountType,
                     'total' => $total,
-                    'profit' => $profit-$request->discountAmount,
+                    'profit' => $profit - $request->discountAmount,
                 ]
             );
             $customerDueTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('customer_transaction');
@@ -1164,13 +1164,11 @@ class ApiController extends Controller
     {
         $validator = Validator::make($request->all(),
             [
-                'purchase_id' => 'required',
-                'supplier_id' => 'required',
+                'invoice_id' => 'required',
                 'date' => 'required',
                 'productIds' => 'required',
                 'productQuantities' => 'required',
                 'productPrices' => 'required',
-                'total' => 'required',
             ]
         );
         if ($validator->fails()) {
@@ -1181,79 +1179,130 @@ class ApiController extends Controller
         $products = $request->productIds;
         $quantities = $request->productQuantities;
         $prices = $request->productPrices;
+        if (!empty($request->customer_id)) {
+            $customerId = $request->customer_id;
+        } else {
+            $customerId = DB::table('customers')->where('name', 'Walking Customer')->first()->id;
+        }
         if (count($products) > 0) {
-            $purchase = DB::table('purchases')->where('id', $request->purchase_id)->first();
-            DB::table('purchases')->where('id', $request->purchase_id)->update(
-                [
-                    'supplier_id' => $request->supplier_id,
-                    'amount' => $request->total,
-                    'paid' => $request->paid,
-                    'comment' => $request->comment,
-                    'date' => $request->date,
-                ]
-            );
-            DB::table('purchase_items')->where('purchase_id', $purchase->purchase_id)->delete();
+            $txGenerator = new InvoiceNumberGeneratorService();
+            $invoiceId = $request->invoice_id;
+            $total = 0;
+            $profit = 0;
+            DB::table('invoice_items')->where('invoice_id', $invoiceId)->delete();
             for ($i = 0, $n = count($products); $i < $n; $i++) {
                 $productID = $products[$i];
                 $quantity = $quantities[$i];
                 $price = $prices[$i];
+                $total += $quantity * $price;
                 if ($quantity > 0) {
-                    DB::table('purchase_items')->insert([
-                        'purchase_id' => $purchase->purchase_id,
+                    DB::table('invoice_items')->insert([
+                        'invoice_id' => $invoiceId,
                         'product_id' => $productID,
                         'price' => $price,
                         'quantity' => $quantity,
                         'date' => $request->date,
                         'total' => $quantity * $price,
                     ]);
+                    $purchasePrice = DB::table('average_purchase_prices')->where('product_id', $productID)->first();
+                    $profit += ($quantity * $price) - ($quantity * $purchasePrice->price);
                 }
             }
-            DB::table('supplier_ledgers')
-                ->where('reference_no', $request->id)
-                ->where('type', 'due')
-                ->update(array(
-                    'supplier_id' => $request->supplier_id,
-                    'due' => $request->total,
-                    'deposit' => 0,
-                    'date' => $request->date
-                ));
-            DB::table('supplier_ledgers')
-                ->where('reference_no', $request->id)
-                ->where('type', 'deposit')
-                ->delete();
-            DB::table('cash_books')
-                ->where('reference_no', $request->id)
-                ->where('type', 'payment')
-                ->delete();
+            DB::table('invoices')->where('invoice_id', $invoiceId)->update(
+                [
+                    'customer_id' => $customerId,
+                    'comment' => $request->comment,
+                    'date' => $request->date,
+                    'discount' => $request->discount,
+                    'discountAmount' => $request->discountAmount,
+                    'discountType' => $request->discountType,
+                    'total' => $total,
+                    'profit' => $profit - $request->discountAmount,
+                ]
+            );
+            DB::table('customer_ledgers')->where('reference_no', "inv-$invoiceId")->delete();
+            $customerDueTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('customer_transaction');
+            DB::table('customer_ledgers')->insert(array(
+                'customer_id' => $customerId,
+                'transaction_id' => $customerDueTxId,
+                'reference_no' => "inv-$invoiceId",
+                'type' => 'due',
+                'due' => $total - $request->discountAmount,
+                'deposit' => 0,
+                'date' => $request->date,
+                'comment' => "Due for Invoice ID ($invoiceId)"
+            ));
+            $txGenerator->setNextInvoiceNo();
 
-            if (!empty($request->paid)) {
-                $txGenerator = new InvoiceNumberGeneratorService();
-                $supplierPaidTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('transaction');
-                DB::table('supplier_ledgers')->insert(array(
-                    'supplier_id' => $request->supplier_id,
-                    'reference_no' => $request->id,
-                    'transaction_id' => $supplierPaidTxId,
+            $paid = $request->cash + $request->bcash + $request->nagad + $request->card;
+            if ($paid > 0) {
+                $customerPaidTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('transaction');
+                DB::table('customer_ledgers')->insert(array(
+                    'customer_id' => $customerId,
+                    'reference_no' => "inv-$invoiceId",
+                    'transaction_id' => $customerPaidTxId,
                     'type' => 'deposit',
                     'due' => 0,
-                    'deposit' => $request->paid,
+                    'deposit' => $request->cash,
                     'date' => $request->date,
-                    'comment' => "Deposit for Purchase id ($purchase->purchase_id)"
+                    'comment' => "Deposit for Invoice ID ($invoiceId)"
                 ));
                 $txGenerator->setNextInvoiceNo();
-
-                $cashTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('transaction');
-                DB::table('cash_books')->insert(array(
-                    'transaction_id' => $cashTxId,
-                    'reference_no' => $request->id,
-                    'type' => 'payment',
-                    'payment' => $request->paid,
-                    'date' => $request->date,
-                    'comment' => "Paid for Purchase id ($purchase->purchase_id)"
-                ));
-                $txGenerator->setNextInvoiceNo();
+                DB::table('cash_transaction')->where('reference_no', "inv-$invoiceId")->delete();
+                if (!empty($request->cash) && $request->cash > 0) {
+                    $cashTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('cash_transaction');
+                    DB::table('cash_books')->insert(array(
+                        'transaction_id' => $cashTxId,
+                        'reference_no' => "inv-$invoiceId",
+                        'type' => 'receive',
+                        'receive' => $request->cash,
+                        'date' => $request->date,
+                        'comment' => "Cash receive for Invoice No ($invoiceId)"
+                    ));
+                    $txGenerator->setNextInvoiceNo();
+                }
+                DB::table('bcash_transaction')->where('reference_no', "inv-$invoiceId")->delete();
+                if (!empty($request->bcash) && $request->bcash > 0) {
+                    $cashTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('bcash_transaction');
+                    DB::table('bkash_transactions')->insert(array(
+                        'transaction_id' => $cashTxId,
+                        'reference_no' => "inv-$invoiceId",
+                        'type' => 'deposit',
+                        'deposit' => $request->bcash,
+                        'date' => $request->date,
+                        'comment' => "Cash receive for Invoice No ($invoiceId)"
+                    ));
+                    $txGenerator->setNextInvoiceNo();
+                }
+                DB::table('nagad_transaction')->where('reference_no', "inv-$invoiceId")->delete();
+                if (!empty($request->nagad) && $request->nagad > 0) {
+                    $cashTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('nagad_transaction');
+                    DB::table('nagad_transactions')->insert(array(
+                        'transaction_id' => $cashTxId,
+                        'reference_no' => "inv-$invoiceId",
+                        'type' => 'deposit',
+                        'deposit' => $request->nagad,
+                        'date' => $request->date,
+                        'comment' => "Cash receive for Invoice No ($invoiceId)"
+                    ));
+                    $txGenerator->setNextInvoiceNo();
+                }
+                DB::table('card_transactions')->where('reference_no', "inv-$invoiceId")->delete();
+                if (!empty($request->card) && $request->card > 0) {
+                    $cashTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('card_transaction');
+                    DB::table('card_transactions')->insert(array(
+                        'transaction_id' => $cashTxId,
+                        'reference_no' => "inv-$invoiceId",
+                        'type' => 'deposit',
+                        'deposit' => $request->card,
+                        'date' => $request->date,
+                        'comment' => "Cash receive for Invoice No ($invoiceId)"
+                    ));
+                    $txGenerator->setNextInvoiceNo();
+                }
             }
             $status = true;
-            $message = 'Purchase saved';
+            $message = 'Invoice updated';
             return response()->json(compact('status', 'message'));
         } else {
             $status = false;
@@ -1266,24 +1315,16 @@ class ApiController extends Controller
     {
         $id = $request->id;
         if (!empty($id)) {
-            $purchase = DB::table('purchases')->where('id', $request->id)->first();
-            $deleted = DB::table('purchase_items')->where('purchase_id', $purchase->purchase_id)->delete();
-            $deleted = DB::table('supplier_ledgers')
-                ->where('reference_no', $request->id)
-                ->delete();
-            $deleted = DB::table('cash_books')
-                ->where('reference_no', $request->id)
-                ->delete();
-            $deleted = Db::table('purchases')->where('id', $id)->delete();
-            if ($deleted) {
-                $status = true;
-                $message = 'Purchase deleted';
-                return response()->json(compact('status', 'message'));
-            } else {
-                $status = false;
-                $error = 'Purchase not found';
-                return response()->json(compact('status', 'error'));
-            }
+            DB::table('invoices')->where('invoice_id', $id)->delete();
+            DB::table('purchase_items')->where('invoice_id', $id)->delete();
+            DB::table('customer_ledgers')->where('reference_no', "inv-$id")->delete();
+            DB::table('card_transactions')->where('reference_no', "inv-$id")->delete();
+            DB::table('nagad_transactions')->where('reference_no', "inv-$id")->delete();
+            DB::table('bcash_transactions')->where('reference_no', "inv-$id")->delete();
+            DB::table('cash_transactions')->where('reference_no', "inv-$id")->delete();
+            $status = true;
+            $message = 'Invoice deleted';
+            return response()->json(compact('status', 'message'));
         } else {
             $status = false;
             $error = 'Purchase not found';
@@ -1292,7 +1333,7 @@ class ApiController extends Controller
     }
     /*
     |--------------------------------------------------------------------------
-    | Purchase End
+    | Invoice End
     |--------------------------------------------------------------------------
     */
 
@@ -1306,7 +1347,7 @@ class ApiController extends Controller
         $name = $request->name;
         if (empty($name)) {
             $products = DB::table('products')
-                ->select('products.name AS product_name','products.product_id AS product_id', DB::raw('SUM(purchase_items.quantity) as totalPurchaseQuantity'), DB::raw('SUM(invoice_items.quantity) as totalSaleQuantity'))
+                ->select('products.name AS product_name', 'products.product_id AS product_id', DB::raw('SUM(purchase_items.quantity) as totalPurchaseQuantity'), DB::raw('SUM(invoice_items.quantity) as totalSaleQuantity'))
                 ->leftJoin('invoice_items', 'invoice_items.product_id', '=', 'products.product_id')
                 ->leftJoin('purchase_items', 'purchase_items.product_id', '=', 'products.product_id')
                 ->groupBy('products.product_id', 'products.name')

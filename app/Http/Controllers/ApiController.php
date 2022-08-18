@@ -39,13 +39,6 @@ class ApiController extends Controller
         }
         $credentials = array('email' => $request->email, 'password' => $request->password);
         $user = DB::table('users')->where('email', $request->email)->first();
-        if (!empty($user)) {
-            $userData = array(
-                'user_id' => encrypt($user->id),
-            );
-        } else {
-            $userData = [];
-        }
         if (!$token = auth()->attempt($credentials)) {
             $status = false;
             $errors = 'Email and password did not matched';
@@ -604,7 +597,7 @@ class ApiController extends Controller
                             DB::raw('SUM(total) as totalPrice')
                         )->where('product_id', $productID)->first();
                     DB::table('average_purchase_prices')->where('product_id', $productID)
-                        ->update(['price' => number_format($averagePrice->totalPrice / $averagePrice->totalQuantity,2)]);
+                        ->update(['price' => number_format($averagePrice->totalPrice / $averagePrice->totalQuantity,2,'.','')]);
                 }
             }
             $supplierDueTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('supplier_transaction');
@@ -707,7 +700,7 @@ class ApiController extends Controller
                             DB::raw('SUM(total) as totalPrice')
                         )->where('product_id', $productID)->first();
                     DB::table('average_purchase_prices')->where('product_id', $productID)
-                        ->update(['price' => number_format($averagePrice->totalPrice / $averagePrice->totalQuantity,2)]);
+                        ->update(['price' => number_format($averagePrice->totalPrice / $averagePrice->totalQuantity,2,'.','')]);
                 }
             }
             DB::table('supplier_ledgers')
@@ -1035,8 +1028,7 @@ class ApiController extends Controller
                         'total' => $quantity * $price,
                     ]);
                     $purchasePrice = DB::table('average_purchase_prices')->where('product_id', $productID)->first();
-                    $produtProfit = ($quantity * $price) - ($quantity * $purchasePrice->price);
-                    $profit += $produtProfit;
+                    $profit += ($quantity * $price) - ($quantity * $purchasePrice->price);
                 }
             }
             DB::table('invoices')->insert(

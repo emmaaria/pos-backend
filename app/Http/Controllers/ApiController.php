@@ -997,8 +997,8 @@ class ApiController extends Controller
         $payments = array(
             'cash' => $cash->receive,
             'bcash' => $bcash ? $bcash->deposit : 0,
-            'nagad' => $bcash ? $bcash->deposit : 0,
-            'card' => $bcash ? $bcash->deposit : 0,
+            'nagad' => $nagad ? $nagad->deposit : 0,
+            'card' => $card ? $card->deposit : 0,
         );
         $invoice = array(
             'invoiceData' => $purchaseData,

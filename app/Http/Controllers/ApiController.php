@@ -1035,7 +1035,8 @@ class ApiController extends Controller
                         'total' => $quantity * $price,
                     ]);
                     $purchasePrice = DB::table('average_purchase_prices')->where('product_id', $productID)->first();
-                    $profit += (($quantity * $price) - ($quantity * $purchasePrice->price));
+                    $produtProfit = ($quantity * $price) - ($quantity * $purchasePrice->price);
+                    $profit += $produtProfit;
                 }
             }
             DB::table('invoices')->insert(

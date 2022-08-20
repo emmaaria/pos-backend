@@ -377,26 +377,37 @@ class ApiController extends Controller
     */
     public function getCustomers(Request $request)
     {
-        $name = $request->name;
-        if (empty($name)) {
-            $customers = DB::table('customers')
-                ->select('customers.id', 'customers.name', 'customers.mobile', 'customers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
-                ->leftJoin('customer_ledgers', 'customer_ledgers.customer_id', '=', 'customers.id')
-                ->groupBy('customers.id', 'customers.name', 'customers.mobile', 'customers.address')
-                ->paginate(50);
-            $status = true;
-            return response()->json(compact('status', 'customers'));
-        } else {
-            $customers = DB::table('customers')
-                ->select('customers.id', 'customers.name', 'customers.mobile', 'customers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
-                ->leftJoin('customer_ledgers', 'customer_ledgers.customer_id', '=', 'customers.id')
-                ->where('customers.name', 'like', '%' . $name . '%')
-                ->orWhere('customers.mobile', 'like', '%' . $name . '%')
-                ->orWhere('customers.address', 'like', '%' . $name . '%')
-                ->groupBy('customers.id', 'customers.name', 'customers.mobile', 'customers.address')
-                ->paginate(50);
-            $status = true;
-            return response()->json(compact('status', 'customers'));
+        $companyId = $this->getCompanyId();
+        if ($companyId){
+            $name = $request->name;
+            if (empty($name)) {
+                $customers = DB::table('customers')
+                    ->select('customers.id', 'customers.name', 'customers.mobile', 'customers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
+                    ->leftJoin('customer_ledgers', 'customer_ledgers.customer_id', '=', 'customers.id')
+                    ->where('customers.company_id', $companyId)
+                    ->where('customer_ledgers.company_id', $companyId)
+                    ->groupBy('customers.id', 'customers.name', 'customers.mobile', 'customers.address')
+                    ->paginate(50);
+                $status = true;
+                return response()->json(compact('status', 'customers'));
+            } else {
+                $customers = DB::table('customers')
+                    ->select('customers.id', 'customers.name', 'customers.mobile', 'customers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
+                    ->leftJoin('customer_ledgers', 'customer_ledgers.customer_id', '=', 'customers.id')
+                    ->where('customers.company_id', $companyId)
+                    ->where('customer_ledgers.company_id', $companyId)
+                    ->where('customers.name', 'like', '%' . $name . '%')
+                    ->orWhere('customers.mobile', 'like', '%' . $name . '%')
+                    ->orWhere('customers.address', 'like', '%' . $name . '%')
+                    ->groupBy('customers.id', 'customers.name', 'customers.mobile', 'customers.address')
+                    ->paginate(50);
+                $status = true;
+                return response()->json(compact('status', 'customers'));
+            }
+        }else{
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
         }
     }
 

@@ -137,30 +137,44 @@ class ApiController extends Controller
 
     public function getCategory($id)
     {
-        $category = DB::table('categories')->where('id', $id)->first();
-        $status = true;
-        return response()->json(compact('status', 'category'));
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $category = DB::table('categories')->where('id', $id)->where('company_id', $companyId)->first();
+            $status = true;
+            return response()->json(compact('status', 'category'));
+        } else {
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
     }
 
     public function storeCategory(Request $request)
     {
-        $validator = Validator::make($request->all(),
-            [
-                'name' => 'required',
-            ]
-        );
-        if ($validator->fails()) {
-            $status = false;
-            $errors = $validator->errors();
-            return response()->json(compact('status', 'errors'));
-        }
-        $categoty = DB::table('categories')->insert(['name' => $request->name]);
-        if ($categoty) {
-            $status = true;
-            return response()->json(compact('status'));
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $validator = Validator::make($request->all(),
+                [
+                    'name' => 'required',
+                ]
+            );
+            if ($validator->fails()) {
+                $status = false;
+                $errors = $validator->errors();
+                return response()->json(compact('status', 'errors'));
+            }
+            $categoty = DB::table('categories')->insert(['name' => $request->name, 'company_id' => $companyId]);
+            if ($categoty) {
+                $status = true;
+                return response()->json(compact('status'));
+            } else {
+                $status = false;
+                return response()->json(compact('status'));
+            }
         } else {
             $status = false;
-            return response()->json(compact('status'));
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
         }
     }
 

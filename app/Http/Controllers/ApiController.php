@@ -244,20 +244,27 @@ class ApiController extends Controller
     */
     public function getUnits(Request $request)
     {
-        $name = $request->name;
-        $all = $request->allData;
-        if (empty($name) && empty($all)) {
-            $units = DB::table('units')->select('id', 'name')->paginate(50);
-            $status = true;
-            return response()->json(compact('status', 'units'));
-        } elseif (!empty($all)) {
-            $units = DB::table('units')->get();
-            $status = true;
-            return response()->json(compact('status', 'units'));
-        } else {
-            $units = DB::table('units')->select('id', 'name')->where('name', 'like', '%' . $name . '%')->paginate(50);
-            $status = true;
-            return response()->json(compact('status', 'units'));
+        $companyId = $this->getCompanyId();
+        if ($companyId){
+            $name = $request->name;
+            $all = $request->allData;
+            if (empty($name) && empty($all)) {
+                $units = DB::table('units')->select('id', 'name')->where('company_id', $companyId)->paginate(50);
+                $status = true;
+                return response()->json(compact('status', 'units'));
+            } elseif (!empty($all)) {
+                $units = DB::table('units')->where('company_id', $companyId)->get();
+                $status = true;
+                return response()->json(compact('status', 'units'));
+            } else {
+                $units = DB::table('units')->select('id', 'name')->where('name', 'like', '%' . $name . '%')->where('company_id', $companyId)->paginate(50);
+                $status = true;
+                return response()->json(compact('status', 'units'));
+            }
+        }else{
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
         }
     }
 

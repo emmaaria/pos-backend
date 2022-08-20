@@ -383,7 +383,7 @@ class ApiController extends Controller
             if (empty($name)) {
                 $customers = DB::table('customers')
                     ->select('customers.id', 'customers.name', 'customers.mobile', 'customers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
-                    ->leftJoin('customer_ledgers', 'customer_ledgers.customer_id', '=', 'customers.id')
+                    ->rightJoin('customer_ledgers', 'customer_ledgers.customer_id', '=', 'customers.id')
                     ->where('customers.company_id', $companyId)
                     ->where('customer_ledgers.company_id', $companyId)
                     ->groupBy('customers.id', 'customers.name', 'customers.mobile', 'customers.address')

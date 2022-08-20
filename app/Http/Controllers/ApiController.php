@@ -270,70 +270,98 @@ class ApiController extends Controller
 
     public function getUnit($id)
     {
-        $unit = DB::table('units')->where('id', $id)->first();
-        $status = true;
-        return response()->json(compact('status', 'unit'));
+        $companyId = $this->getCompanyId();
+        if ($companyId){
+            $unit = DB::table('units')->where('id', $id)->where('company_id', $companyId)->first();
+            $status = true;
+            return response()->json(compact('status', 'unit'));
+        }else{
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
     }
 
     public function storeUnit(Request $request)
     {
-        $validator = Validator::make($request->all(),
-            [
-                'name' => 'required',
-            ]
-        );
-        if ($validator->fails()) {
+        $companyId = $this->getCompanyId();
+        if ($companyId){
+            $validator = Validator::make($request->all(),
+                [
+                    'name' => 'required',
+                ]
+            );
+            if ($validator->fails()) {
+                $status = false;
+                $errors = $validator->errors();
+                return response()->json(compact('status', 'errors'));
+            }
+            $unit = DB::table('units')->insert(['name' => $request->name, 'company_id' => $companyId]);
+            if ($unit) {
+                $status = true;
+                return response()->json(compact('status'));
+            } else {
+                $status = false;
+                return response()->json(compact('status'));
+            }
+        }else{
             $status = false;
-            $errors = $validator->errors();
+            $errors = 'You are not authorized';
             return response()->json(compact('status', 'errors'));
-        }
-        $unit = DB::table('units')->insert(['name' => $request->name]);
-        if ($unit) {
-            $status = true;
-            return response()->json(compact('status'));
-        } else {
-            $status = false;
-            return response()->json(compact('status'));
         }
     }
 
     public function updateUnit(Request $request)
     {
-        $validator = Validator::make($request->all(),
-            [
-                'id' => 'required',
-                'name' => 'required',
-            ]
-        );
-        if ($validator->fails()) {
+        $companyId = $this->getCompanyId();
+        if ($companyId){
+            $validator = Validator::make($request->all(),
+                [
+                    'id' => 'required',
+                    'name' => 'required',
+                ]
+            );
+            if ($validator->fails()) {
+                $status = false;
+                $errors = $validator->errors();
+                return response()->json(compact('status', 'errors'));
+            }
+            DB::table('units')->where('id', $request->id)->where('company_id', $companyId)->update(['name' => $request->name]);
+            $status = true;
+            $message = 'Updated';
+            return response()->json(compact('status', 'message'));
+        }else{
             $status = false;
-            $errors = $validator->errors();
+            $errors = 'You are not authorized';
             return response()->json(compact('status', 'errors'));
         }
-        DB::table('units')->where('id', $request->id)->update(['name' => $request->name]);
-        $status = true;
-        $message = 'Updated';
-        return response()->json(compact('status', 'message'));
     }
 
     public function deleteUnit(Request $request)
     {
-        $id = $request->id;
-        if (!empty($id)) {
-            $deleted = DB::table('units')->where('id', $id)->delete();
-            if ($deleted) {
-                $status = true;
-                $message = 'Unit deleted';
-                return response()->json(compact('status', 'message'));
+        $companyId = $this->getCompanyId();
+        if ($companyId){
+            $id = $request->id;
+            if (!empty($id)) {
+                $deleted = DB::table('units')->where('id', $id)->where('company_id', $companyId)->delete();
+                if ($deleted) {
+                    $status = true;
+                    $message = 'Unit deleted';
+                    return response()->json(compact('status', 'message'));
+                } else {
+                    $status = false;
+                    $error = 'Unit not found';
+                    return response()->json(compact('status', 'error'));
+                }
             } else {
                 $status = false;
                 $error = 'Unit not found';
                 return response()->json(compact('status', 'error'));
             }
-        } else {
+        }else{
             $status = false;
-            $error = 'Unit not found';
-            return response()->json(compact('status', 'error'));
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
         }
     }
     /*

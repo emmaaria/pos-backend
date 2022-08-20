@@ -693,24 +693,35 @@ class ApiController extends Controller
     */
     public function getPurchases(Request $request)
     {
-        $name = $request->name;
-        if (empty($name)) {
-            $purchases = DB::table('purchases')
-                ->select('suppliers.name AS supplier_name', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id', 'purchases.date')
-                ->leftJoin('suppliers', 'suppliers.id', '=', 'purchases.supplier_id')
-                ->orderBy('id', 'desc')
-                ->paginate(50);
-            $status = true;
-            return response()->json(compact('status', 'purchases'));
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $name = $request->name;
+            if (empty($name)) {
+                $purchases = DB::table('purchases')
+                    ->select('suppliers.name AS supplier_name', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id', 'purchases.date')
+                    ->where('purchases.company_id', $companyId)
+                    ->where('suppliers.company_id', $companyId)
+                    ->leftJoin('suppliers', 'suppliers.id', '=', 'purchases.supplier_id')
+                    ->orderBy('id', 'desc')
+                    ->paginate(50);
+                $status = true;
+                return response()->json(compact('status', 'purchases'));
+            } else {
+                $purchases = DB::table('purchases')
+                    ->select('suppliers.name AS supplier_name', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id', 'purchases.date')
+                    ->join('suppliers', 'suppliers.id', '=', 'purchases.supplier_id')
+                    ->where('purchases.company_id', $companyId)
+                    ->where('suppliers.company_id', $companyId)
+                    ->where('purchases.purchase_id', 'like', '%' . $name . '%')
+                    ->orWhere('suppliers.name', 'like', '%' . $name . '%')
+                    ->paginate(50);
+                $status = true;
+                return response()->json(compact('status', 'purchases'));
+            }
         } else {
-            $purchases = DB::table('purchases')
-                ->select('suppliers.name AS supplier_name', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id', 'purchases.date')
-                ->join('suppliers', 'suppliers.id', '=', 'purchases.supplier_id')
-                ->where('purchases.purchase_id', 'like', '%' . $name . '%')
-                ->orWhere('suppliers.name', 'like', '%' . $name . '%')
-                ->paginate(50);
-            $status = true;
-            return response()->json(compact('status', 'purchases'));
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
         }
     }
 

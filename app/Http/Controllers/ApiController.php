@@ -535,26 +535,35 @@ class ApiController extends Controller
     */
     public function getSuppliers(Request $request)
     {
-        $name = $request->name;
-        if (empty($name)) {
-            $suppliers = DB::table('suppliers')
-                ->select('suppliers.id', 'suppliers.name', 'suppliers.mobile', 'suppliers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
-                ->leftJoin('supplier_ledgers', 'supplier_ledgers.supplier_id', '=', 'suppliers.id')
-                ->groupBy('suppliers.id', 'suppliers.name', 'suppliers.mobile', 'suppliers.address')
-                ->paginate(50);
-            $status = true;
-            return response()->json(compact('status', 'suppliers'));
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $name = $request->name;
+            if (empty($name)) {
+                $suppliers = DB::table('suppliers')
+                    ->select('suppliers.id', 'suppliers.name', 'suppliers.mobile', 'suppliers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
+                    ->where('suppliers.company_id', $companyId)
+                    ->leftJoin('supplier_ledgers', 'supplier_ledgers.supplier_id', '=', 'suppliers.id')
+                    ->groupBy('suppliers.id', 'suppliers.name', 'suppliers.mobile', 'suppliers.address')
+                    ->paginate(50);
+                $status = true;
+                return response()->json(compact('status', 'suppliers'));
+            } else {
+                $suppliers = DB::table('suppliers')
+                    ->select('suppliers.id', 'suppliers.name', 'suppliers.mobile', 'suppliers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
+                    ->where('suppliers.company_id', $companyId)
+                    ->leftJoin('supplier_ledgers', 'supplier_ledgers.supplier_id', '=', 'suppliers.id')
+                    ->where('suppliers.name', 'like', '%' . $name . '%')
+                    ->orWhere('suppliers.mobile', 'like', '%' . $name . '%')
+                    ->orWhere('suppliers.address', 'like', '%' . $name . '%')
+                    ->groupBy('suppliers.id', 'suppliers.name', 'suppliers.mobile', 'suppliers.address')
+                    ->paginate(50);
+                $status = true;
+                return response()->json(compact('status', 'suppliers'));
+            }
         } else {
-            $suppliers = DB::table('suppliers')
-                ->select('suppliers.id', 'suppliers.name', 'suppliers.mobile', 'suppliers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
-                ->leftJoin('supplier_ledgers', 'supplier_ledgers.supplier_id', '=', 'suppliers.id')
-                ->where('suppliers.name', 'like', '%' . $name . '%')
-                ->orWhere('suppliers.mobile', 'like', '%' . $name . '%')
-                ->orWhere('suppliers.address', 'like', '%' . $name . '%')
-                ->groupBy('suppliers.id', 'suppliers.name', 'suppliers.mobile', 'suppliers.address')
-                ->paginate(50);
-            $status = true;
-            return response()->json(compact('status', 'suppliers'));
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
         }
     }
 

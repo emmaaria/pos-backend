@@ -569,77 +569,106 @@ class ApiController extends Controller
 
     public function getSupplier($id)
     {
-        $supplier = DB::table('suppliers')->where('id', $id)->first();
-        $status = true;
-        return response()->json(compact('status', 'supplier'));
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $supplier = DB::table('suppliers')->where('id', $id)->where('company_id', $companyId)->first();
+            $status = true;
+            return response()->json(compact('status', 'supplier'));
+        } else {
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
     }
 
     public function storeSupplier(Request $request)
     {
-        $validator = Validator::make($request->all(),
-            [
-                'name' => 'required',
-            ]
-        );
-        if ($validator->fails()) {
-            $status = false;
-            $errors = $validator->errors();
-            return response()->json(compact('status', 'errors'));
-        }
-        $supplierId = DB::table('suppliers')->insertGetId(['name' => $request->name, 'mobile' => $request->mobile, 'address' => $request->address]);
-
-        if ($supplierId) {
-            if (!empty($request->due)) {
-                $txIdGenerator = new InvoiceNumberGeneratorService();
-                $txId = $txIdGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('supplier_transaction');
-                DB::table('supplier_ledgers')->insert(array(
-                    'supplier_id' => $supplierId,
-                    'transaction_id' => $txId,
-                    'type' => 'due',
-                    'due' => $request->due,
-                    'deposit' => 0,
-                    'date' => date('Y-m-d'),
-                    'comment' => 'Previous Due'
-                ));
-                $txIdGenerator->setNextInvoiceNo();
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $validator = Validator::make($request->all(),
+                [
+                    'name' => 'required',
+                ]
+            );
+            if ($validator->fails()) {
+                $status = false;
+                $errors = $validator->errors();
+                return response()->json(compact('status', 'errors'));
             }
-            $status = true;
-            return response()->json(compact('status'));
+            $supplierId = DB::table('suppliers')->insertGetId(['name' => $request->name, 'mobile' => $request->mobile, 'address' => $request->address, 'company_id' => $companyId]);
+
+            if ($supplierId) {
+                if (!empty($request->due)) {
+                    $txIdGenerator = new InvoiceNumberGeneratorService();
+                    $txId = $txIdGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('supplier_transaction');
+                    DB::table('supplier_ledgers')->insert(array(
+                        'supplier_id' => $supplierId,
+                        'transaction_id' => $txId,
+                        'type' => 'due',
+                        'due' => $request->due,
+                        'company_id' => $companyId,
+                        'deposit' => 0,
+                        'date' => date('Y-m-d'),
+                        'comment' => 'Previous Due'
+                    ));
+                    $txIdGenerator->setNextInvoiceNo();
+                }
+                $status = true;
+                return response()->json(compact('status'));
+            } else {
+                $status = false;
+                return response()->json(compact('status'));
+            }
         } else {
             $status = false;
-            return response()->json(compact('status'));
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
         }
     }
 
     public function updateSupplier(Request $request)
     {
-        $validator = Validator::make($request->all(),
-            [
-                'id' => 'required',
-                'name' => 'required',
-            ]
-        );
-        if ($validator->fails()) {
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $validator = Validator::make($request->all(),
+                [
+                    'id' => 'required',
+                    'name' => 'required',
+                ]
+            );
+            if ($validator->fails()) {
+                $status = false;
+                $errors = $validator->errors();
+                return response()->json(compact('status', 'errors'));
+            }
+            DB::table('suppliers')->where('id', $request->id)->where('company_id', $companyId)->update(['name' => $request->name, 'mobile' => $request->mobile, 'address' => $request->address]);
+            $status = true;
+            $message = 'Updated';
+            return response()->json(compact('status', 'message'));
+        } else {
             $status = false;
-            $errors = $validator->errors();
+            $errors = 'You are not authorized';
             return response()->json(compact('status', 'errors'));
         }
-        DB::table('suppliers')->where('id', $request->id)->update(['name' => $request->name, 'mobile' => $request->mobile, 'address' => $request->address]);
-        $status = true;
-        $message = 'Updated';
-        return response()->json(compact('status', 'message'));
     }
 
     public function deleteSupplier(Request $request)
     {
-        $id = $request->id;
-        if (!empty($id)) {
-            $deleted = DB::table('suppliers')->where('id', $id)->delete();
-            DB::table('supplier_ledgers')->where('supplier_id', $id)->delete();
-            if ($deleted) {
-                $status = true;
-                $message = 'Supplier deleted';
-                return response()->json(compact('status', 'message'));
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $id = $request->id;
+            if (!empty($id)) {
+                $deleted = DB::table('suppliers')->where('id', $id)->where('company_id', $companyId)->delete();
+                DB::table('supplier_ledgers')->where('company_id', $companyId)->where('supplier_id', $id)->delete();
+                if ($deleted) {
+                    $status = true;
+                    $message = 'Supplier deleted';
+                    return response()->json(compact('status', 'message'));
+                } else {
+                    $status = false;
+                    $error = 'Supplier not found';
+                    return response()->json(compact('status', 'error'));
+                }
             } else {
                 $status = false;
                 $error = 'Supplier not found';
@@ -647,8 +676,8 @@ class ApiController extends Controller
             }
         } else {
             $status = false;
-            $error = 'Supplier not found';
-            return response()->json(compact('status', 'error'));
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
         }
     }
     /*

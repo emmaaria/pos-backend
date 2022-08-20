@@ -245,7 +245,7 @@ class ApiController extends Controller
     public function getUnits(Request $request)
     {
         $companyId = $this->getCompanyId();
-        if ($companyId){
+        if ($companyId) {
             $name = $request->name;
             $all = $request->allData;
             if (empty($name) && empty($all)) {
@@ -261,7 +261,7 @@ class ApiController extends Controller
                 $status = true;
                 return response()->json(compact('status', 'units'));
             }
-        }else{
+        } else {
             $status = false;
             $errors = 'You are not authorized';
             return response()->json(compact('status', 'errors'));
@@ -271,11 +271,11 @@ class ApiController extends Controller
     public function getUnit($id)
     {
         $companyId = $this->getCompanyId();
-        if ($companyId){
+        if ($companyId) {
             $unit = DB::table('units')->where('id', $id)->where('company_id', $companyId)->first();
             $status = true;
             return response()->json(compact('status', 'unit'));
-        }else{
+        } else {
             $status = false;
             $errors = 'You are not authorized';
             return response()->json(compact('status', 'errors'));
@@ -285,7 +285,7 @@ class ApiController extends Controller
     public function storeUnit(Request $request)
     {
         $companyId = $this->getCompanyId();
-        if ($companyId){
+        if ($companyId) {
             $validator = Validator::make($request->all(),
                 [
                     'name' => 'required',
@@ -304,7 +304,7 @@ class ApiController extends Controller
                 $status = false;
                 return response()->json(compact('status'));
             }
-        }else{
+        } else {
             $status = false;
             $errors = 'You are not authorized';
             return response()->json(compact('status', 'errors'));
@@ -314,7 +314,7 @@ class ApiController extends Controller
     public function updateUnit(Request $request)
     {
         $companyId = $this->getCompanyId();
-        if ($companyId){
+        if ($companyId) {
             $validator = Validator::make($request->all(),
                 [
                     'id' => 'required',
@@ -330,7 +330,7 @@ class ApiController extends Controller
             $status = true;
             $message = 'Updated';
             return response()->json(compact('status', 'message'));
-        }else{
+        } else {
             $status = false;
             $errors = 'You are not authorized';
             return response()->json(compact('status', 'errors'));
@@ -340,7 +340,7 @@ class ApiController extends Controller
     public function deleteUnit(Request $request)
     {
         $companyId = $this->getCompanyId();
-        if ($companyId){
+        if ($companyId) {
             $id = $request->id;
             if (!empty($id)) {
                 $deleted = DB::table('units')->where('id', $id)->where('company_id', $companyId)->delete();
@@ -358,7 +358,7 @@ class ApiController extends Controller
                 $error = 'Unit not found';
                 return response()->json(compact('status', 'error'));
             }
-        }else{
+        } else {
             $status = false;
             $errors = 'You are not authorized';
             return response()->json(compact('status', 'errors'));
@@ -378,7 +378,7 @@ class ApiController extends Controller
     public function getCustomers(Request $request)
     {
         $companyId = $this->getCompanyId();
-        if ($companyId){
+        if ($companyId) {
             $name = $request->name;
             if (empty($name)) {
                 $customers = DB::table('customers')
@@ -404,7 +404,7 @@ class ApiController extends Controller
                 $status = true;
                 return response()->json(compact('status', 'customers'));
             }
-        }else{
+        } else {
             $status = false;
             $errors = 'You are not authorized';
             return response()->json(compact('status', 'errors'));
@@ -413,45 +413,60 @@ class ApiController extends Controller
 
     public function getCustomer($id)
     {
-        $customer = DB::table('customers')->where('id', $id)->first();
-        $status = true;
-        return response()->json(compact('status', 'customer'));
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $customer = DB::table('customers')->where('id', $id)->where('company_id', $companyId)->first();
+            $status = true;
+            return response()->json(compact('status', 'customer'));
+        } else {
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
     }
 
     public function storeCustomer(Request $request)
     {
-        $validator = Validator::make($request->all(),
-            [
-                'name' => 'required',
-            ]
-        );
-        if ($validator->fails()) {
-            $status = false;
-            $errors = $validator->errors();
-            return response()->json(compact('status', 'errors'));
-        }
-        $customerId = DB::table('customers')->insertGetId(['name' => $request->name, 'mobile' => $request->mobile, 'address' => $request->address]);
-
-        if ($customerId) {
-            if (!empty($request->due)) {
-                $txIdGenerator = new InvoiceNumberGeneratorService();
-                $txId = $txIdGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('customer_transaction');
-                DB::table('customer_ledgers')->insert(array(
-                    'customer_id' => $customerId,
-                    'transaction_id' => $txId,
-                    'type' => 'due',
-                    'due' => $request->due,
-                    'deposit' => 0,
-                    'date' => date('Y-m-d'),
-                    'comment' => 'Previous Due'
-                ));
-                $txIdGenerator->setNextInvoiceNo();
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $validator = Validator::make($request->all(),
+                [
+                    'name' => 'required',
+                ]
+            );
+            if ($validator->fails()) {
+                $status = false;
+                $errors = $validator->errors();
+                return response()->json(compact('status', 'errors'));
             }
-            $status = true;
-            return response()->json(compact('status'));
+            $customerId = DB::table('customers')->insertGetId(['name' => $request->name, 'mobile' => $request->mobile, 'address' => $request->address, 'company_id' => $companyId]);
+
+            if ($customerId) {
+                if (!empty($request->due)) {
+                    $txIdGenerator = new InvoiceNumberGeneratorService();
+                    $txId = $txIdGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('customer_transaction');
+                    DB::table('customer_ledgers')->insert(array(
+                        'customer_id' => $customerId,
+                        'transaction_id' => $txId,
+                        'company_id' => $companyId,
+                        'type' => 'due',
+                        'due' => $request->due,
+                        'deposit' => 0,
+                        'date' => date('Y-m-d'),
+                        'comment' => 'Previous Due'
+                    ));
+                    $txIdGenerator->setNextInvoiceNo();
+                }
+                $status = true;
+                return response()->json(compact('status'));
+            } else {
+                $status = false;
+                return response()->json(compact('status'));
+            }
         } else {
             $status = false;
-            return response()->json(compact('status'));
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
         }
     }
 

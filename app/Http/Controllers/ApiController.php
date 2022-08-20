@@ -116,15 +116,15 @@ class ApiController extends Controller
             $name = $request->name;
             $all = $request->allData;
             if (empty($name) && empty($all)) {
-                $categories = DB::table('categories')->select('id', 'name')->paginate(50);
+                $categories = DB::table('categories')->select('id', 'name')->where('company_id', $companyId)->paginate(50);
                 $status = true;
                 return response()->json(compact('status', 'categories'));
             } elseif (!empty($all)) {
-                $categories = DB::table('categories')->get();
+                $categories = DB::table('categories')->where('company_id', $companyId)->get();
                 $status = true;
                 return response()->json(compact('status', 'categories'));
             } else {
-                $categories = DB::table('categories')->select('id', 'name')->where('name', 'like', '%' . $name . '%')->paginate(50);
+                $categories = DB::table('categories')->select('id', 'name')->where('name', 'like', '%' . $name . '%')->where('company_id', $companyId)->paginate(50);
                 $status = true;
                 return response()->json(compact('status', 'categories'));
             }

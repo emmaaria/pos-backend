@@ -181,7 +181,7 @@ class ApiController extends Controller
     public function updateCategory(Request $request)
     {
         $companyId = $this->getCompanyId();
-        if ($companyId){
+        if ($companyId) {
             $validator = Validator::make($request->all(),
                 [
                     'id' => 'required',
@@ -197,7 +197,7 @@ class ApiController extends Controller
             $status = true;
             $message = 'Updated';
             return response()->json(compact('status', 'message'));
-        }else {
+        } else {
             $status = false;
             $errors = 'You are not authorized';
             return response()->json(compact('status', 'errors'));
@@ -206,13 +206,20 @@ class ApiController extends Controller
 
     public function deleteCategory(Request $request)
     {
-        $id = $request->id;
-        if (!empty($id)) {
-            $deleted = DB::table('categories')->where('id', $id)->delete();
-            if ($deleted) {
-                $status = true;
-                $message = 'Category deleted';
-                return response()->json(compact('status', 'message'));
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $id = $request->id;
+            if (!empty($id)) {
+                $deleted = DB::table('categories')->where('id', $id)->where('company_id', $companyId)->delete();
+                if ($deleted) {
+                    $status = true;
+                    $message = 'Category deleted';
+                    return response()->json(compact('status', 'message'));
+                } else {
+                    $status = false;
+                    $error = 'Category not found';
+                    return response()->json(compact('status', 'error'));
+                }
             } else {
                 $status = false;
                 $error = 'Category not found';
@@ -220,8 +227,8 @@ class ApiController extends Controller
             }
         } else {
             $status = false;
-            $error = 'Category not found';
-            return response()->json(compact('status', 'error'));
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
         }
     }
     /*

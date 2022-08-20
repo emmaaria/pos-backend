@@ -711,7 +711,6 @@ class ApiController extends Controller
                     ->select('suppliers.name AS supplier_name', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id', 'purchases.date')
                     ->join('suppliers', 'suppliers.id', '=', 'purchases.supplier_id')
                     ->where('purchases.company_id', $companyId)
-                    ->where('suppliers.company_id', $companyId)
                     ->where('purchases.purchase_id', 'like', '%' . $name . '%')
                     ->orWhere('suppliers.name', 'like', '%' . $name . '%')
                     ->paginate(50);
@@ -727,22 +726,32 @@ class ApiController extends Controller
 
     public function getPurchase($id)
     {
-        $purchaseData = DB::table('purchases')
-            ->select('suppliers.name AS supplier_name', 'suppliers.id AS supplier_id', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id', 'purchases.date', 'purchases.paid')
-            ->join('suppliers', 'suppliers.id', '=', 'purchases.supplier_id')
-            ->where('purchases.id', $id)
-            ->first();
-        $purchaseItems = DB::table('purchase_items')
-            ->select('products.name', 'purchase_items.price as purchase_price', 'purchase_items.total', 'purchase_items.quantity', 'products.product_id')
-            ->join('products', 'products.product_id', '=', 'purchase_items.product_id')
-            ->where('purchase_items.purchase_id', $purchaseData->purchase_id)
-            ->get();
-        $purchase = array(
-            'purchaseData' => $purchaseData,
-            'purchaseItems' => $purchaseItems,
-        );
-        $status = true;
-        return response()->json(compact('status', 'purchase'));
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $purchaseData = DB::table('purchases')
+                ->select('suppliers.name AS supplier_name', 'suppliers.id AS supplier_id', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id', 'purchases.date', 'purchases.paid')
+                ->join('suppliers', 'suppliers.id', '=', 'purchases.supplier_id')
+                ->where('purchases.company_id', $companyId)
+                ->where('purchases.id', $id)
+                ->first();
+            $purchaseItems = DB::table('purchase_items')
+                ->select('products.name', 'purchase_items.price as purchase_price', 'purchase_items.total', 'purchase_items.quantity', 'products.product_id')
+                ->where('purchase_items.company_id', $companyId)
+                ->where('products.company_id', $companyId)
+                ->join('products', 'products.product_id', '=', 'purchase_items.product_id')
+                ->where('purchase_items.purchase_id', $purchaseData->purchase_id)
+                ->get();
+            $purchase = array(
+                'purchaseData' => $purchaseData,
+                'purchaseItems' => $purchaseItems,
+            );
+            $status = true;
+            return response()->json(compact('status', 'purchase'));
+        } else {
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
     }
 
     public function storePurchase(Request $request)

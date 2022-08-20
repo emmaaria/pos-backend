@@ -470,42 +470,56 @@ class ApiController extends Controller
 
     public function updateCustomer(Request $request)
     {
-        $validator = Validator::make($request->all(),
-            [
-                'id' => 'required',
-                'name' => 'required',
-            ]
-        );
-        if ($validator->fails()) {
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $validator = Validator::make($request->all(),
+                [
+                    'id' => 'required',
+                    'name' => 'required',
+                ]
+            );
+            if ($validator->fails()) {
+                $status = false;
+                $errors = $validator->errors();
+                return response()->json(compact('status', 'errors'));
+            }
+            DB::table('customers')->where('id', $request->id)->where('company_id', $companyId)->update(['name' => $request->name, 'mobile' => $request->mobile, 'address' => $request->address]);
+            $status = true;
+            $message = 'Updated';
+            return response()->json(compact('status', 'message'));
+        } else {
             $status = false;
-            $errors = $validator->errors();
+            $errors = 'You are not authorized';
             return response()->json(compact('status', 'errors'));
         }
-        DB::table('customers')->where('id', $request->id)->update(['name' => $request->name, 'mobile' => $request->mobile, 'address' => $request->address]);
-        $status = true;
-        $message = 'Updated';
-        return response()->json(compact('status', 'message'));
     }
 
     public function deleteCustomer(Request $request)
     {
-        $id = $request->id;
-        if (!empty($id)) {
-            $deleted = DB::table('customers')->where('id', $id)->delete();
-            DB::table('customer_ledgers')->where('customer_id', $id)->delete();
-            if ($deleted) {
-                $status = true;
-                $message = 'Unit deleted';
-                return response()->json(compact('status', 'message'));
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $id = $request->id;
+            if (!empty($id)) {
+                $deleted = DB::table('customers')->where('id', $id)->where('company_id', $companyId)->delete();
+                DB::table('customer_ledgers')->where('company_id', $companyId)->where('customer_id', $id)->delete();
+                if ($deleted) {
+                    $status = true;
+                    $message = 'Customer deleted';
+                    return response()->json(compact('status', 'message'));
+                } else {
+                    $status = false;
+                    $error = 'Customer not found';
+                    return response()->json(compact('status', 'error'));
+                }
             } else {
                 $status = false;
-                $error = 'Unit not found';
+                $error = 'Customer not found';
                 return response()->json(compact('status', 'error'));
             }
         } else {
             $status = false;
-            $error = 'Unit not found';
-            return response()->json(compact('status', 'error'));
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
         }
     }
     /*

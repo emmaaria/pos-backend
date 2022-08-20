@@ -25,22 +25,23 @@ class ApiController extends Controller
         return Auth::guard();
     }
 
-    public function getCompanyId (){
+    public function getCompanyId()
+    {
         try {
             $token = JWTAuth::getToken();
             $token = JWTAuth::getPayload($token)->toArray();
-            if ($token['company_id']){
+            if ($token['company_id']) {
                 try {
                     $companyId = decrypt($token['company_id']);
                     return $companyId;
-                }catch (\Exception $e){
+                } catch (\Exception $e) {
                     return null;
                 }
-            }else{
+            } else {
                 return null;
             }
 
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
             return null;
         }
     }
@@ -62,19 +63,19 @@ class ApiController extends Controller
         if ($validator->fails()) {
             $status = false;
             $errors = '';
-            foreach ($validator->errors()->all() as $message){
+            foreach ($validator->errors()->all() as $message) {
                 $errors .= $message;
             }
             return response()->json(compact('status', 'errors'));
         }
         $credentials = array('email' => $request->email, 'password' => $request->password);
         $user = DB::table('users')->where('email', $request->email)->where('company_id', $request->company_id)->first();
-        if ($user){
-            if (!empty($user)){
+        if ($user) {
+            if (!empty($user)) {
                 $userData = array(
                     'company_id' => encrypt($user->company_id),
                 );
-            }else{
+            } else {
                 $userData = null;
             }
             if (!$token = auth()->claims($userData)->attempt($credentials)) {
@@ -85,7 +86,7 @@ class ApiController extends Controller
             $status = true;
             $user = User::select('id', 'name', 'email', 'role')->where('email', $request->email)->first();
             return response()->json(compact('status', 'user', 'token'));
-        }else{
+        } else {
             $status = false;
             $errors = 'Email, password and company id did not matched';
             return response()->json(compact('status', 'errors'));
@@ -110,20 +111,27 @@ class ApiController extends Controller
     */
     public function getCategories(Request $request)
     {
-        $name = $request->name;
-        $all = $request->allData;
-        if (empty($name) && empty($all)) {
-            $categories = DB::table('categories')->select('id', 'name')->paginate(50);
-            $status = true;
-            return response()->json(compact('status', 'categories'));
-        } elseif (!empty($all)) {
-            $categories = DB::table('categories')->get();
-            $status = true;
-            return response()->json(compact('status', 'categories'));
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $name = $request->name;
+            $all = $request->allData;
+            if (empty($name) && empty($all)) {
+                $categories = DB::table('categories')->select('id', 'name')->paginate(50);
+                $status = true;
+                return response()->json(compact('status', 'categories'));
+            } elseif (!empty($all)) {
+                $categories = DB::table('categories')->get();
+                $status = true;
+                return response()->json(compact('status', 'categories'));
+            } else {
+                $categories = DB::table('categories')->select('id', 'name')->where('name', 'like', '%' . $name . '%')->paginate(50);
+                $status = true;
+                return response()->json(compact('status', 'categories'));
+            }
         } else {
-            $categories = DB::table('categories')->select('id', 'name')->where('name', 'like', '%' . $name . '%')->paginate(50);
-            $status = true;
-            return response()->json(compact('status', 'categories'));
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
         }
     }
 
@@ -842,7 +850,7 @@ class ApiController extends Controller
     public function getProducts(Request $request)
     {
         $companyId = $this->getCompanyId();
-        if ($companyId){
+        if ($companyId) {
             $name = $request->name;
             $all = $request->all;
             if (empty($name) && empty($all)) {
@@ -858,7 +866,7 @@ class ApiController extends Controller
                 $status = true;
                 return response()->json(compact('status', 'products'));
             }
-        }else{
+        } else {
             $status = false;
             $errors = 'You are not authorized';
             return response()->json(compact('status', 'errors'));

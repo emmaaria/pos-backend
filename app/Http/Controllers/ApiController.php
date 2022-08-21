@@ -1288,7 +1288,7 @@ class ApiController extends Controller
                 ->where('company_id', $companyId)
                 ->where('type', 'receive')
                 ->first();
-            $bcash = DB::table('bkash_transactions')
+            $bkash = DB::table('bkash_transactions')
                 ->where('reference_no', "inv-$id")
                 ->where('company_id', $companyId)
                 ->where('type', 'deposit')
@@ -1306,7 +1306,7 @@ class ApiController extends Controller
 
             $payments = array(
                 'cash' => $cash->receive,
-                'bcash' => $bcash ? $bcash->deposit : 0,
+                'bkash' => $bkash ? $bkash->deposit : 0,
                 'nagad' => $nagad ? $nagad->deposit : 0,
                 'card' => $card ? $card->deposit : 0,
             );
@@ -1374,7 +1374,7 @@ class ApiController extends Controller
                         $profit += ($quantity * $price) - ($quantity * $purchasePrice->price);
                     }
                 }
-                $paid = $request->cash + $request->bcash + $request->nagad + $request->card;
+                $paid = $request->cash + $request->bkash + $request->nagad + $request->card;
                 DB::table('invoices')->insert(
                     [
                         'customer_id' => $customerId,
@@ -1427,7 +1427,7 @@ class ApiController extends Controller
                     if (!empty($request->cash) && $request->cash > 0) {
                         $cashTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('cash_transaction');
                         if ($request->pos === 1) {
-                            $onlinePayments = $request->bcash + $request->nagad + $request->card;
+                            $onlinePayments = $request->bkash + $request->nagad + $request->card;
                             DB::table('cash_books')->insert(array(
                                 'transaction_id' => $cashTxId,
                                 'company_id' => $companyId,
@@ -1452,14 +1452,14 @@ class ApiController extends Controller
                         $txGenerator->setNextInvoiceNo();
                     }
 
-                    if (!empty($request->bcash) && $request->bcash > 0) {
-                        $cashTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('bcash_transaction');
+                    if (!empty($request->bkash) && $request->bkash > 0) {
+                        $cashTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('bkash_transaction');
                         DB::table('bkash_transactions')->insert(array(
                             'transaction_id' => $cashTxId,
                             'company_id' => $companyId,
                             'reference_no' => "inv-$invoiceId",
                             'type' => 'deposit',
-                            'deposit' => $request->bcash,
+                            'deposit' => $request->bkash,
                             'date' => $request->date,
                             'comment' => "Cash receive for Invoice No ($invoiceId)"
                         ));
@@ -1587,7 +1587,7 @@ class ApiController extends Controller
                 ));
                 $txGenerator->setNextInvoiceNo();
 
-                $paid = $request->cash + $request->bcash + $request->nagad + $request->card;
+                $paid = $request->cash + $request->bkash + $request->nagad + $request->card;
                 if ($paid > 0) {
                     $customerPaidTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('transaction');
                     DB::table('customer_ledgers')->insert(array(
@@ -1616,15 +1616,15 @@ class ApiController extends Controller
                         ));
                         $txGenerator->setNextInvoiceNo();
                     }
-                    DB::table('bcash_transaction')->where('reference_no', "inv-$invoiceId")->where('company_id', $companyId)->delete();
-                    if (!empty($request->bcash) && $request->bcash > 0) {
-                        $cashTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('bcash_transaction');
+                    DB::table('bkash_transaction')->where('reference_no', "inv-$invoiceId")->where('company_id', $companyId)->delete();
+                    if (!empty($request->bkash) && $request->bkash > 0) {
+                        $cashTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('bkash_transaction');
                         DB::table('bkash_transactions')->insert(array(
                             'transaction_id' => $cashTxId,
                             'reference_no' => "inv-$invoiceId",
                             'type' => 'deposit',
                             'company_id' => $companyId,
-                            'deposit' => $request->bcash,
+                            'deposit' => $request->bkash,
                             'date' => $request->date,
                             'comment' => "Cash receive for Invoice No ($invoiceId)"
                         ));
@@ -1685,7 +1685,7 @@ class ApiController extends Controller
                 DB::table('customer_ledgers')->where('reference_no', "inv-$id")->where('company_id', $companyId)->delete();
                 DB::table('card_transactions')->where('reference_no', "inv-$id")->where('company_id', $companyId)->delete();
                 DB::table('nagad_transactions')->where('reference_no', "inv-$id")->where('company_id', $companyId)->delete();
-                DB::table('bcash_transactions')->where('reference_no', "inv-$id")->where('company_id', $companyId)->delete();
+                DB::table('bkash_transactions')->where('reference_no', "inv-$id")->where('company_id', $companyId)->delete();
                 DB::table('cash_books')->where('reference_no', "inv-$id")->where('company_id', $companyId)->delete();
                 $status = true;
                 $message = 'Invoice deleted';

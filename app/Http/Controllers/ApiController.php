@@ -1405,7 +1405,7 @@ class ApiController extends Controller
                 $txGenerator->setNextInvoiceNo();
                 if ($request->pos === 1) {
                     if ($paid > $total) {
-                        $paid = $total;
+                        $paid = $total - $request->discountAmount;
                     }
                 }
 
@@ -1433,7 +1433,7 @@ class ApiController extends Controller
                                 'company_id' => $companyId,
                                 'reference_no' => "inv-$invoiceId",
                                 'type' => 'receive',
-                                'receive' => $onlinePayments - $request->cash,
+                                'receive' => ($total - $request->discountAmount) - $onlinePayments,
                                 'date' => $request->date,
                                 'comment' => "Cash receive for Invoice No ($invoiceId)"
                             ));

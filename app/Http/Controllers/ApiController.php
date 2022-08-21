@@ -1437,7 +1437,7 @@ class ApiController extends Controller
                                 'date' => $request->date,
                                 'comment' => "Cash receive for Invoice No ($invoiceId)"
                             ));
-                        }else{
+                        } else {
                             DB::table('cash_books')->insert(array(
                                 'transaction_id' => $cashTxId,
                                 'company_id' => $companyId,
@@ -1686,7 +1686,7 @@ class ApiController extends Controller
                 DB::table('card_transactions')->where('reference_no', "inv-$id")->where('company_id', $companyId)->delete();
                 DB::table('nagad_transactions')->where('reference_no', "inv-$id")->where('company_id', $companyId)->delete();
                 DB::table('bcash_transactions')->where('reference_no', "inv-$id")->where('company_id', $companyId)->delete();
-                DB::table('cash_transactions')->where('reference_no', "inv-$id")->where('company_id', $companyId)->delete();
+                DB::table('cash_books')->where('reference_no', "inv-$id")->where('company_id', $companyId)->delete();
                 $status = true;
                 $message = 'Invoice deleted';
                 return response()->json(compact('status', 'message'));

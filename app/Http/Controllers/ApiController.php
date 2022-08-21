@@ -1624,7 +1624,7 @@ class ApiController extends Controller
                     ));
                     $txGenerator->setNextInvoiceNo();
 
-                    DB::table('cash_transaction')->where('reference_no', "inv-$invoiceId")->delete();
+                    DB::table('cash_books')->where('reference_no', "inv-$invoiceId")->delete();
 
                     if (!empty($request->cash) && $request->cash > 0) {
                         $onlinePayments = $request->bkash + $request->nagad + $request->card;

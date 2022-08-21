@@ -1391,22 +1391,21 @@ class ApiController extends Controller
                     ]
                 );
                 $customerDueTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('customer_transaction');
+                $grandTotal = $total - $request->discountAmount;
                 DB::table('customer_ledgers')->insert(array(
                     'customer_id' => $customerId,
                     'transaction_id' => $customerDueTxId,
                     'reference_no' => "inv-$invoiceId",
                     'type' => 'due',
                     'company_id' => $companyId,
-                    'due' => $total - $request->discountAmount,
+                    'due' => $grandTotal,
                     'deposit' => 0,
                     'date' => $request->date,
                     'comment' => "Due for Invoice ID ($invoiceId)"
                 ));
                 $txGenerator->setNextInvoiceNo();
-                if ($request->pos === 1) {
-                    if ($paid > $total) {
-                        $paid = $total - $request->discountAmount;
-                    }
+                if ($paid > $grandTotal) {
+                    $paid = $grandTotal;
                 }
 
                 if ($paid > 0) {
@@ -1425,15 +1424,29 @@ class ApiController extends Controller
                     $txGenerator->setNextInvoiceNo();
 
                     if (!empty($request->cash) && $request->cash > 0) {
+                        $onlinePayments = $request->bkash + $request->nagad + $request->card;
+                        $dueAfterOnlinePayment = $grandTotal - $onlinePayments;
+                        $cashPaid = $request->cash;
+                        $change = $grandTotal - ($dueAfterOnlinePayment - $cashPaid);
                         $cashTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('cash_transaction');
-                        if ($request->pos === 1) {
-                            $onlinePayments = $request->bkash + $request->nagad + $request->card;
+
+                        if ($change > 0) {
                             DB::table('cash_books')->insert(array(
                                 'transaction_id' => $cashTxId,
                                 'company_id' => $companyId,
                                 'reference_no' => "inv-$invoiceId",
                                 'type' => 'receive',
-                                'receive' => ($total - $request->discountAmount) - $onlinePayments,
+                                'receive' => $dueAfterOnlinePayment,
+                                'date' => $request->date,
+                                'comment' => "Cash receive for Invoice No ($invoiceId)"
+                            ));
+                        }elseif ($change < 0){
+                            DB::table('cash_books')->insert(array(
+                                'transaction_id' => $cashTxId,
+                                'company_id' => $companyId,
+                                'reference_no' => "inv-$invoiceId",
+                                'type' => 'receive',
+                                'receive' => $cashPaid,
                                 'date' => $request->date,
                                 'comment' => "Cash receive for Invoice No ($invoiceId)"
                             ));
@@ -1443,7 +1456,7 @@ class ApiController extends Controller
                                 'company_id' => $companyId,
                                 'reference_no' => "inv-$invoiceId",
                                 'type' => 'receive',
-                                'receive' => $request->cash,
+                                'receive' => $cashPaid,
                                 'date' => $request->date,
                                 'comment' => "Cash receive for Invoice No ($invoiceId)"
                             ));

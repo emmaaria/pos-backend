@@ -1573,6 +1573,7 @@ class ApiController extends Controller
                         $profit += ($quantity * $price) - ($quantity * $purchasePrice->price);
                     }
                 }
+                $paid = $request->cash + $request->bkash + $request->nagad + $request->card;
                 DB::table('invoices')->where('invoice_id', $invoiceId)->where('company_id', $companyId)->update(
                     [
                         'customer_id' => $customerId,
@@ -1582,54 +1583,90 @@ class ApiController extends Controller
                         'discountAmount' => $request->discountAmount,
                         'discountType' => $request->discountType,
                         'total' => $total,
+                        'paid_amount' => $paid,
+                        'company_id' => $companyId,
                         'profit' => $profit - $request->discountAmount,
                     ]
                 );
                 DB::table('customer_ledgers')->where('reference_no', "inv-$invoiceId")->where('company_id', $companyId)->delete();
+
                 $customerDueTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('customer_transaction');
+                $grandTotal = $total - $request->discountAmount;
                 DB::table('customer_ledgers')->insert(array(
                     'customer_id' => $customerId,
                     'transaction_id' => $customerDueTxId,
                     'reference_no' => "inv-$invoiceId",
-                    'company_id' => $companyId,
                     'type' => 'due',
-                    'due' => $total - $request->discountAmount,
+                    'company_id' => $companyId,
+                    'due' => $grandTotal,
                     'deposit' => 0,
                     'date' => $request->date,
                     'comment' => "Due for Invoice ID ($invoiceId)"
                 ));
                 $txGenerator->setNextInvoiceNo();
 
-                $paid = $request->cash + $request->bkash + $request->nagad + $request->card;
+                if ($paid > $grandTotal) {
+                    $paid = $grandTotal;
+                }
+
                 if ($paid > 0) {
                     $customerPaidTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('transaction');
                     DB::table('customer_ledgers')->insert(array(
                         'customer_id' => $customerId,
-                        'company_id' => $companyId,
                         'reference_no' => "inv-$invoiceId",
                         'transaction_id' => $customerPaidTxId,
                         'type' => 'deposit',
+                        'company_id' => $companyId,
                         'due' => 0,
-                        'deposit' => $request->cash,
+                        'deposit' => $paid,
                         'date' => $request->date,
                         'comment' => "Deposit for Invoice ID ($invoiceId)"
                     ));
                     $txGenerator->setNextInvoiceNo();
+
                     DB::table('cash_transaction')->where('reference_no', "inv-$invoiceId")->delete();
+
                     if (!empty($request->cash) && $request->cash > 0) {
+                        $onlinePayments = $request->bkash + $request->nagad + $request->card;
+                        $dueAfterOnlinePayment = $grandTotal - $onlinePayments;
+                        $cashPaid = $request->cash;
+                        $change = $grandTotal - ($dueAfterOnlinePayment - $cashPaid);
                         $cashTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('cash_transaction');
-                        DB::table('cash_books')->insert(array(
-                            'transaction_id' => $cashTxId,
-                            'company_id' => $companyId,
-                            'reference_no' => "inv-$invoiceId",
-                            'type' => 'receive',
-                            'receive' => $request->cash,
-                            'date' => $request->date,
-                            'comment' => "Cash receive for Invoice No ($invoiceId)"
-                        ));
+                        if ($change > 0) {
+                            DB::table('cash_books')->insert(array(
+                                'transaction_id' => $cashTxId,
+                                'company_id' => $companyId,
+                                'reference_no' => "inv-$invoiceId",
+                                'type' => 'receive',
+                                'receive' => $dueAfterOnlinePayment,
+                                'date' => $request->date,
+                                'comment' => "Cash receive for Invoice No ($invoiceId)"
+                            ));
+                        }elseif ($change < 0){
+                            DB::table('cash_books')->insert(array(
+                                'transaction_id' => $cashTxId,
+                                'company_id' => $companyId,
+                                'reference_no' => "inv-$invoiceId",
+                                'type' => 'receive',
+                                'receive' => $cashPaid,
+                                'date' => $request->date,
+                                'comment' => "Cash receive for Invoice No ($invoiceId)"
+                            ));
+                        } else {
+                            DB::table('cash_books')->insert(array(
+                                'transaction_id' => $cashTxId,
+                                'company_id' => $companyId,
+                                'reference_no' => "inv-$invoiceId",
+                                'type' => 'receive',
+                                'receive' => $cashPaid,
+                                'date' => $request->date,
+                                'comment' => "Cash receive for Invoice No ($invoiceId)"
+                            ));
+                        }
                         $txGenerator->setNextInvoiceNo();
                     }
                     DB::table('bkash_transaction')->where('reference_no', "inv-$invoiceId")->where('company_id', $companyId)->delete();
+
                     if (!empty($request->bkash) && $request->bkash > 0) {
                         $cashTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('bkash_transaction');
                         DB::table('bkash_transactions')->insert(array(

@@ -1374,6 +1374,7 @@ class ApiController extends Controller
                         $profit += ($quantity * $price) - ($quantity * $purchasePrice->price);
                     }
                 }
+                $paid = $request->cash + $request->bcash + $request->nagad + $request->card;
                 DB::table('invoices')->insert(
                     [
                         'customer_id' => $customerId,
@@ -1384,6 +1385,7 @@ class ApiController extends Controller
                         'discountAmount' => $request->discountAmount,
                         'discountType' => $request->discountType,
                         'total' => $total,
+                        'paid_amount' => $paid,
                         'company_id' => $companyId,
                         'profit' => $profit - $request->discountAmount,
                     ]
@@ -1401,8 +1403,11 @@ class ApiController extends Controller
                     'comment' => "Due for Invoice ID ($invoiceId)"
                 ));
                 $txGenerator->setNextInvoiceNo();
-
-                $paid = $request->cash + $request->bcash + $request->nagad + $request->card;
+                if ($request->pos === 1) {
+                    if ($paid > $total) {
+                        $paid = $total;
+                    }
+                }
 
                 if ($paid > 0) {
                     $customerPaidTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('transaction');
@@ -1413,7 +1418,7 @@ class ApiController extends Controller
                         'type' => 'deposit',
                         'company_id' => $companyId,
                         'due' => 0,
-                        'deposit' => $request->cash,
+                        'deposit' => $paid,
                         'date' => $request->date,
                         'comment' => "Deposit for Invoice ID ($invoiceId)"
                     ));
@@ -1421,15 +1426,29 @@ class ApiController extends Controller
 
                     if (!empty($request->cash) && $request->cash > 0) {
                         $cashTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('cash_transaction');
-                        DB::table('cash_books')->insert(array(
-                            'transaction_id' => $cashTxId,
-                            'company_id' => $companyId,
-                            'reference_no' => "inv-$invoiceId",
-                            'type' => 'receive',
-                            'receive' => $request->cash,
-                            'date' => $request->date,
-                            'comment' => "Cash receive for Invoice No ($invoiceId)"
-                        ));
+                        if ($request->pos === 1) {
+                            $onlinePayments = $request->bcash + $request->nagad + $request->card;
+                            DB::table('cash_books')->insert(array(
+                                'transaction_id' => $cashTxId,
+                                'company_id' => $companyId,
+                                'reference_no' => "inv-$invoiceId",
+                                'type' => 'receive',
+                                'receive' => $onlinePayments - $request->cash,
+                                'date' => $request->date,
+                                'comment' => "Cash receive for Invoice No ($invoiceId)"
+                            ));
+                        }else{
+                            DB::table('cash_books')->insert(array(
+                                'transaction_id' => $cashTxId,
+                                'company_id' => $companyId,
+                                'reference_no' => "inv-$invoiceId",
+                                'type' => 'receive',
+                                'receive' => $request->cash,
+                                'date' => $request->date,
+                                'comment' => "Cash receive for Invoice No ($invoiceId)"
+                            ));
+                        }
+
                         $txGenerator->setNextInvoiceNo();
                     }
 

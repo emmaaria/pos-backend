@@ -1665,7 +1665,7 @@ class ApiController extends Controller
                         }
                         $txGenerator->setNextInvoiceNo();
                     }
-                    DB::table('bkash_transaction')->where('reference_no', "inv-$invoiceId")->where('company_id', $companyId)->delete();
+                    DB::table('bkash_transactions')->where('reference_no', "inv-$invoiceId")->where('company_id', $companyId)->delete();
 
                     if (!empty($request->bkash) && $request->bkash > 0) {
                         $cashTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('bkash_transaction');
@@ -1680,7 +1680,7 @@ class ApiController extends Controller
                         ));
                         $txGenerator->setNextInvoiceNo();
                     }
-                    DB::table('nagad_transaction')->where('reference_no', "inv-$invoiceId")->where('company_id', $companyId)->delete();
+                    DB::table('nagad_transactions')->where('reference_no', "inv-$invoiceId")->where('company_id', $companyId)->delete();
                     if (!empty($request->nagad) && $request->nagad > 0) {
                         $cashTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('nagad_transaction');
                         DB::table('nagad_transactions')->insert(array(

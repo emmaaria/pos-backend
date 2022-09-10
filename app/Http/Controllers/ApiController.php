@@ -1177,12 +1177,13 @@ class ApiController extends Controller
                 $errors = $validator->errors();
                 return response()->json(compact('status', 'errors'));
             }
-            $product = Product::where('product_id', $request->id)->where('company_id', $companyId)->first();
+            $product = Product::where('id', $request->id)->where('company_id', $companyId)->first();
             $product->name = $request->name;
             $product->category = $request->category;
             $product->unit = $request->unit;
             $product->price = $request->price;
             $product->purchase_price = $request->purchase_price;
+            $product->product_id = $request->product_id;
             $product->weight = $request->weight;
             $product->save();
             $status = true;

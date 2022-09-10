@@ -19,8 +19,8 @@ Route::get('/migrate', function () {
     dd(Artisan::output());
 });
 Route::get('/pull', function () {
-    exec('git pull');
-    dd('Pulled');
+    $output = exec('git pull 2>&1', $output, $return_var);
+    dd($output);
 });
 Route::get('/clear', function () {
     $output = [];

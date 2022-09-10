@@ -437,30 +437,33 @@ class ApiController extends Controller
                 $errors = $validator->errors();
                 return response()->json(compact('status', 'errors'));
             }
-            $customerId = DB::table('customers')->insertGetId(['name' => $request->name, 'mobile' => $request->mobile, 'address' => $request->address, 'company_id' => $companyId]);
-
-            if ($customerId) {
-                if (!empty($request->due)) {
-                    $txIdGenerator = new InvoiceNumberGeneratorService();
-                    $txId = $txIdGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('customer_transaction');
-                    DB::table('customer_ledgers')->insert(array(
-                        'customer_id' => $customerId,
-                        'transaction_id' => $txId,
-                        'company_id' => $companyId,
-                        'type' => 'due',
-                        'due' => $request->due,
-                        'deposit' => 0,
-                        'date' => date('Y-m-d'),
-                        'comment' => 'Previous Due'
-                    ));
-                    $txIdGenerator->setNextInvoiceNo();
-                }
-                $status = true;
-                return response()->json(compact('status'));
-            } else {
+            try {
+                DB::transaction(function () use ($companyId, $request) {
+                    $customerId = DB::table('customers')->insertGetId(['name' => $request->name, 'mobile' => $request->mobile, 'address' => $request->address, 'company_id' => $companyId]);
+                    if (!empty($request->due)) {
+                        $txIdGenerator = new InvoiceNumberGeneratorService();
+                        $txId = $txIdGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('customer_transaction');
+                        DB::table('customer_ledgers')->insert(array(
+                            'customer_id' => $customerId,
+                            'transaction_id' => $txId,
+                            'company_id' => $companyId,
+                            'type' => 'due',
+                            'due' => $request->due,
+                            'deposit' => 0,
+                            'date' => date('Y-m-d'),
+                            'comment' => 'Previous Due'
+                        ));
+                        $txIdGenerator->setNextInvoiceNo();
+                    }
+                });
+            } catch (Exception $e) {
                 $status = false;
-                return response()->json(compact('status'));
+                $errors = 'Something went wrong';
+                return response()->json(compact('status', 'errors'));
             }
+            $status = true;
+            $message = 'Successfully saved';
+            return response()->json(compact('status', 'message'));
         } else {
             $status = false;
             $errors = 'You are not authorized';

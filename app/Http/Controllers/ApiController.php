@@ -50,12 +50,12 @@ class ApiController extends Controller
     {
         $validator = Validator::make($request->all(),
             [
-                'email' => 'required',
+                'mobile' => 'required',
                 'company_id' => 'required',
                 'password' => 'required',
             ],
             [
-                'email.required' => 'Mobile number required',
+                'mobile.required' => 'Mobile number required',
                 'company_id.required' => 'Company number required',
                 'password.required' => 'Password required',
             ]
@@ -68,8 +68,8 @@ class ApiController extends Controller
             }
             return response()->json(compact('status', 'errors'));
         }
-        $credentials = array('email' => $request->email, 'password' => $request->password);
-        $user = DB::table('users')->where('email', $request->email)->where('company_id', $request->company_id)->first();
+        $credentials = array('email' => $request->mobile, 'password' => $request->password);
+        $user = DB::table('users')->where('email', $request->mobile)->where('company_id', $request->company_id)->first();
         if ($user) {
             if (!empty($user)) {
                 $userData = array(
@@ -80,7 +80,7 @@ class ApiController extends Controller
             }
             if (!$token = auth()->claims($userData)->attempt($credentials)) {
                 $status = false;
-                $errors = 'Email and password did not matched';
+                $errors = 'Credentials did not matched';
                 return response()->json(compact('status', 'errors'));
             }
             $status = true;

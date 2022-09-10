@@ -1123,14 +1123,14 @@ class ApiController extends Controller
                 $errors = $validator->errors();
                 return response()->json(compact('status', 'errors'));
             }
+            if (!empty($request->product_id)) {
+                $productId = $request->product_id;
+            } else {
+                $productIdGenerator = new InvoiceNumberGeneratorService();
+                $productId = $productIdGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('product');
+            }
             try {
-                DB::transaction(function () use ($request, $companyId) {
-                    if (!empty($request->product_id)) {
-                        $productId = $request->product_id;
-                    } else {
-                        $productIdGenerator = new InvoiceNumberGeneratorService();
-                        $productId = $productIdGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('product');
-                    }
+                DB::transaction(function () use ($request, $companyId, $productId) {
                     Product::create(array(
                         'name' => $request->name,
                         'product_id' => $productId,
@@ -1146,6 +1146,7 @@ class ApiController extends Controller
                         'price' => $request->purchase_price,
                         'company_id' => $companyId,
                     ));
+                    $productIdGenerator->setNextInvoiceNo();
                     $status = true;
                     return response()->json(compact('status'));
                 });

@@ -1130,32 +1130,32 @@ class ApiController extends Controller
                 $productId = $productIdGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('product');
                 $productIdGenerator->setNextInvoiceNo();
             }
-            $success = DB::transaction(function () use ($request, $companyId, $productId) {
-                Product::create(array(
-                    'name' => $request->name,
-                    'product_id' => $productId,
-                    'category' => $request->category,
-                    'company_id' => $companyId,
-                    'unit' => $request->unit,
-                    'price' => $request->price,
-                    'purchase_price' => $request->purchase_price,
-                    'weight' => $request->weight ?: 0,
-                ));
-                AveragePurchasePrice::create(array(
-                    'product_id' => $productId,
-                    'price' => $request->purchase_price,
-                    'company_id' => $companyId,
-                ));
-            });
-            if ($success) {
-                $status = true;
-                $message = "Successfully saved";
-                return response()->json(compact('status', 'message'));
-            } else {
+            try {
+                DB::transaction(function () use ($request, $companyId, $productId) {
+                    Product::create(array(
+                        'name' => $request->name,
+                        'product_id' => $productId,
+                        'category' => $request->category,
+                        'company_id' => $companyId,
+                        'unit' => $request->unit,
+                        'price' => $request->price,
+                        'purchase_price' => $request->purchase_price,
+                        'weight' => $request->weight ?: 0,
+                    ));
+                    AveragePurchasePrice::create(array(
+                        'product_id' => $productId,
+                        'price' => $request->purchase_price,
+                        'company_id' => $companyId,
+                    ));
+                });
+            } catch (Exception $e) {
                 $status = false;
                 $errors = 'Something went wrong';
                 return response()->json(compact('status', 'errors'));
             }
+            $status = true;
+            $message = "Successfully Saved";
+            return response()->json(compact('status', 'message'));
         } else {
             $status = false;
             $errors = 'You are not authorized';
@@ -1210,11 +1210,11 @@ class ApiController extends Controller
                     $product->delete();
                     return true;
                 });
-                if ($success) {
+                if ($success){
                     $status = true;
                     $message = 'Product deleted';
                     return response()->json(compact('status', 'message'));
-                } else {
+                }else{
                     $status = false;
                     $errors = 'Something went wrong';
                     return response()->json(compact('status', 'errors'));

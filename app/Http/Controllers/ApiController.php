@@ -1204,21 +1204,21 @@ class ApiController extends Controller
         if ($companyId) {
             $id = $request->id;
             if (!empty($id)) {
-                $success = DB::transaction(function () use ($companyId, $id) {
-                    $product = Product::where('id', $id)->where('company_id', $companyId)->first();
-                    AveragePurchasePrice::where('product_id', $product->product_id)->where('company_id', $companyId)->delete();
-                    $product->delete();
-                    return true;
-                });
-                if ($success){
-                    $status = true;
-                    $message = 'Product deleted';
-                    return response()->json(compact('status', 'message'));
-                }else{
+                try {
+                    DB::transaction(function () use ($companyId, $id) {
+                        $product = Product::where('id', $id)->where('company_id', $companyId)->first();
+                        AveragePurchasePrice::where('product_id', $product->product_id)->where('company_id', $companyId)->delete();
+                        $product->delete();
+                        return true;
+                    });
+                } catch (Exception $e) {
                     $status = false;
                     $errors = 'Something went wrong';
                     return response()->json(compact('status', 'errors'));
                 }
+                $status = true;
+                $message = 'Product deleted';
+                return response()->json(compact('status', 'message'));
             } else {
                 $status = false;
                 $errors = 'Product not found';

@@ -88,7 +88,7 @@ class ApiController extends Controller
             return response()->json(compact('status', 'user', 'token'));
         } else {
             $status = false;
-            $errors = 'Email, password and company id did not matched';
+            $errors = 'Mobile, password and company id did not matched';
             return response()->json(compact('status', 'errors'));
         }
     }

@@ -1150,7 +1150,7 @@ class ApiController extends Controller
                     $status = true;
                     return response()->json(compact('status'));
                 });
-            }catch (Exception $e){
+            } catch (Exception $e) {
                 $status = false;
                 $errors = 'Something went wrong';
                 return response()->json(compact('status', 'errors'));
@@ -1169,7 +1169,7 @@ class ApiController extends Controller
             $validator = Validator::make($request->all(),
                 [
                     'id' => 'required',
-                    'product_id' => 'unique:products,id,'.$request->id,
+                    'product_id' => 'unique:products,id,' . $request->id,
                     'name' => 'required',
                 ]
             );
@@ -1203,16 +1203,17 @@ class ApiController extends Controller
         if ($companyId) {
             $id = $request->id;
             if (!empty($id)) {
-                try {
-                    DB::transaction(function () use ($companyId, $id) {
-                        $product = Product::where('id', $id)->where('company_id', $companyId)->first();
-                        AveragePurchasePrice::where('product_id', $product->product_id)->where('company_id', $companyId)->delete();
-                        $product->delete();
-                        $status = true;
-                        $message = 'Product deleted';
-                        return response()->json(compact('status', 'message'));
-                    });
-                }catch (Exception $e){
+                $success = DB::transaction(function () use ($companyId, $id) {
+                    $product = Product::where('id', $id)->where('company_id', $companyId)->first();
+                    AveragePurchasePrice::where('product_id', $product->product_id)->where('company_id', $companyId)->delete();
+                    $product->delete();
+                    return true;
+                });
+                if ($success){
+                    $status = true;
+                    $message = 'Product deleted';
+                    return response()->json(compact('status', 'message'));
+                }else{
                     $status = false;
                     $errors = 'Something went wrong';
                     return response()->json(compact('status', 'errors'));
@@ -1445,7 +1446,7 @@ class ApiController extends Controller
                                 'date' => $request->date,
                                 'comment' => "Cash receive for Invoice No ($invoiceId)"
                             ));
-                        }elseif ($change < 0){
+                        } elseif ($change < 0) {
                             DB::table('cash_books')->insert(array(
                                 'transaction_id' => $cashTxId,
                                 'company_id' => $companyId,
@@ -1647,7 +1648,7 @@ class ApiController extends Controller
                                 'date' => $request->date,
                                 'comment' => "Cash receive for Invoice No ($invoiceId)"
                             ));
-                        }elseif ($change < 0){
+                        } elseif ($change < 0) {
                             DB::table('cash_books')->insert(array(
                                 'transaction_id' => $cashTxId,
                                 'company_id' => $companyId,

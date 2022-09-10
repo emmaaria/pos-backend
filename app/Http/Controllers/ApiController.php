@@ -442,7 +442,7 @@ class ApiController extends Controller
                     $customerId = DB::table('customers')->insertGetId(['name' => $request->name, 'mobile' => $request->mobile, 'address' => $request->address, 'company_id' => $companyId]);
                     if (!empty($request->due)) {
                         $txIdGenerator = new InvoiceNumberGeneratorService();
-                        $txId = $txIdGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('customer_transaction');
+                        $txId = $txIdGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('customer_transaction');
                         DB::table('customer_ledgers')->insert(array(
                             'customer_id' => $customerId,
                             'transaction_id' => $txId,

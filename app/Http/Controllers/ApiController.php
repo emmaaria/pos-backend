@@ -1128,6 +1128,7 @@ class ApiController extends Controller
             } else {
                 $productIdGenerator = new InvoiceNumberGeneratorService();
                 $productId = $productIdGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('product');
+                $productIdGenerator->setNextInvoiceNo();
             }
             try {
                 DB::transaction(function () use ($request, $companyId, $productId) {
@@ -1146,7 +1147,6 @@ class ApiController extends Controller
                         'price' => $request->purchase_price,
                         'company_id' => $companyId,
                     ));
-                    $productIdGenerator->setNextInvoiceNo();
                     $status = true;
                     return response()->json(compact('status'));
                 });
@@ -1203,21 +1203,23 @@ class ApiController extends Controller
         if ($companyId) {
             $id = $request->id;
             if (!empty($id)) {
-                $deleted = Product::where('product_id', $id)->where('company_id', $companyId)->delete();
-                AveragePurchasePrice::where('product_id', $id)->where('company_id', $companyId)->delete();
-                if ($deleted) {
-                    $status = true;
-                    $message = 'Product deleted';
-                    return response()->json(compact('status', 'message'));
-                } else {
+                try {
+                    DB::transaction(function () use ($companyId, $id) {
+                        Product::where('product_id', $id)->where('company_id', $companyId)->delete();
+                        AveragePurchasePrice::where('product_id', $id)->where('company_id', $companyId)->delete();
+                        $status = true;
+                        $message = 'Product deleted';
+                        return response()->json(compact('status', 'message'));
+                    });
+                }catch (Exception $e){
                     $status = false;
-                    $error = 'Product not found';
-                    return response()->json(compact('status', 'error'));
+                    $errors = 'Something went wrong';
+                    return response()->json(compact('status', 'errors'));
                 }
             } else {
                 $status = false;
-                $error = 'Product not found';
-                return response()->json(compact('status', 'error'));
+                $errors = 'Product not found';
+                return response()->json(compact('status', 'errors'));
             }
         } else {
             $status = false;

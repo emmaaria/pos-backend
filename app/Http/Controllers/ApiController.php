@@ -1129,7 +1129,7 @@ class ApiController extends Controller
                         $productId = $request->product_id;
                     } else {
                         $productIdGenerator = new InvoiceNumberGeneratorService();
-                        $productId = $productIdGenerator->prefix('')->setCompanyId($companyId)->startAt(100000)->getInvoiceNumber('product');
+                        $productId = $productIdGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('product');
                     }
                     Product::create(array(
                         'name' => $request->name,

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AveragePurchasePrice;
 use App\Models\Product;
 use App\Models\User;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -34,14 +35,14 @@ class ApiController extends Controller
                 try {
                     $companyId = decrypt($token['company_id']);
                     return $companyId;
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     return null;
                 }
             } else {
                 return null;
             }
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return null;
         }
     }
@@ -1073,7 +1074,7 @@ class ApiController extends Controller
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
-            $product = Product::where('product_id', $id)->where('company_id', $companyId)->first();
+            $product = Product::where('id', $id)->where('company_id', $companyId)->first();
             $status = true;
             return response()->json(compact('status', 'product'));
         } else {
@@ -1122,37 +1123,36 @@ class ApiController extends Controller
                 $errors = $validator->errors();
                 return response()->json(compact('status', 'errors'));
             }
-
-            if (!empty($request->product_id)) {
-                $productId = $request->product_id;
-            } else {
-                $productIdGenerator = new InvoiceNumberGeneratorService();
-                $productId = $productIdGenerator->prefix('')->setCompanyId(1)->startAt(100000)->getInvoiceNumber('product');
-            }
-            $product = Product::create(array(
-                'name' => $request->name,
-                'product_id' => $productId,
-                'category' => $request->category,
-                'company_id' => $companyId,
-                'unit' => $request->unit,
-                'price' => $request->price,
-                'purchase_price' => $request->purchase_price,
-                'weight' => $request->weight ?: 0,
-            ));
-            AveragePurchasePrice::create(array(
-                'product_id' => $productId,
-                'price' => $request->purchase_price,
-                'company_id' => $companyId,
-            ));
-            if ($product) {
-                if (empty($request->product_id)) {
-                    $productIdGenerator->setNextInvoiceNo();
-                }
-                $status = true;
-                return response()->json(compact('status'));
-            } else {
+            try {
+                DB::transaction(function () use ($request, $companyId) {
+                    if (!empty($request->product_id)) {
+                        $productId = $request->product_id;
+                    } else {
+                        $productIdGenerator = new InvoiceNumberGeneratorService();
+                        $productId = $productIdGenerator->prefix('')->setCompanyId($companyId)->startAt(100000)->getInvoiceNumber('product');
+                    }
+                    Product::create(array(
+                        'name' => $request->name,
+                        'product_id' => $productId,
+                        'category' => $request->category,
+                        'company_id' => $companyId,
+                        'unit' => $request->unit,
+                        'price' => $request->price,
+                        'purchase_price' => $request->purchase_price,
+                        'weight' => $request->weight ?: 0,
+                    ));
+                    AveragePurchasePrice::create(array(
+                        'product_id' => $productId,
+                        'price' => $request->purchase_price,
+                        'company_id' => $companyId,
+                    ));
+                    $status = true;
+                    return response()->json(compact('status'));
+                });
+            }catch (Exception $e){
                 $status = false;
-                return response()->json(compact('status'));
+                $errors = 'Something went wrong';
+                return response()->json(compact('status', 'errors'));
             }
         } else {
             $status = false;
@@ -1201,7 +1201,7 @@ class ApiController extends Controller
             $id = $request->id;
             if (!empty($id)) {
                 $deleted = Product::where('product_id', $id)->where('company_id', $companyId)->delete();
-                AveragePurchasePricewhere('product_id', $id)->where('company_id', $companyId)->delete();
+                AveragePurchasePrice::where('product_id', $id)->where('company_id', $companyId)->delete();
                 if ($deleted) {
                     $status = true;
                     $message = 'Product deleted';

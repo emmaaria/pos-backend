@@ -1168,7 +1168,7 @@ class ApiController extends Controller
             $validator = Validator::make($request->all(),
                 [
                     'id' => 'required',
-                    'product_id' => 'unique:products,product_id,'.$request->id,
+                    'product_id' => 'unique:products,id,'.$request->id,
                     'name' => 'required',
                 ]
             );

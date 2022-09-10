@@ -1205,8 +1205,9 @@ class ApiController extends Controller
             if (!empty($id)) {
                 try {
                     DB::transaction(function () use ($companyId, $id) {
-                        Product::where('product_id', $id)->where('company_id', $companyId)->delete();
-                        AveragePurchasePrice::where('product_id', $id)->where('company_id', $companyId)->delete();
+                        $product = Product::where('id', $id)->where('company_id', $companyId)->first();
+                        AveragePurchasePrice::where('product_id', $product->product_id)->where('company_id', $companyId)->delete();
+                        $product->delete();
                         $status = true;
                         $message = 'Product deleted';
                         return response()->json(compact('status', 'message'));

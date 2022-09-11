@@ -17,6 +17,7 @@ class CreateSupplierProductsTable extends Migration
             $table->id();
             $table->string('supplier_id');
             $table->string('product_id');
+            $table->string('company_id');
             $table->timestamps();
         });
     }

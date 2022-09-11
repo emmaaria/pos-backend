@@ -29,6 +29,7 @@ return array(
     'App\\Http\\Middleware\\VerifyCsrfToken' => $baseDir . '/app/Http/Middleware/VerifyCsrfToken.php',
     'App\\Models\\AveragePurchasePrice' => $baseDir . '/app/Models/AveragePurchasePrice.php',
     'App\\Models\\Bank' => $baseDir . '/app/Models/Bank.php',
+    'App\\Models\\BankLedger' => $baseDir . '/app/Models/BankLedger.php',
     'App\\Models\\BkashTransaction' => $baseDir . '/app/Models/BkashTransaction.php',
     'App\\Models\\CardTransaction' => $baseDir . '/app/Models/CardTransaction.php',
     'App\\Models\\CashBook' => $baseDir . '/app/Models/CashBook.php',

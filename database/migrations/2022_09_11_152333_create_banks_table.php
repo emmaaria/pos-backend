@@ -19,6 +19,7 @@ class CreateBanksTable extends Migration
             $table->string('account_name');
             $table->string('account_no');
             $table->string('branch');
+            $table->string('company_id');
             $table->timestamps();
         });
     }

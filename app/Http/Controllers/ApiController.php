@@ -1113,6 +1113,7 @@ class ApiController extends Controller
         if ($companyId) {
             $product = Product::where('id', $id)->where('company_id', $companyId)->first();
             $suppliers = DB::table('supplier_products')
+                ->select('suppliers.id', 'suppliers.name')
                 ->leftJoin('suppliers', 'suppliers.id', '=', 'supplier_products.supplier_id')
                 ->where('product_id', $product->product_id)
                 ->where('company_id', $companyId)

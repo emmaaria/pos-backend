@@ -1939,6 +1939,7 @@ class ApiController extends Controller
                 [
                     'name' => 'required',
                     'account_name' => 'required',
+                    'bank_type' => 'required',
                     'account_no' => 'required',
                     'branch' => 'required',
                 ]

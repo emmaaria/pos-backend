@@ -1951,11 +1951,18 @@ class ApiController extends Controller
             }
             try {
                 DB::transaction(function () use ($companyId, $request) {
-                    $bankId = DB::table('banks')->insertGetId(['name' => $request->name, 'account_name' => $request->account_name, 'account_no' => $request->account_no, 'branch' => $request->branch, 'company_id' => $companyId]);
+                    $bankId = DB::table('banks')->insertGetId([
+                        'name' => $request->name,
+                        'account_name' => $request->account_name,
+                        'account_no' => $request->account_no,
+                        'branch' => $request->branch, 
+                        'company_id' => $companyId,
+                        'bank_type' => $request->bank_type
+                    ]);
                     if (!empty($request->balance)) {
                         $txIdGenerator = new InvoiceNumberGeneratorService();
                         $txId = $txIdGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('bank_transaction');
-                        if ($request->bank_type == 'saving'){
+                        if ($request->bank_type == 'saving') {
                             DB::table('bank_ledgers')->insert(array(
                                 'bank_id' => $bankId,
                                 'transaction_id' => $txId,
@@ -1966,7 +1973,7 @@ class ApiController extends Controller
                                 'company_id' => $companyId,
                                 'date' => date('Y-m-d')
                             ));
-                        }else{
+                        } else {
                             DB::table('bank_ledgers')->insert(array(
                                 'bank_id' => $bankId,
                                 'transaction_id' => $txId,
@@ -1983,7 +1990,7 @@ class ApiController extends Controller
                 });
             } catch (Exception $e) {
                 $status = false;
-                $errors = $e;
+                $errors = 'Something went wrong';
                 return response()->json(compact('status', 'errors'));
             }
             $status = true;

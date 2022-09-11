@@ -689,6 +689,7 @@ class ApiController extends Controller
                         DB::table('suppliers')->where('id', $id)->where('company_id', $companyId)->delete();
                         DB::table('supplier_ledgers')->where('company_id', $companyId)->where('customer_id', $id)->delete();
                         $purchases = DB::table('purchase')->where('supplier_id', $id)->where('company_id', $companyId)->get();
+                        DB::table('supplier_products')->where('supplier_id', $id)->where('company_id', $companyId)->delete();
                         foreach ($purchases as $purchase) {
                             DB::table('purchase_items')->where('purchase_id', $purchase->purchase_id)->where('company_id', $companyId)->delete();
                             DB::table('bkash_transactions')->where('reference_no', 'pur-' . $purchase->purchase_id)->where('company_id', $companyId)->delete();
@@ -1268,6 +1269,7 @@ class ApiController extends Controller
                     DB::transaction(function () use ($companyId, $id) {
                         $product = Product::where('id', $id)->where('company_id', $companyId)->first();
                         AveragePurchasePrice::where('product_id', $product->product_id)->where('company_id', $companyId)->delete();
+                        DB::table('supplier_products')->where('product_id', $product->product_id)->where('company_id', $companyId)->delete();
                         $product->delete();
                         return true;
                     });

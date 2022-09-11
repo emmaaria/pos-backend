@@ -442,7 +442,7 @@ class ApiController extends Controller
                     $customerId = DB::table('customers')->insertGetId(['name' => $request->name, 'mobile' => $request->mobile, 'address' => $request->address, 'company_id' => $companyId]);
                     if (!empty($request->due)) {
                         $txIdGenerator = new InvoiceNumberGeneratorService();
-                        $txId = $txIdGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('customer_transaction');
+                        $txId = $txIdGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('customer_transaction');
                         DB::table('customer_ledgers')->insert(array(
                             'customer_id' => $customerId,
                             'transaction_id' => $txId,
@@ -510,10 +510,10 @@ class ApiController extends Controller
                         $invoices = DB::table('invoices')->where('customer_id', $id)->where('company_id', $companyId)->get();
                         foreach ($invoices as $invoice) {
                             DB::table('invoice_items')->where('invoice_id', $invoice->invoice_id)->where('company_id', $companyId)->delete();
-                            DB::table('bkash_transactions')->where('reference_no', $invoice->invoice_id)->where('company_id', $companyId)->delete();
-                            DB::table('card_transactions')->where('reference_no', $invoice->invoice_id)->where('company_id', $companyId)->delete();
-                            DB::table('cash_books')->where('reference_no', $invoice->invoice_id)->where('company_id', $companyId)->delete();
-                            DB::table('nagad_transactions')->where('reference_no', $invoice->invoice_id)->where('company_id', $companyId)->delete();
+                            DB::table('bkash_transactions')->where('reference_no', 'inv-' . $invoice->invoice_id)->where('company_id', $companyId)->delete();
+                            DB::table('card_transactions')->where('reference_no', 'inv-' . $invoice->invoice_id)->where('company_id', $companyId)->delete();
+                            DB::table('cash_books')->where('reference_no', 'inv-' . $invoice->invoice_id)->where('company_id', $companyId)->delete();
+                            DB::table('nagad_transactions')->where('reference_no', 'inv-' . $invoice->invoice_id)->where('company_id', $companyId)->delete();
                         }
                     });
                 } catch (Exception $e) {
@@ -609,30 +609,32 @@ class ApiController extends Controller
                 $errors = $validator->errors();
                 return response()->json(compact('status', 'errors'));
             }
-            $supplierId = DB::table('suppliers')->insertGetId(['name' => $request->name, 'mobile' => $request->mobile, 'address' => $request->address, 'company_id' => $companyId]);
-
-            if ($supplierId) {
-                if (!empty($request->due)) {
-                    $txIdGenerator = new InvoiceNumberGeneratorService();
-                    $txId = $txIdGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('supplier_transaction');
-                    DB::table('supplier_ledgers')->insert(array(
-                        'supplier_id' => $supplierId,
-                        'transaction_id' => $txId,
-                        'type' => 'due',
-                        'due' => $request->due,
-                        'company_id' => $companyId,
-                        'deposit' => 0,
-                        'date' => date('Y-m-d'),
-                        'comment' => 'Previous Due'
-                    ));
-                    $txIdGenerator->setNextInvoiceNo();
-                }
-                $status = true;
-                return response()->json(compact('status'));
-            } else {
+            try {
+                DB::transaction(function () use ($companyId, $request) {
+                    $supplierId = DB::table('suppliers')->insertGetId(['name' => $request->name, 'mobile' => $request->mobile, 'address' => $request->address, 'company_id' => $companyId]);
+                    if (!empty($request->due)) {
+                        $txIdGenerator = new InvoiceNumberGeneratorService();
+                        $txId = $txIdGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('supplier_transaction');
+                        DB::table('supplier_ledgers')->insert(array(
+                            'supplier_id' => $supplierId,
+                            'transaction_id' => $txId,
+                            'type' => 'due',
+                            'due' => $request->due,
+                            'company_id' => $companyId,
+                            'deposit' => 0,
+                            'date' => date('Y-m-d'),
+                            'comment' => 'Previous Due'
+                        ));
+                        $txIdGenerator->setNextInvoiceNo();
+                    }
+                });
+            } catch (Exception $e) {
                 $status = false;
-                return response()->json(compact('status'));
+                $errors = 'Something went wrong';
+                return response()->json(compact('status', 'errors'));
             }
+            $status = true;
+            return response()->json(compact('status'));
         } else {
             $status = false;
             $errors = 'You are not authorized';
@@ -672,17 +674,28 @@ class ApiController extends Controller
         if ($companyId) {
             $id = $request->id;
             if (!empty($id)) {
-                $deleted = DB::table('suppliers')->where('id', $id)->where('company_id', $companyId)->delete();
-                DB::table('supplier_ledgers')->where('company_id', $companyId)->where('supplier_id', $id)->delete();
-                if ($deleted) {
-                    $status = true;
-                    $message = 'Supplier deleted';
-                    return response()->json(compact('status', 'message'));
-                } else {
+                try {
+                    DB::transaction(function () use ($companyId, $id) {
+                        DB::table('suppliers')->where('id', $id)->where('company_id', $companyId)->delete();
+                        DB::table('supplier_ledgers')->where('company_id', $companyId)->where('customer_id', $id)->delete();
+                        $purchases = DB::table('purchase')->where('supplier_id', $id)->where('company_id', $companyId)->get();
+                        foreach ($purchases as $purchase) {
+                            DB::table('purchase_items')->where('purchase_id', $purchase->purchase_id)->where('company_id', $companyId)->delete();
+                            DB::table('bkash_transactions')->where('reference_no', 'pur-' . $purchase->purchase_id)->where('company_id', $companyId)->delete();
+                            DB::table('card_transactions')->where('reference_no', 'pur-' . $purchase->purchase_id)->where('company_id', $companyId)->delete();
+                            DB::table('cash_books')->where('reference_no', 'pur-' . $purchase->purchase_id)->where('company_id', $companyId)->delete();
+                            DB::table('nagad_transactions')->where('reference_no', 'pur-' . $purchase->purchase_id)->where('company_id', $companyId)->delete();
+                        }
+                    });
+                } catch (Exception $e) {
                     $status = false;
-                    $error = 'Supplier not found';
-                    return response()->json(compact('status', 'error'));
+                    $errors = 'Something went wrong';
+                    return response()->json(compact('status', 'errors'));
                 }
+
+                $status = true;
+                $message = 'Customer deleted';
+                return response()->json(compact('status', 'message'));
             } else {
                 $status = false;
                 $error = 'Supplier not found';

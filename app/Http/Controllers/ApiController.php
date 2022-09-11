@@ -1950,21 +1950,34 @@ class ApiController extends Controller
                 return response()->json(compact('status', 'errors'));
             }
             try {
-                DB::transaction(function () use ($companyId, $request) {
+                DB::transaction(function () use ($customerId, $companyId, $request) {
                     $bankId = DB::table('banks')->insertGetId(['name' => $request->name, 'account_name' => $request->account_name, 'account_no' => $request->account_no, 'branch' => $request->branch, 'company_id' => $companyId]);
                     if (!empty($request->balance)) {
                         $txIdGenerator = new InvoiceNumberGeneratorService();
-                        $txId = $txIdGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('customer_transaction');
-                        DB::table('customer_ledgers')->insert(array(
-                            'customer_id' => $customerId,
-                            'transaction_id' => $txId,
-                            'company_id' => $companyId,
-                            'type' => 'due',
-                            'due' => $request->due,
-                            'deposit' => 0,
-                            'date' => date('Y-m-d'),
-                            'comment' => 'Previous Due'
-                        ));
+                        $txId = $txIdGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('bank_transaction');
+                        if ($request->bank_type == 'saving'){
+                            DB::table('bank_ledgers')->insert(array(
+                                'bank_id' => $bankId,
+                                'transaction_id' => $txId,
+                                'comment' => "Previous balance",
+                                'type' => 'deposit',
+                                'withdraw' => 0,
+                                'deposit' => $request->balance,
+                                'company_id' => $companyId,
+                                'date' => date('Y-m-d')
+                            ));
+                        }else{
+                            DB::table('bank_ledgers')->insert(array(
+                                'bank_id' => $bankId,
+                                'transaction_id' => $txId,
+                                'comment' => "Previous balance",
+                                'type' => 'deposit',
+                                'withdraw' => $request->balance,
+                                'deposit' => 0,
+                                'company_id' => $companyId,
+                                'date' => date('Y-m-d')
+                            ));
+                        }
                         $txIdGenerator->setNextInvoiceNo();
                     }
                 });

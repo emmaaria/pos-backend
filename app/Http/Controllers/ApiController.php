@@ -1115,8 +1115,8 @@ class ApiController extends Controller
             $suppliers = DB::table('supplier_products')
                 ->select('suppliers.id', 'suppliers.name')
                 ->leftJoin('suppliers', 'suppliers.id', '=', 'supplier_products.supplier_id')
-                ->where('product_id', $product->product_id)
-                ->where('company_id', $companyId)
+                ->where('supplier_products.product_id', $product->product_id)
+                ->where('supplier_products.company_id', $companyId)
                 ->get();
             $status = true;
             return response()->json(compact('status', 'product', 'suppliers'));

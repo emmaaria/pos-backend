@@ -15,6 +15,7 @@ class CreateBankLedgersTable extends Migration
     {
         Schema::create('bank_ledgers', function (Blueprint $table) {
             $table->id();
+            $table->string('bank_id');
             $table->string('transaction_id');
             $table->string('reference_no')->nullable();
             $table->string('comment')->nullable();

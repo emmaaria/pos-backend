@@ -1112,8 +1112,9 @@ class ApiController extends Controller
         $companyId = $this->getCompanyId();
         if ($companyId) {
             $product = Product::where('id', $id)->where('company_id', $companyId)->first();
+            $suppliers = DB::table('supplier_products')->where('product_id', $product->product_id)->where('company_id', $companyId)->get();
             $status = true;
-            return response()->json(compact('status', 'product'));
+            return response()->json(compact('status', 'product', 'suppliers'));
         } else {
             $status = false;
             $errors = 'You are not authorized';

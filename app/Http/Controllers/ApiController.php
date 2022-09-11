@@ -503,17 +503,20 @@ class ApiController extends Controller
         if ($companyId) {
             $id = $request->id;
             if (!empty($id)) {
-                $deleted = DB::table('customers')->where('id', $id)->where('company_id', $companyId)->delete();
-                DB::table('customer_ledgers')->where('company_id', $companyId)->where('customer_id', $id)->delete();
-                if ($deleted) {
-                    $status = true;
-                    $message = 'Customer deleted';
-                    return response()->json(compact('status', 'message'));
-                } else {
+                try {
+                    DB::transaction(function () use ($companyId, $id) {
+                        DB::table('customers')->where('id', $id)->where('company_id', $companyId)->delete();
+                        DB::table('customer_ledgers')->where('company_id', $companyId)->where('customer_id', $id)->delete();
+                    });
+                } catch (Exception $e) {
                     $status = false;
-                    $error = 'Customer not found';
-                    return response()->json(compact('status', 'error'));
+                    $errors = 'Something went wrong';
+                    return response()->json(compact('status', 'errors'));
                 }
+
+                $status = true;
+                $message = 'Customer deleted';
+                return response()->json(compact('status', 'message'));
             } else {
                 $status = false;
                 $error = 'Customer not found';

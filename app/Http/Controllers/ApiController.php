@@ -507,6 +507,14 @@ class ApiController extends Controller
                     DB::transaction(function () use ($companyId, $id) {
                         DB::table('customers')->where('id', $id)->where('company_id', $companyId)->delete();
                         DB::table('customer_ledgers')->where('company_id', $companyId)->where('customer_id', $id)->delete();
+                        $invoices = DB::table('invoices')->where('customer_id', $id)->where('company_id', $companyId)->get();
+                        foreach ($invoices as $invoice) {
+                            DB::table('invoice_items')->where('invoice_id', $invoice->invoice_id)->where('company_id', $companyId)->delete();
+                            DB::table('bkash_transactions')->where('reference_no', $invoice->invoice_id)->where('company_id', $companyId)->delete();
+                            DB::table('card_transactions')->where('reference_no', $invoice->invoice_id)->where('company_id', $companyId)->delete();
+                            DB::table('cash_books')->where('reference_no', $invoice->invoice_id)->where('company_id', $companyId)->delete();
+                            DB::table('nagad_transactions')->where('reference_no', $invoice->invoice_id)->where('company_id', $companyId)->delete();
+                        }
                     });
                 } catch (Exception $e) {
                     $status = false;

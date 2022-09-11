@@ -42,6 +42,7 @@ return array(
     'App\\Models\\PurchaseItem' => $baseDir . '/app/Models/PurchaseItem.php',
     'App\\Models\\Supplier' => $baseDir . '/app/Models/Supplier.php',
     'App\\Models\\SupplierLedger' => $baseDir . '/app/Models/SupplierLedger.php',
+    'App\\Models\\SupplierProduct' => $baseDir . '/app/Models/SupplierProduct.php',
     'App\\Models\\Unit' => $baseDir . '/app/Models/Unit.php',
     'App\\Models\\User' => $baseDir . '/app/Models/User.php',
     'App\\Providers\\AppServiceProvider' => $baseDir . '/app/Providers/AppServiceProvider.php',

@@ -552,7 +552,6 @@ class ApiController extends Controller
         $companyId = $this->getCompanyId();
         if ($companyId) {
             $name = $request->name;
-            $name = $request->name;
             $all = $request->allData;
             if (empty($name) && empty($all)) {
                 $suppliers = DB::table('suppliers')

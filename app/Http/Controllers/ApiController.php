@@ -1187,7 +1187,7 @@ class ApiController extends Controller
                     $suppliers = $request->suppliers;
                     if (count($suppliers) > 0){
                         foreach ($suppliers as $supplier){
-                            DB::table('supplier_products')->insert(['supplier_id' => $supplier->id, 'product_id' => $productId, 'company_id' => $companyId]);
+                            DB::table('supplier_products')->insert(['supplier_id' => $supplier['id'], 'product_id' => $productId, 'company_id' => $companyId]);
                         }
                     }
                 });

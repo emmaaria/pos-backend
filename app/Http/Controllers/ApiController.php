@@ -552,13 +552,24 @@ class ApiController extends Controller
         $companyId = $this->getCompanyId();
         if ($companyId) {
             $name = $request->name;
-            if (empty($name)) {
+            $name = $request->name;
+            $all = $request->allData;
+            if (empty($name) && empty($all)) {
                 $suppliers = DB::table('suppliers')
                     ->select('suppliers.id', 'suppliers.name', 'suppliers.mobile', 'suppliers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
                     ->where('suppliers.company_id', $companyId)
                     ->leftJoin('supplier_ledgers', 'supplier_ledgers.supplier_id', '=', 'suppliers.id')
                     ->groupBy('suppliers.id', 'suppliers.name', 'suppliers.mobile', 'suppliers.address')
                     ->paginate(50);
+                $status = true;
+                return response()->json(compact('status', 'suppliers'));
+            } elseif (!empty($all)) {
+                $suppliers = DB::table('suppliers')
+                    ->select('suppliers.id', 'suppliers.name', 'suppliers.mobile', 'suppliers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
+                    ->where('suppliers.company_id', $companyId)
+                    ->leftJoin('supplier_ledgers', 'supplier_ledgers.supplier_id', '=', 'suppliers.id')
+                    ->groupBy('suppliers.id', 'suppliers.name', 'suppliers.mobile', 'suppliers.address')
+                    ->get();
                 $status = true;
                 return response()->json(compact('status', 'suppliers'));
             } else {

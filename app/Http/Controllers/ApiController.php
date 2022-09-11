@@ -896,7 +896,7 @@ class ApiController extends Controller
                             $txGenerator->setNextInvoiceNo();
                         }
                     });
-                }catch (Exception $e){
+                } catch (Exception $e) {
                     $status = false;
                     $errors = 'Something went wrong';
                     return response()->json(compact('status', 'errors'));
@@ -1197,8 +1197,8 @@ class ApiController extends Controller
                         'company_id' => $companyId,
                     ));
                     $suppliers = $request->suppliers;
-                    if (count($suppliers) > 0){
-                        foreach ($suppliers as $supplier){
+                    if (count($suppliers) > 0) {
+                        foreach ($suppliers as $supplier) {
                             DB::table('supplier_products')->insert(['supplier_id' => $supplier['id'], 'product_id' => $productId, 'company_id' => $companyId]);
                         }
                     }
@@ -1245,13 +1245,13 @@ class ApiController extends Controller
                     $product->save();
                     DB::table('supplier_products')->where('product_id', $product->product_id)->where('company_id', $companyId)->delete();
                     $suppliers = $request->suppliers;
-                    if (count($suppliers) > 0){
-                        foreach ($suppliers as $supplier){
+                    if (count($suppliers) > 0) {
+                        foreach ($suppliers as $supplier) {
                             DB::table('supplier_products')->insert(['supplier_id' => $supplier['id'], 'product_id' => $product->product_id, 'company_id' => $companyId]);
                         }
                     }
                 });
-            }catch (Exception $e){
+            } catch (Exception $e) {
                 $status = false;
                 $errors = 'Something went wrong';
                 return response()->json(compact('status', 'errors'));
@@ -1874,6 +1874,182 @@ class ApiController extends Controller
     /*
     |--------------------------------------------------------------------------
     | Report End
+    |--------------------------------------------------------------------------
+    */
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Bank Start
+    |--------------------------------------------------------------------------
+    */
+    public function getBanks(Request $request)
+    {
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $name = $request->name;
+            if (empty($name)) {
+                $customers = DB::table('customers')
+                    ->select('customers.id', 'customers.name', 'customers.mobile', 'customers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
+                    ->leftJoin('customer_ledgers', 'customer_ledgers.customer_id', '=', 'customers.id')
+                    ->where('customers.company_id', $companyId)
+                    ->groupBy('customers.id', 'customers.name', 'customers.mobile', 'customers.address')
+                    ->paginate(50);
+                $status = true;
+                return response()->json(compact('status', 'customers'));
+            } else {
+                $customers = DB::table('customers')
+                    ->select('customers.id', 'customers.name', 'customers.mobile', 'customers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
+                    ->leftJoin('customer_ledgers', 'customer_ledgers.customer_id', '=', 'customers.id')
+                    ->where('customers.company_id', $companyId)
+                    ->where('customers.name', 'like', '%' . $name . '%')
+                    ->orWhere('customers.mobile', 'like', '%' . $name . '%')
+                    ->orWhere('customers.address', 'like', '%' . $name . '%')
+                    ->groupBy('customers.id', 'customers.name', 'customers.mobile', 'customers.address')
+                    ->paginate(50);
+                $status = true;
+                return response()->json(compact('status', 'customers'));
+            }
+        } else {
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
+    }
+
+    public function getBank($id)
+    {
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $customer = DB::table('customers')->where('id', $id)->where('company_id', $companyId)->first();
+            $status = true;
+            return response()->json(compact('status', 'customer'));
+        } else {
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
+    }
+
+    public function storeBank(Request $request)
+    {
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $validator = Validator::make($request->all(),
+                [
+                    'name' => 'required',
+                    'account_name' => 'required',
+                    'account_no' => 'required',
+                    'branch' => 'required',
+                ]
+            );
+            if ($validator->fails()) {
+                $status = false;
+                $errors = $validator->errors();
+                return response()->json(compact('status', 'errors'));
+            }
+            try {
+                DB::transaction(function () use ($companyId, $request) {
+                    $bankId = DB::table('banks')->insertGetId(['name' => $request->name, 'account_name' => $request->account_name, 'account_no' => $request->account_no, 'branch' => $request->branch, 'company_id' => $companyId]);
+                    if (!empty($request->balance)) {
+                        $txIdGenerator = new InvoiceNumberGeneratorService();
+                        $txId = $txIdGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('customer_transaction');
+                        DB::table('customer_ledgers')->insert(array(
+                            'customer_id' => $customerId,
+                            'transaction_id' => $txId,
+                            'company_id' => $companyId,
+                            'type' => 'due',
+                            'due' => $request->due,
+                            'deposit' => 0,
+                            'date' => date('Y-m-d'),
+                            'comment' => 'Previous Due'
+                        ));
+                        $txIdGenerator->setNextInvoiceNo();
+                    }
+                });
+            } catch (Exception $e) {
+                $status = false;
+                $errors = 'Something went wrong';
+                return response()->json(compact('status', 'errors'));
+            }
+            $status = true;
+            $message = 'Successfully saved';
+            return response()->json(compact('status', 'message'));
+        } else {
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
+    }
+
+    public function updateBank(Request $request)
+    {
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $validator = Validator::make($request->all(),
+                [
+                    'id' => 'required',
+                    'name' => 'required',
+                ]
+            );
+            if ($validator->fails()) {
+                $status = false;
+                $errors = $validator->errors();
+                return response()->json(compact('status', 'errors'));
+            }
+            DB::table('customers')->where('id', $request->id)->where('company_id', $companyId)->update(['name' => $request->name, 'mobile' => $request->mobile, 'address' => $request->address]);
+            $status = true;
+            $message = 'Updated';
+            return response()->json(compact('status', 'message'));
+        } else {
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
+    }
+
+    public function deleteBank(Request $request)
+    {
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $id = $request->id;
+            if (!empty($id)) {
+                try {
+                    DB::transaction(function () use ($companyId, $id) {
+                        DB::table('customers')->where('id', $id)->where('company_id', $companyId)->delete();
+                        DB::table('customer_ledgers')->where('company_id', $companyId)->where('customer_id', $id)->delete();
+                        $invoices = DB::table('invoices')->where('customer_id', $id)->where('company_id', $companyId)->get();
+                        foreach ($invoices as $invoice) {
+                            DB::table('invoice_items')->where('invoice_id', $invoice->invoice_id)->where('company_id', $companyId)->delete();
+                            DB::table('bkash_transactions')->where('reference_no', 'inv-' . $invoice->invoice_id)->where('company_id', $companyId)->delete();
+                            DB::table('card_transactions')->where('reference_no', 'inv-' . $invoice->invoice_id)->where('company_id', $companyId)->delete();
+                            DB::table('cash_books')->where('reference_no', 'inv-' . $invoice->invoice_id)->where('company_id', $companyId)->delete();
+                            DB::table('nagad_transactions')->where('reference_no', 'inv-' . $invoice->invoice_id)->where('company_id', $companyId)->delete();
+                        }
+                    });
+                } catch (Exception $e) {
+                    $status = false;
+                    $errors = 'Something went wrong';
+                    return response()->json(compact('status', 'errors'));
+                }
+
+                $status = true;
+                $message = 'Customer deleted';
+                return response()->json(compact('status', 'message'));
+            } else {
+                $status = false;
+                $error = 'Customer not found';
+                return response()->json(compact('status', 'error'));
+            }
+        } else {
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
+    }
+    /*
+    |--------------------------------------------------------------------------
+    | Bank End
     |--------------------------------------------------------------------------
     */
 }

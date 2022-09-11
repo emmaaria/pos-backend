@@ -1148,11 +1148,9 @@ class ApiController extends Controller
             $validator = Validator::make($request->all(),
                 [
                     'name' => 'required',
-                    'product_id' => 'unique:products',
                 ],
                 [
                     'name.required' => 'Product name is required',
-                    'product_id.unique' => 'This barcode already used for another product'
                 ]
             );
             if ($validator->fails()) {
@@ -1213,7 +1211,6 @@ class ApiController extends Controller
             $validator = Validator::make($request->all(),
                 [
                     'id' => 'required',
-                    'product_id' => 'unique:products,id,' . $request->id,
                     'name' => 'required',
                 ]
             );
@@ -1228,7 +1225,6 @@ class ApiController extends Controller
             $product->unit = $request->unit;
             $product->price = $request->price;
             $product->purchase_price = $request->purchase_price;
-            $product->product_id = $request->product_id;
             $product->weight = $request->weight;
             $product->save();
             $status = true;

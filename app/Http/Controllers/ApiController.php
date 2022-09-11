@@ -1950,7 +1950,7 @@ class ApiController extends Controller
                 return response()->json(compact('status', 'errors'));
             }
             try {
-                DB::transaction(function () use ($customerId, $companyId, $request) {
+                DB::transaction(function () use ($companyId, $request) {
                     $bankId = DB::table('banks')->insertGetId(['name' => $request->name, 'account_name' => $request->account_name, 'account_no' => $request->account_no, 'branch' => $request->branch, 'company_id' => $companyId]);
                     if (!empty($request->balance)) {
                         $txIdGenerator = new InvoiceNumberGeneratorService();

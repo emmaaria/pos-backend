@@ -1225,14 +1225,29 @@ class ApiController extends Controller
                 $errors = $validator->errors();
                 return response()->json(compact('status', 'errors'));
             }
-            $product = Product::where('id', $request->id)->where('company_id', $companyId)->first();
-            $product->name = $request->name;
-            $product->category = $request->category;
-            $product->unit = $request->unit;
-            $product->price = $request->price;
-            $product->purchase_price = $request->purchase_price;
-            $product->weight = $request->weight;
-            $product->save();
+            try {
+                DB::transaction(function () use ($companyId, $request) {
+                    $product = Product::where('id', $request->id)->where('company_id', $companyId)->first();
+                    $product->name = $request->name;
+                    $product->category = $request->category;
+                    $product->unit = $request->unit;
+                    $product->price = $request->price;
+                    $product->purchase_price = $request->purchase_price;
+                    $product->weight = $request->weight;
+                    $product->save();
+                    DB::table('supplier_products')->where('product_id', $product->product_id)->where('company_id', $companyId)->delete();
+                    $suppliers = $request->suppliers;
+                    if (count($suppliers) > 0){
+                        foreach ($suppliers as $supplier){
+                            DB::table('supplier_products')->insert(['supplier_id' => $supplier['id'], 'product_id' => $product->product_id, 'company_id' => $companyId]);
+                        }
+                    }
+                });
+            }catch (Exception $e){
+                $status = false;
+                $errors = 'Something went wrong';
+                return response()->json(compact('status', 'errors'));
+            }
             $status = true;
             $message = 'Updated';
             return response()->json(compact('status', 'message'));

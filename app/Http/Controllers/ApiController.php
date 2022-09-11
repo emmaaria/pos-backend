@@ -1184,6 +1184,12 @@ class ApiController extends Controller
                         'price' => $request->purchase_price,
                         'company_id' => $companyId,
                     ));
+                    $suppliers = $request->suppliers;
+                    if (count($suppliers) > 0){
+                        foreach ($suppliers as $supplier){
+                            DB::table('supplier_products')->insert(['supplier_id' => $supplier->id, 'product_id' => $productId, 'company_id' => $companyId]);
+                        }
+                    }
                 });
             } catch (Exception $e) {
                 $status = false;

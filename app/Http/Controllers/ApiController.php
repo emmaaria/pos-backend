@@ -1891,31 +1891,31 @@ class ApiController extends Controller
             $all = $request->all_data;
             if (empty($name) && empty($all)) {
                 $banks = DB::table('banks')
-                    ->select('banks.id','banks.name','banks.account_name','banks.account_no','banks.branch','banks.bank_type', DB::raw('SUM(withdraw) as withdraw'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(withdraw - deposit) as balance'))
+                    ->select('banks.id', 'banks.name', 'banks.account_name', 'banks.account_no', 'banks.branch', 'banks.bank_type', DB::raw('SUM(withdraw) as withdraw'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(withdraw - deposit) as balance'))
                     ->leftJoin('bank_ledgers', 'bank_ledgers.bank_id', '=', 'banks.id')
                     ->where('banks.company_id', $companyId)
-                    ->groupBy('banks.id','banks.name','banks.account_name','banks.account_no','banks.branch','banks.bank_type')
+                    ->groupBy('banks.id', 'banks.name', 'banks.account_name', 'banks.account_no', 'banks.branch', 'banks.bank_type')
                     ->paginate(50);
                 $status = true;
                 return response()->json(compact('status', 'banks'));
             } elseif (!empty($all)) {
                 $banks = DB::table('banks')
-                    ->select('banks.id','banks.name','banks.account_name','banks.account_no','banks.branch','banks.bank_type', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
+                    ->select('banks.id', 'banks.name', 'banks.account_name', 'banks.account_no', 'banks.branch', 'banks.bank_type', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
                     ->leftJoin('bank_ledgers', 'bank_ledgers.bank_id', '=', 'banks.id')
                     ->where('banks.company_id', $companyId)
-                    ->groupBy('banks.id','banks.name','banks.account_name','banks.account_no','banks.branch','banks.bank_type')
+                    ->groupBy('banks.id', 'banks.name', 'banks.account_name', 'banks.account_no', 'banks.branch', 'banks.bank_type')
                     ->get();
                 $status = true;
                 return response()->json(compact('status', 'banks'));
-            }else {
+            } else {
                 $banks = DB::table('banks')
-                    ->select('banks.id','banks.name','banks.account_name','banks.account_no','banks.branch','banks.bank_type', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
+                    ->select('banks.id', 'banks.name', 'banks.account_name', 'banks.account_no', 'banks.branch', 'banks.bank_type', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
                     ->leftJoin('bank_ledgers', 'bank_ledgers.bank_id', '=', 'banks.id')
                     ->where('banks.company_id', $companyId)
                     ->where('banks.name', 'like', '%' . $name . '%')
                     ->orWhere('banks.account_name', 'like', '%' . $name . '%')
                     ->orWhere('banks.account_no', 'like', '%' . $name . '%')
-                    ->groupBy('banks.id','banks.name','banks.account_name','banks.account_no','banks.branch','banks.bank_type')
+                    ->groupBy('banks.id', 'banks.name', 'banks.account_name', 'banks.account_no', 'banks.branch', 'banks.bank_type')
                     ->paginate(50);
                 $status = true;
                 return response()->json(compact('status', 'banks'));
@@ -2019,8 +2019,11 @@ class ApiController extends Controller
         if ($companyId) {
             $validator = Validator::make($request->all(),
                 [
-                    'id' => 'required',
                     'name' => 'required',
+                    'account_name' => 'required',
+                    'bank_type' => 'required',
+                    'account_no' => 'required',
+                    'branch' => 'required',
                 ]
             );
             if ($validator->fails()) {
@@ -2028,7 +2031,15 @@ class ApiController extends Controller
                 $errors = $validator->errors();
                 return response()->json(compact('status', 'errors'));
             }
-            DB::table('customers')->where('id', $request->id)->where('company_id', $companyId)->update(['name' => $request->name, 'mobile' => $request->mobile, 'address' => $request->address]);
+            DB::table('banks')->where('id', $request->id)->where('company_id', $companyId)->update(
+                [
+                    'name' => $request->name,
+                    'account_name' => $request->account_name,
+                    'account_no' => $request->account_no,
+                    'branch' => $request->branch,
+                    'bank_type' => $request->bank_type
+                ]
+            );
             $status = true;
             $message = 'Updated';
             return response()->json(compact('status', 'message'));

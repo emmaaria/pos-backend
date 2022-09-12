@@ -1931,9 +1931,9 @@ class ApiController extends Controller
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
-            $customer = DB::table('customers')->where('id', $id)->where('company_id', $companyId)->first();
+            $bank = DB::table('banks')->where('id', $id)->where('company_id', $companyId)->first();
             $status = true;
-            return response()->json(compact('status', 'customer'));
+            return response()->json(compact('status', 'bank'));
         } else {
             $status = false;
             $errors = 'You are not authorized';

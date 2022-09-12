@@ -1894,6 +1894,7 @@ class ApiController extends Controller
                     ->select('banks.*', DB::raw('SUM(withdraw) as withdraw'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(withdraw - deposit) as balance'))
                     ->leftJoin('bank_ledgers', 'bank_ledgers.bank_id', '=', 'banks.id')
                     ->where('banks.company_id', $companyId)
+                    ->groupBy('banks.id')
                     ->paginate(50);
                 $status = true;
                 return response()->json(compact('status', 'banks'));
@@ -1902,6 +1903,7 @@ class ApiController extends Controller
                     ->select('banks.*', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
                     ->leftJoin('bank_ledgers', 'bank_ledgers.bank_id', '=', 'banks.id')
                     ->where('banks.company_id', $companyId)
+                    ->groupBy('banks.id')
                     ->get();
                 $status = true;
                 return response()->json(compact('status', 'banks'));
@@ -1913,6 +1915,7 @@ class ApiController extends Controller
                     ->where('banks.name', 'like', '%' . $name . '%')
                     ->orWhere('banks.account_name', 'like', '%' . $name . '%')
                     ->orWhere('banks.account_no', 'like', '%' . $name . '%')
+                    ->groupBy('banks.id')
                     ->paginate(50);
                 $status = true;
                 return response()->json(compact('status', 'banks'));

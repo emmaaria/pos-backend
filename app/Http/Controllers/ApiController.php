@@ -1888,27 +1888,34 @@ class ApiController extends Controller
         $companyId = $this->getCompanyId();
         if ($companyId) {
             $name = $request->name;
-            if (empty($name)) {
-                $customers = DB::table('customers')
-                    ->select('customers.id', 'customers.name', 'customers.mobile', 'customers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
-                    ->leftJoin('customer_ledgers', 'customer_ledgers.customer_id', '=', 'customers.id')
-                    ->where('customers.company_id', $companyId)
-                    ->groupBy('customers.id', 'customers.name', 'customers.mobile', 'customers.address')
+            $all = $request->all_data;
+            if (empty($name) && empty($all)) {
+                $banks = DB::table('banks')
+                    ->select('banks.*', DB::raw('SUM(withdraw) as withdraw'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(withdraw - deposit) as balance'))
+                    ->leftJoin('bank_ledgers', 'bank_ledgers.bank_id', '=', 'banks.id')
+                    ->where('banks.company_id', $companyId)
                     ->paginate(50);
                 $status = true;
-                return response()->json(compact('status', 'customers'));
-            } else {
-                $customers = DB::table('customers')
-                    ->select('customers.id', 'customers.name', 'customers.mobile', 'customers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
-                    ->leftJoin('customer_ledgers', 'customer_ledgers.customer_id', '=', 'customers.id')
-                    ->where('customers.company_id', $companyId)
-                    ->where('customers.name', 'like', '%' . $name . '%')
-                    ->orWhere('customers.mobile', 'like', '%' . $name . '%')
-                    ->orWhere('customers.address', 'like', '%' . $name . '%')
-                    ->groupBy('customers.id', 'customers.name', 'customers.mobile', 'customers.address')
+                return response()->json(compact('status', 'banks'));
+            } elseif (!empty($all)) {
+                $banks = DB::table('banks')
+                    ->select('banks.*', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
+                    ->leftJoin('bank_ledgers', 'bank_ledgers.bank_id', '=', 'banks.id')
+                    ->where('banks.company_id', $companyId)
+                    ->get();
+                $status = true;
+                return response()->json(compact('status', 'banks'));
+            }else {
+                $banks = DB::table('banks')
+                    ->select('banks.*', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
+                    ->leftJoin('bank_ledgers', 'bank_ledgers.bank_id', '=', 'banks.id')
+                    ->where('banks.company_id', $companyId)
+                    ->where('banks.name', 'like', '%' . $name . '%')
+                    ->orWhere('banks.account_name', 'like', '%' . $name . '%')
+                    ->orWhere('banks.account_no', 'like', '%' . $name . '%')
                     ->paginate(50);
                 $status = true;
-                return response()->json(compact('status', 'customers'));
+                return response()->json(compact('status', 'banks'));
             }
         } else {
             $status = false;
@@ -1955,7 +1962,7 @@ class ApiController extends Controller
                         'name' => $request->name,
                         'account_name' => $request->account_name,
                         'account_no' => $request->account_no,
-                        'branch' => $request->branch, 
+                        'branch' => $request->branch,
                         'company_id' => $companyId,
                         'bank_type' => $request->bank_type
                     ]);

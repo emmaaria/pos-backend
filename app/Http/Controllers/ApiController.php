@@ -1891,7 +1891,7 @@ class ApiController extends Controller
             $all = $request->all_data;
             if (empty($name) && empty($all)) {
                 $banks = DB::table('banks')
-                    ->select('banks.id','banks.name','banks.account_name','banks.account_no','banks.branch','banks.bank_type', DB::raw('SUM(withdraw) as withdraw'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(withdraw - deposit) as balance'), DB::raw('SET @row_number = 0'), DB::raw('(@row_number:=@row_number + 1) AS SL'))
+                    ->select('banks.id','banks.name','banks.account_name','banks.account_no','banks.branch','banks.bank_type', DB::raw('SUM(withdraw) as withdraw'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(withdraw - deposit) as balance'))
                     ->leftJoin('bank_ledgers', 'bank_ledgers.bank_id', '=', 'banks.id')
                     ->where('banks.company_id', $companyId)
                     ->groupBy('banks.id','banks.name','banks.account_name','banks.account_no','banks.branch','banks.bank_type')
@@ -1900,7 +1900,7 @@ class ApiController extends Controller
                 return response()->json(compact('status', 'banks'));
             } elseif (!empty($all)) {
                 $banks = DB::table('banks')
-                    ->select('banks.id','banks.name','banks.account_name','banks.account_no','banks.branch','banks.bank_type', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'), DB::raw('@row := @row + 1 AS SL'))
+                    ->select('banks.id','banks.name','banks.account_name','banks.account_no','banks.branch','banks.bank_type', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
                     ->leftJoin('bank_ledgers', 'bank_ledgers.bank_id', '=', 'banks.id')
                     ->where('banks.company_id', $companyId)
                     ->groupBy('banks.id','banks.name','banks.account_name','banks.account_no','banks.branch','banks.bank_type')
@@ -1909,7 +1909,7 @@ class ApiController extends Controller
                 return response()->json(compact('status', 'banks'));
             }else {
                 $banks = DB::table('banks')
-                    ->select('banks.id','banks.name','banks.account_name','banks.account_no','banks.branch','banks.bank_type', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'), DB::raw('@row := @row + 1 AS SL'))
+                    ->select('banks.id','banks.name','banks.account_name','banks.account_no','banks.branch','banks.bank_type', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
                     ->leftJoin('bank_ledgers', 'bank_ledgers.bank_id', '=', 'banks.id')
                     ->where('banks.company_id', $companyId)
                     ->where('banks.name', 'like', '%' . $name . '%')

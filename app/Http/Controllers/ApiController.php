@@ -2056,18 +2056,20 @@ class ApiController extends Controller
         if ($companyId) {
             $id = $request->id;
             if (!empty($id)) {
+                $check = DB::table('bank_ledgers')
+                    ->where('company_id', $companyId)
+                    ->where('bank_id', $id)
+                    ->whereNotNull('reference_no')
+                    ->get();
+                if (count($check) > 0){
+                    $status = false;
+                    $errors = 'You can not delete this bank as it already used for calculation';
+                    return response()->json(compact('status', 'errors'));
+                }
                 try {
                     DB::transaction(function () use ($companyId, $id) {
-                        DB::table('customers')->where('id', $id)->where('company_id', $companyId)->delete();
-                        DB::table('customer_ledgers')->where('company_id', $companyId)->where('customer_id', $id)->delete();
-                        $invoices = DB::table('invoices')->where('customer_id', $id)->where('company_id', $companyId)->get();
-                        foreach ($invoices as $invoice) {
-                            DB::table('invoice_items')->where('invoice_id', $invoice->invoice_id)->where('company_id', $companyId)->delete();
-                            DB::table('bkash_transactions')->where('reference_no', 'inv-' . $invoice->invoice_id)->where('company_id', $companyId)->delete();
-                            DB::table('card_transactions')->where('reference_no', 'inv-' . $invoice->invoice_id)->where('company_id', $companyId)->delete();
-                            DB::table('cash_books')->where('reference_no', 'inv-' . $invoice->invoice_id)->where('company_id', $companyId)->delete();
-                            DB::table('nagad_transactions')->where('reference_no', 'inv-' . $invoice->invoice_id)->where('company_id', $companyId)->delete();
-                        }
+                        DB::table('banks')->where('id', $id)->where('company_id', $companyId)->delete();
+                        DB::table('bank_ledgers')->where('company_id', $companyId)->where('bank_id', $id)->delete();
                     });
                 } catch (Exception $e) {
                     $status = false;

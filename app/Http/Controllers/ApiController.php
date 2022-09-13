@@ -2096,4 +2096,57 @@ class ApiController extends Controller
     | Bank End
     |--------------------------------------------------------------------------
     */
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Unit Start
+    |--------------------------------------------------------------------------
+    */
+
+    public function getCompany()
+    {
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $company = DB::table('companies')->where('company_id', $companyId)->first();
+            $status = true;
+            return response()->json(compact('status', 'company'));
+        } else {
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
+    }
+
+    public function updateCompany(Request $request)
+    {
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $validator = Validator::make($request->all(),
+                [
+                    'id' => 'required',
+                    'name' => 'required',
+                ]
+            );
+            if ($validator->fails()) {
+                $status = false;
+                $errors = $validator->errors();
+                return response()->json(compact('status', 'errors'));
+            }
+            DB::table('units')->where('id', $request->id)->where('company_id', $companyId)->update(['name' => $request->name]);
+            $status = true;
+            $message = 'Updated';
+            return response()->json(compact('status', 'message'));
+        } else {
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Company End
+    |--------------------------------------------------------------------------
+    */
 }

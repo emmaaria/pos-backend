@@ -67,4 +67,7 @@ Route::group(['middleware' => 'api'], function ($router) {
     Route::post('/bank/store', [\App\Http\Controllers\ApiController::class, 'storeBank']);
     Route::post('/bank/update', [\App\Http\Controllers\ApiController::class, 'updateBank']);
     Route::post('/bank/delete', [\App\Http\Controllers\ApiController::class, 'deleteBank']);
+
+    Route::get('/company', [\App\Http\Controllers\ApiController::class, 'getCompany']);
+    Route::post('/company/update', [\App\Http\Controllers\ApiController::class, 'updateCompany']);
 });

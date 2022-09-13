@@ -34,6 +34,7 @@ return array(
     'App\\Models\\CardTransaction' => $baseDir . '/app/Models/CardTransaction.php',
     'App\\Models\\CashBook' => $baseDir . '/app/Models/CashBook.php',
     'App\\Models\\Category' => $baseDir . '/app/Models/Category.php',
+    'App\\Models\\Company' => $baseDir . '/app/Models/Company.php',
     'App\\Models\\Customer' => $baseDir . '/app/Models/Customer.php',
     'App\\Models\\CustomerLedger' => $baseDir . '/app/Models/CustomerLedger.php',
     'App\\Models\\Invoice' => $baseDir . '/app/Models/Invoice.php',

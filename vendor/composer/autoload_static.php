@@ -559,6 +559,7 @@ class ComposerStaticInitdf8e0732c33bb66ed26c29372ec37aaf
         'App\\Models\\CardTransaction' => __DIR__ . '/../..' . '/app/Models/CardTransaction.php',
         'App\\Models\\CashBook' => __DIR__ . '/../..' . '/app/Models/CashBook.php',
         'App\\Models\\Category' => __DIR__ . '/../..' . '/app/Models/Category.php',
+        'App\\Models\\Company' => __DIR__ . '/../..' . '/app/Models/Company.php',
         'App\\Models\\Customer' => __DIR__ . '/../..' . '/app/Models/Customer.php',
         'App\\Models\\CustomerLedger' => __DIR__ . '/../..' . '/app/Models/CustomerLedger.php',
         'App\\Models\\Invoice' => __DIR__ . '/../..' . '/app/Models/Invoice.php',

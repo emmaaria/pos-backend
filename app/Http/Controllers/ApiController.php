@@ -1104,7 +1104,11 @@ class ApiController extends Controller
                 $status = true;
                 return response()->json(compact('status', 'products'));
             } else {
-                $products = DB::table('products')->select('*')->where('company_id', $companyId)->where('name', 'like', '%' . $name . '%')->paginate(50);
+                $products = DB::table('products')
+                    ->select('*')
+                    ->where('company_id', $companyId)
+                    ->where('name', 'like', '%' . $name . '%')
+                    ->paginate(50);
                 $status = true;
                 return response()->json(compact('status', 'products'));
             }
@@ -1888,7 +1892,7 @@ class ApiController extends Controller
         $companyId = $this->getCompanyId();
         if ($companyId) {
             $name = $request->name;
-            $all = $request->all_data;
+            $all = $request->allData;
             if (empty($name) && empty($all)) {
                 $banks = DB::table('banks')
                     ->select('banks.id', 'banks.name', 'banks.account_name', 'banks.account_no', 'banks.branch', 'banks.bank_type', DB::raw('SUM(withdraw) as withdraw'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(deposit - withdraw) as balance'))

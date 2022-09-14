@@ -2132,20 +2132,36 @@ class ApiController extends Controller
                 $errors = $validator->errors();
                 return response()->json(compact('status', 'errors'));
             }
-            DB::table('companies')->where('company_id', $companyId)->update(
-                [
-                    'name' => $request->name,
-                    'address' => $request->address,
-                    'email' => $request->email,
-                    'mobile' => $request->mobile,
-                    'logo' => $request->logo,
-                    'vat_number' => $request->vat_number,
-                    'mushok_number' => $request->mushok_number,
-                ]
-            );
-            $status = true;
-            $message = 'Updated';
-            return response()->json(compact('status', 'message'));
+            if (!empty($request->logo)){
+                DB::table('companies')->where('company_id', $companyId)->update(
+                    [
+                        'name' => $request->name,
+                        'address' => $request->address,
+                        'email' => $request->email,
+                        'mobile' => $request->mobile,
+                        'logo' => $request->logo,
+                        'vat_number' => $request->vat_number,
+                        'mushok_number' => $request->mushok_number,
+                    ]
+                );
+                $status = true;
+                $message = 'Updated';
+                return response()->json(compact('status', 'message'));
+            }else{
+                DB::table('companies')->where('company_id', $companyId)->update(
+                    [
+                        'name' => $request->name,
+                        'address' => $request->address,
+                        'email' => $request->email,
+                        'mobile' => $request->mobile,
+                        'vat_number' => $request->vat_number,
+                        'mushok_number' => $request->mushok_number,
+                    ]
+                );
+                $status = true;
+                $message = 'Updated';
+                return response()->json(compact('status', 'message'));
+            }
         } else {
             $status = false;
             $errors = 'You are not authorized';

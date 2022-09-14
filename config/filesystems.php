@@ -44,10 +44,10 @@ return [
 
         's3' => [
             'driver' => 's3',
-            'key' => env('AKIASSZRZ5BA6DGMLPRV'),
-            'secret' => env('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'),
-            'region' => env('ap-south-1'),
-            'bucket' => env('mypos-bd'),
+            'key' => env('AWS_ACCESS_KEY_ID'),
+            'secret' => env('AWS_SECRET_ACCESS_KEY'),
+            'region' => env('AWS_DEFAULT_REGION'),
+            'bucket' => env('AWS_BUCKET'),
             'url' => env('AWS_URL'),
             'endpoint' => env('AWS_ENDPOINT'),
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),

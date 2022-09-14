@@ -2136,6 +2136,7 @@ class ApiController extends Controller
                 [
                     'name' => $request->name,
                     'address' => $request->address,
+                    'email' => $request->email,
                     'mobile' => $request->mobile,
                     'logo' => $request->logo,
                     'vat_number' => $request->vat_number,

@@ -40,6 +40,7 @@ return array(
     'App\\Models\\Invoice' => $baseDir . '/app/Models/Invoice.php',
     'App\\Models\\InvoiceItem' => $baseDir . '/app/Models/InvoiceItem.php',
     'App\\Models\\NagadTransaction' => $baseDir . '/app/Models/NagadTransaction.php',
+    'App\\Models\\PaymentMethod' => $baseDir . '/app/Models/PaymentMethod.php',
     'App\\Models\\Product' => $baseDir . '/app/Models/Product.php',
     'App\\Models\\Purchase' => $baseDir . '/app/Models/Purchase.php',
     'App\\Models\\PurchaseItem' => $baseDir . '/app/Models/PurchaseItem.php',

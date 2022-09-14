@@ -565,6 +565,7 @@ class ComposerStaticInitdf8e0732c33bb66ed26c29372ec37aaf
         'App\\Models\\Invoice' => __DIR__ . '/../..' . '/app/Models/Invoice.php',
         'App\\Models\\InvoiceItem' => __DIR__ . '/../..' . '/app/Models/InvoiceItem.php',
         'App\\Models\\NagadTransaction' => __DIR__ . '/../..' . '/app/Models/NagadTransaction.php',
+        'App\\Models\\PaymentMethod' => __DIR__ . '/../..' . '/app/Models/PaymentMethod.php',
         'App\\Models\\Product' => __DIR__ . '/../..' . '/app/Models/Product.php',
         'App\\Models\\Purchase' => __DIR__ . '/../..' . '/app/Models/Purchase.php',
         'App\\Models\\PurchaseItem' => __DIR__ . '/../..' . '/app/Models/PurchaseItem.php',

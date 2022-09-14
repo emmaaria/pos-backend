@@ -1988,7 +1988,7 @@ class ApiController extends Controller
                                 'bank_id' => $bankId,
                                 'transaction_id' => $txId,
                                 'comment' => "Previous balance",
-                                'type' => 'deposit',
+                                'type' => 'withdraw',
                                 'withdraw' => $request->balance,
                                 'deposit' => 0,
                                 'company_id' => $companyId,

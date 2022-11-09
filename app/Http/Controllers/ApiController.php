@@ -825,7 +825,7 @@ class ApiController extends Controller
                             [
                                 'supplier_id' => $request->supplier_id,
                                 'amount' => $request->total,
-                                'paid' => $request->paid,
+                                'paid' => $request->cash + $request->bkash + $request->nagad + $request->bank,
                                 'comment' => $request->comment,
                                 'purchase_id' => $purchaseId,
                                 'date' => $request->date,

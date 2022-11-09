@@ -1092,7 +1092,7 @@ class ApiController extends Controller
                     });
                 } catch (Exception $e) {
                     $status = false;
-                    $errors = 'Something went wrong';
+                    $errors = $e;
                     return response()->json(compact('status', 'errors'));
                 }
                 $status = true;

@@ -71,7 +71,8 @@ class ApiController extends Controller
         }
         $credentials = array('email' => $request->mobile, 'password' => $request->password);
         $user = DB::table('users')->where('email', $request->mobile)->where('company_id', $request->company_id)->first();
-        if ($user) {
+        $company = DB::table('companies')->where('company_id', $request->company_id)->first();
+        if ($user && $company) {
             if (!empty($user)) {
                 $userData = array(
                     'company_id' => encrypt($user->company_id),
@@ -455,15 +456,22 @@ class ApiController extends Controller
                         ));
                         $txIdGenerator->setNextInvoiceNo();
                     }
+                    $customer = DB::table('customers')
+                        ->select('customers.id', 'customers.name', 'customers.mobile', 'customers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
+                        ->leftJoin('customer_ledgers', 'customer_ledgers.customer_id', '=', 'customers.id')
+                        ->where('customers.company_id', $companyId)
+                        ->where('customers.id', $customerId)
+                        ->groupBy('customers.id', 'customers.name', 'customers.mobile', 'customers.address')
+                        ->first();
+                    $status = true;
+                    $message = 'Successfully saved';
+                    return response()->json(compact('status', 'message', 'customer'));
                 });
             } catch (Exception $e) {
                 $status = false;
                 $errors = 'Something went wrong';
                 return response()->json(compact('status', 'errors'));
             }
-            $status = true;
-            $message = 'Successfully saved';
-            return response()->json(compact('status', 'message'));
         } else {
             $status = false;
             $errors = 'You are not authorized';
@@ -1395,7 +1403,7 @@ class ApiController extends Controller
                         'company_id' => $companyId,
                     ));
                     $suppliers = $request->suppliers;
-                    if (count($suppliers) > 0) {
+                    if (!empty($suppliers) && count($suppliers) > 0) {
                         foreach ($suppliers as $supplier) {
                             DB::table('supplier_products')->insert(['supplier_id' => $supplier['id'], 'product_id' => $productId, 'company_id' => $companyId]);
                         }

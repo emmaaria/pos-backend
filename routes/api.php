@@ -61,6 +61,7 @@ Route::group(['middleware' => 'api'], function ($router) {
     Route::get('/product-by-barcode', [\App\Http\Controllers\ApiController::class, 'getProductByBarcode']);
 
     Route::get('/stock', [\App\Http\Controllers\ApiController::class, 'getStock']);
+    Route::get('/products-with-stock', [\App\Http\Controllers\ApiController::class, 'getProductsWithStock']);
 
     Route::get('/bank', [\App\Http\Controllers\ApiController::class, 'getBanks']);
     Route::get('/bank/{id}', [\App\Http\Controllers\ApiController::class, 'getBank']);

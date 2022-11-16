@@ -2033,6 +2033,40 @@ class ApiController extends Controller
             return response()->json(compact('status', 'errors'));
         }
     }
+
+    public function getProductsWithStock(Request $request)
+    {
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $name = $request->name;
+            if (empty($name)) {
+                $products = DB::table('products')
+                    ->select('products.name AS product_name', 'products.product_id AS product_id', 'products.price AS price', DB::raw('SUM(purchase_items.quantity) as totalPurchaseQuantity'), DB::raw('SUM(invoice_items.quantity) as totalSaleQuantity'), DB::raw('SUM(totalPurchaseQuantity - totalSaleQuantity) as stock'))
+                    ->where('products.company_id', $companyId)
+                    ->leftJoin('invoice_items', 'invoice_items.product_id', '=', 'products.product_id')
+                    ->leftJoin('purchase_items', 'purchase_items.product_id', '=', 'products.product_id')
+                    ->groupBy('products.product_id', 'products.name', 'products.price')
+                    ->get();
+                $status = true;
+                return response()->json(compact('status', 'products'));
+            } else {
+                $products = DB::table('products')
+                    ->select('products.name AS product_name', 'products.product_id AS product_id', 'products.price AS price', DB::raw('SUM(purchase_items.quantity) as totalPurchaseQuantity'), DB::raw('SUM(invoice_items.quantity) as totalSaleQuantity'), DB::raw('SUM(totalPurchaseQuantity - totalSaleQuantity) as stock'))
+                    ->where('products.company_id', $companyId)
+                    ->where('products.name', 'like', '%' . $name . '%')
+                    ->leftJoin('invoice_items', 'invoice_items.product_id', '=', 'products.product_id')
+                    ->leftJoin('purchase_items', 'purchase_items.product_id', '=', 'products.product_id')
+                    ->groupBy('products.product_id', 'products.name', 'products.price')
+                    ->get();
+                $status = true;
+                return response()->json(compact('status', 'products'));
+            }
+        } else {
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
+    }
     /*
     |--------------------------------------------------------------------------
     | Invoice End

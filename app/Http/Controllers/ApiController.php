@@ -1451,7 +1451,7 @@ class ApiController extends Controller
                     $product->save();
                     DB::table('supplier_products')->where('product_id', $product->product_id)->where('company_id', $companyId)->delete();
                     $suppliers = $request->suppliers;
-                    if (count($suppliers) > 0) {
+                    if (!empty($suppliers) && count($suppliers) > 0) {
                         foreach ($suppliers as $supplier) {
                             DB::table('supplier_products')->insert(['supplier_id' => $supplier['id'], 'product_id' => $product->product_id, 'company_id' => $companyId]);
                         }

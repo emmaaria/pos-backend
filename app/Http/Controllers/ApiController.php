@@ -2119,7 +2119,7 @@ class ApiController extends Controller
                 $products = DB::table('products')
                     ->select('products.name AS name', 'products.product_id AS product_id', 'products.price AS price', DB::raw('SUM(purchase_items.quantity) as purchase'), DB::raw('SUM(invoice_items.quantity) as sell'))
                     ->where('products.company_id', $companyId)
-                    ->join('invoice_items', 'invoice_items.product_id', '=', 'products.product_id')
+                    ->rightJoin('invoice_items', 'invoice_items.product_id', '=', 'products.product_id')
                     ->join('purchase_items', 'purchase_items.product_id', '=', 'products.product_id')
                     ->groupBy('products.product_id')
                     ->get();

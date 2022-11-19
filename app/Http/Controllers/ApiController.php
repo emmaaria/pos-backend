@@ -1647,6 +1647,7 @@ class ApiController extends Controller
                         $invoiceId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('transaction');
                         $txGenerator->setNextInvoiceNo();
                         $invoice['invoice_id'] = $invoiceId;
+                        $invoice['date'] = $request->date;
                         $total = 0;
                         $profit = 0;
                         for ($i = 0, $n = count($products); $i < $n; $i++) {

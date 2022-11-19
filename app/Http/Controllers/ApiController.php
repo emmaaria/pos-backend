@@ -2159,7 +2159,7 @@ class ApiController extends Controller
             $name = $request->name;
             if (empty($name)) {
                 $products = DB::table('products')
-                    ->select('products.name AS product_name', 'products.product_id AS product_id', DB::raw('SUM(purchase_items.quantity) as totalPurchaseQuantity'), DB::raw('SUM(invoice_items.quantity) as totalSaleQuantity'))
+                    ->selectRaw("products.name AS name,(select sum(quantity) from invoice_items where product_id= `products`.`product_id`) as 'totalSaleQuantity',(select sum(quantity) from purchase_items where product_id= `products`.`product_id`) as 'totalPurchaseQuantity'")
                     ->where('products.company_id', $companyId)
                     ->leftJoin('invoice_items', 'invoice_items.product_id', '=', 'products.product_id')
                     ->leftJoin('purchase_items', 'purchase_items.product_id', '=', 'products.product_id')
@@ -2169,7 +2169,7 @@ class ApiController extends Controller
                 return response()->json(compact('status', 'products'));
             } else {
                 $products = DB::table('products')
-                    ->select('products.name AS product_name', 'products.product_id AS product_id', DB::raw('SUM(purchase_items.quantity) as totalPurchaseQuantity'), DB::raw('SUM(invoice_items.quantity) as totalSaleQuantity'))
+                    ->selectRaw("products.name AS name,(select sum(quantity) from invoice_items where product_id= `products`.`product_id`) as 'totalSaleQuantity',(select sum(quantity) from purchase_items where product_id= `products`.`product_id`) as 'totalPurchaseQuantity'")
                     ->where('products.company_id', $companyId)
                     ->where('products.name', 'like', '%' . $name . '%')
                     ->leftJoin('invoice_items', 'invoice_items.product_id', '=', 'products.product_id')

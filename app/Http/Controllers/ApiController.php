@@ -76,11 +76,6 @@ class ApiController extends Controller
             if (!empty($user)) {
                 $userData = array(
                     'company_id' => encrypt($user->company_id),
-                    'company_name' => $company->name,
-                    'company_address' => $company->address,
-                    'company_mobile' => $company->mobile,
-                    'vat_number' => $company->vat_number,
-                    'mushok_number' => $company->mushok_number,
                 );
             } else {
                 $userData = null;
@@ -90,8 +85,15 @@ class ApiController extends Controller
                 $errors = 'Credentials did not matched';
                 return response()->json(compact('status', 'errors'));
             }
+            $company = array(
+                'company_name' => $company->name,
+                'company_address' => $company->address,
+                'company_mobile' => $company->mobile,
+                'vat_number' => $company->vat_number,
+                'mushok_number' => $company->mushok_number,
+            );
             $status = true;
-            return response()->json(compact('status', 'user', 'token'));
+            return response()->json(compact('status', 'user', 'token', 'company'));
         } else {
             $status = false;
             $errors = 'Mobile, password and company id did not matched';

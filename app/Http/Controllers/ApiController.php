@@ -76,6 +76,11 @@ class ApiController extends Controller
             if (!empty($user)) {
                 $userData = array(
                     'company_id' => encrypt($user->company_id),
+                    'company_name' => $company->name,
+                    'company_address' => $company->address,
+                    'company_mobile' => $company->mobile,
+                    'vat_number' => $company->vat_number,
+                    'mushok_number' => $company->mushok_number,
                 );
             } else {
                 $userData = null;

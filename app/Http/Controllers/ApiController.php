@@ -2121,7 +2121,7 @@ class ApiController extends Controller
                     ->where('products.company_id', $companyId)
                     ->leftJoin('invoice_items', 'invoice_items.product_id', '=', 'products.product_id')
                     ->leftJoin('purchase_items', 'purchase_items.product_id', '=', 'products.product_id')
-                    ->groupBy('products.product_id', 'products.name', 'products.price')
+                    ->groupBy('products.product_id', 'products.name')
                     ->get();
                 $status = true;
                 return response()->json(compact('status', 'products'));

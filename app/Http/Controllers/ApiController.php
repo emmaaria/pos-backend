@@ -878,8 +878,8 @@ class ApiController extends Controller
                         ));
                         $txGenerator->setNextInvoiceNo();
                         $paymentMethod = $request->paymentMethod;
-                        if ($paymentMethod == 'cash'){
-                            if (!empty($request->cash) && $request->cash > 0){
+                        if ($paymentMethod == 'cash') {
+                            if (!empty($request->cash) && $request->cash > 0) {
                                 $supplierPaidTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('supplier_transaction');
                                 DB::table('supplier_ledgers')->insert(array(
                                     'supplier_id' => $request->supplier_id,
@@ -905,8 +905,8 @@ class ApiController extends Controller
                                 ));
                                 $txGenerator->setNextInvoiceNo();
                             }
-                        }elseif ($paymentMethod == 'bkash'){
-                            if (!empty($request->bkash) && $request->bkash > 0){
+                        } elseif ($paymentMethod == 'bkash') {
+                            if (!empty($request->bkash) && $request->bkash > 0) {
                                 $supplierPaidTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('supplier_transaction');
                                 DB::table('supplier_ledgers')->insert(array(
                                     'supplier_id' => $request->supplier_id,
@@ -932,8 +932,8 @@ class ApiController extends Controller
                                 ));
                                 $txGenerator->setNextInvoiceNo();
                             }
-                        }elseif ($paymentMethod == 'nagad'){
-                            if (!empty($request->nagad) && $request->nagad > 0){
+                        } elseif ($paymentMethod == 'nagad') {
+                            if (!empty($request->nagad) && $request->nagad > 0) {
                                 $supplierPaidTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('supplier_transaction');
                                 DB::table('supplier_ledgers')->insert(array(
                                     'supplier_id' => $request->supplier_id,
@@ -959,8 +959,8 @@ class ApiController extends Controller
                                 ));
                                 $txGenerator->setNextInvoiceNo();
                             }
-                        }elseif ($paymentMethod == 'bank'){
-                            if (!empty($request->bank) && $request->bank > 0){
+                        } elseif ($paymentMethod == 'bank') {
+                            if (!empty($request->bank) && $request->bank > 0) {
                                 $supplierPaidTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('supplier_transaction');
                                 DB::table('supplier_ledgers')->insert(array(
                                     'supplier_id' => $request->supplier_id,
@@ -987,8 +987,8 @@ class ApiController extends Controller
                                 ));
                                 $txGenerator->setNextInvoiceNo();
                             }
-                        }elseif ($paymentMethod == 'multiple'){
-                            if (!empty($request->cash) && $request->cash > 0){
+                        } elseif ($paymentMethod == 'multiple') {
+                            if (!empty($request->cash) && $request->cash > 0) {
                                 $supplierPaidTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('supplier_transaction');
                                 DB::table('supplier_ledgers')->insert(array(
                                     'supplier_id' => $request->supplier_id,
@@ -1015,7 +1015,7 @@ class ApiController extends Controller
                                 $txGenerator->setNextInvoiceNo();
                             }
 
-                            if (!empty($request->bkash) && $request->bkash > 0){
+                            if (!empty($request->bkash) && $request->bkash > 0) {
                                 $supplierPaidTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('supplier_transaction');
                                 DB::table('supplier_ledgers')->insert(array(
                                     'supplier_id' => $request->supplier_id,
@@ -1042,7 +1042,7 @@ class ApiController extends Controller
                                 $txGenerator->setNextInvoiceNo();
                             }
 
-                            if (!empty($request->nagad) && $request->nagad > 0){
+                            if (!empty($request->nagad) && $request->nagad > 0) {
                                 $supplierPaidTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('supplier_transaction');
                                 DB::table('supplier_ledgers')->insert(array(
                                     'supplier_id' => $request->supplier_id,
@@ -1069,7 +1069,7 @@ class ApiController extends Controller
                                 $txGenerator->setNextInvoiceNo();
                             }
 
-                            if (!empty($request->bank) && $request->bank > 0){
+                            if (!empty($request->bank) && $request->bank > 0) {
                                 $supplierPaidTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('supplier_transaction');
                                 DB::table('supplier_ledgers')->insert(array(
                                     'supplier_id' => $request->supplier_id,
@@ -1632,19 +1632,21 @@ class ApiController extends Controller
             } else {
                 $customerId = DB::table('customers')->where('name', 'Walking Customer')->where('company_id', $companyId)->first()->id;
             }
-            if (!empty($request->bank)){
-                if (empty($request->bankId)){
+            if (!empty($request->bank)) {
+                if (empty($request->bankId)) {
                     $status = false;
                     $errors = 'Please select bank account';
                     return response()->json(compact('status', 'errors'));
                 }
             }
+            $invoice = array();
             if (count($products) > 0) {
-                try{
+                try {
                     DB::transaction(function () use ($request, $companyId, $products, $quantities, $prices, $customerId) {
                         $txGenerator = new InvoiceNumberGeneratorService();
                         $invoiceId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('transaction');
                         $txGenerator->setNextInvoiceNo();
+                        $invoice['invoice_id'] = $invoiceId;
                         $total = 0;
                         $profit = 0;
                         for ($i = 0, $n = count($products); $i < $n; $i++) {
@@ -1653,7 +1655,7 @@ class ApiController extends Controller
                             $price = $prices[$i];
                             $total += $quantity * $price;
                             if ($quantity > 0) {
-                                DB::table('invoice_items')->insert([
+                                $invoiceItemData = array(
                                     'invoice_id' => $invoiceId,
                                     'product_id' => $productID,
                                     'price' => $price,
@@ -1661,12 +1663,25 @@ class ApiController extends Controller
                                     'quantity' => $quantity,
                                     'date' => $request->date,
                                     'total' => $quantity * $price,
-                                ]);
+                                );
+                                $invoice['items'][] = $invoiceItemData;
+                                DB::table('invoice_items')->insert($invoiceItemData);
                                 $purchasePrice = DB::table('average_purchase_prices')->where('product_id', $productID)->where('company_id', $companyId)->first();
                                 $profit += ($quantity * $price) - ($quantity * $purchasePrice->price);
                             }
                         }
+                        $invoice['cash'] = $request->cash;
+                        $invoice['bkash'] = $request->bkash;
+                        $invoice['nagad'] = $request->nagad;
+                        $invoice['card'] = $request->card;
+                        $invoice['bank'] = $request->bank;
+                        $invoice['discountType'] = $request->discountType;
+                        $invoice['discount'] = $request->discount;
+                        $invoice['discountAmount'] = $request->discountAmount;
+                        $invoice['subtotal'] = $total;
+                        $invoice['grandTotal'] = $total - $request->discountAmount;
                         $paid = $request->cash + $request->bkash + $request->nagad + $request->card + $request->bank;
+                        $invoice['due'] = $total - $paid;
                         DB::table('invoices')->insert(
                             [
                                 'customer_id' => $customerId,
@@ -1814,14 +1829,14 @@ class ApiController extends Controller
                             }
                         }
                     });
-                }catch (Exception $e){
+                } catch (Exception $e) {
                     $status = false;
                     $errors = $e;
                     return response()->json(compact('status', 'errors'));
                 }
                 $status = true;
                 $message = 'Invoice saved';
-                return response()->json(compact('status', 'message'));
+                return response()->json(compact('status', 'message', 'invoice'));
             } else {
                 $status = false;
                 $error = 'Please add at least one product';
@@ -2331,7 +2346,7 @@ class ApiController extends Controller
                     ->where('bank_id', $id)
                     ->whereNotNull('reference_no')
                     ->get();
-                if (count($check) > 0){
+                if (count($check) > 0) {
                     $status = false;
                     $errors = 'You can not delete this bank as it already used for calculation';
                     return response()->json(compact('status', 'errors'));
@@ -2402,7 +2417,7 @@ class ApiController extends Controller
                 $errors = $validator->errors();
                 return response()->json(compact('status', 'errors'));
             }
-            if (!empty($request->logo)){
+            if (!empty($request->logo)) {
                 DB::table('companies')->where('company_id', $companyId)->update(
                     [
                         'name' => $request->name,
@@ -2417,7 +2432,7 @@ class ApiController extends Controller
                 $status = true;
                 $message = 'Updated';
                 return response()->json(compact('status', 'message'));
-            }else{
+            } else {
                 DB::table('companies')->where('company_id', $companyId)->update(
                     [
                         'name' => $request->name,

@@ -1623,7 +1623,6 @@ class ApiController extends Controller
                     'productIds' => 'required',
                     'productQuantities' => 'required',
                     'productPrices' => 'required',
-                    'paymentMethod' => 'required',
                 ]
             );
             if ($validator->fails()) {

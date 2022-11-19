@@ -1627,10 +1627,21 @@ class ApiController extends Controller
             $products = $request->productIds;
             $quantities = $request->productQuantities;
             $prices = $request->productPrices;
+            $invoice = array();
             if (!empty($request->customer_id)) {
                 $customerId = $request->customer_id;
+                $customer = DB::table('customers')->where('id', $request->customer_id)->where('company_id', $companyId)->first();
+                $invoice['customer_name'] = $customer->name;
             } else {
-                $customerId = DB::table('customers')->where('name', 'Walking Customer')->where('company_id', $companyId)->first()->id;
+                $customer = DB::table('customers')->where('name', 'Walking Customer')->where('company_id', $companyId)->first();
+                if ($customer){
+                    $customerId = $customer->id;
+                    $invoice['customer_name'] = $customer->name;
+                }else{
+                    $status = false;
+                    $errors = 'No customer selected. Please select a customer or add Walking Customer.';
+                    return response()->json(compact('status', 'errors'));
+                }
             }
             if (!empty($request->bank)) {
                 if (empty($request->bankId)) {
@@ -1639,7 +1650,6 @@ class ApiController extends Controller
                     return response()->json(compact('status', 'errors'));
                 }
             }
-            $invoice = array();
             if (count($products) > 0) {
                 try {
                     DB::transaction(function () use ($request, $companyId, $products, $quantities, $prices, $customerId) {

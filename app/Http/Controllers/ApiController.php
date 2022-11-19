@@ -1671,11 +1671,13 @@ class ApiController extends Controller
                         $profit = 0;
                         for ($i = 0, $n = count($products); $i < $n; $i++) {
                             $productID = $products[$i];
+                            $product = DB::table('products')->select('name')->where('product_id', $productID)->first();
                             $quantity = $quantities[$i];
                             $price = $prices[$i];
                             $total += $quantity * $price;
                             if ($quantity > 0) {
                                 $invoiceItemData = array(
+                                    'name' => $product->name,
                                     'invoice_id' => $invoiceId,
                                     'product_id' => $productID,
                                     'price' => $price,
@@ -1685,7 +1687,15 @@ class ApiController extends Controller
                                     'total' => $quantity * $price,
                                 );
                                 $invoice['items'][] = $invoiceItemData;
-                                DB::table('invoice_items')->insert($invoiceItemData);
+                                DB::table('invoice_items')->insert([
+                                    'invoice_id' => $invoiceId,
+                                    'product_id' => $productID,
+                                    'price' => $price,
+                                    'company_id' => $companyId,
+                                    'quantity' => $quantity,
+                                    'date' => $request->date,
+                                    'total' => $quantity * $price,
+                                ]);
                                 $purchasePrice = DB::table('average_purchase_prices')->where('product_id', $productID)->where('company_id', $companyId)->first();
                                 $profit += ($quantity * $price) - ($quantity * $purchasePrice->price);
                             }

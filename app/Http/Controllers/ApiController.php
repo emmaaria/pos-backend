@@ -2117,13 +2117,9 @@ class ApiController extends Controller
             $name = $request->name;
             if (empty($name)) {
                 $products = DB::table('products')
-                    ->select('products.name AS name', 'products.product_id AS product_id', 'products.price AS price', DB::raw('SUM(purchase_items.quantity) as purchase'), DB::raw('SUM(invoice_items.quantity) as sell'))
+                    ->select("products.name AS name,(select sum(quantity) from invoice_items where product_id= `products`.`product_id`) as 'sell',(select sum(quantity) from purchase_items where product_id= `products`.`product_id`) as 'purchase'")
                     ->where('products.company_id', $companyId)
-                    ->leftJoin('invoice_items', 'invoice_items.product_id', '=', 'products.product_id')
-                    ->leftJoin('purchase_items', 'purchase_items.product_id', '=', 'products.product_id')
                     ->groupBy('products.product_id')
-                    ->groupBy('invoice_items.product_id')
-                    ->groupBy('purchase_items.product_id')
                     ->get();
                 $status = true;
                 return response()->json(compact('status', 'products'));

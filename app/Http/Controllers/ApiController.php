@@ -1632,16 +1632,17 @@ class ApiController extends Controller
             $products = $request->productIds;
             $quantities = $request->productQuantities;
             $prices = $request->productPrices;
-            $invoice = array();
+            $customerName = '';
+
             if (!empty($request->customer_id)) {
                 $customerId = $request->customer_id;
                 $customer = DB::table('customers')->where('id', $request->customer_id)->where('company_id', $companyId)->first();
-                $invoice['customer_name'] = $customer->name;
+                $customerName = $customer->name;
             } else {
                 $customer = DB::table('customers')->where('name', 'Walking Customer')->where('company_id', $companyId)->first();
                 if ($customer){
                     $customerId = $customer->id;
-                    $invoice['customer_name'] = $customer->name;
+                    $customerName = $customer->name;
                 }else{
                     $status = false;
                     $errors = 'No customer selected. Please select a customer or add Walking Customer.';
@@ -1657,7 +1658,9 @@ class ApiController extends Controller
             }
             if (count($products) > 0) {
                 try {
-                    DB::transaction(function () use ($request, $companyId, $products, $quantities, $prices, $customerId) {
+                    $invoice = DB::transaction(function () use ($request, $companyId, $products, $quantities, $prices, $customerId, $customerName) {
+                        $invoice = array();
+                        $invoice['customer_name'] = $customerName;
                         $txGenerator = new InvoiceNumberGeneratorService();
                         $invoiceId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('transaction');
                         $txGenerator->setNextInvoiceNo();
@@ -1844,15 +1847,16 @@ class ApiController extends Controller
                                 $txGenerator->setNextInvoiceNo();
                             }
                         }
+                        return $invoice;
                     });
+                    $status = true;
+                    $message = 'Invoice saved';
+                    return response()->json(compact('status', 'message', 'invoice'));
                 } catch (Exception $e) {
                     $status = false;
                     $errors = $e;
                     return response()->json(compact('status', 'errors'));
                 }
-                $status = true;
-                $message = 'Invoice saved';
-                return response()->json(compact('status', 'message', 'invoice'));
             } else {
                 $status = false;
                 $error = 'Please add at least one product';

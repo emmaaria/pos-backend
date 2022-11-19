@@ -2117,7 +2117,7 @@ class ApiController extends Controller
             $name = $request->name;
             if (empty($name)) {
                 $products = DB::table('products')
-                    ->select("products.name AS name,(select sum(quantity) from invoice_items where product_id= `products`.`product_id`) as 'sell',(select sum(quantity) from purchase_items where product_id= `products`.`product_id`) as 'purchase'")
+                    ->selectRaw("products.name AS name,(select sum(quantity) from invoice_items where product_id= `products`.`product_id`) as 'sell',(select sum(quantity) from purchase_items where product_id= `products`.`product_id`) as 'purchase'")
                     ->where('products.company_id', $companyId)
                     ->groupBy('products.product_id')
                     ->get();

@@ -2129,6 +2129,7 @@ class ApiController extends Controller
                 DB::table('nagad_transactions')->where('reference_no', "inv-$id")->where('company_id', $companyId)->delete();
                 DB::table('bkash_transactions')->where('reference_no', "inv-$id")->where('company_id', $companyId)->delete();
                 DB::table('cash_books')->where('reference_no', "inv-$id")->where('company_id', $companyId)->delete();
+                DB::table('bank_ledgers ')->where('reference_no', "inv-$id")->where('company_id', $companyId)->delete();
                 $status = true;
                 $message = 'Invoice deleted';
                 return response()->json(compact('status', 'message'));

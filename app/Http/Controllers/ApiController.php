@@ -1555,6 +1555,40 @@ class ApiController extends Controller
         }
     }
 
+    public function getTodayInvoices(Request $request)
+    {
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $name = $request->keyword;
+            if (empty($name)) {
+                $invoices = DB::table('invoices')
+                    ->select('customers.name AS customer_name', 'invoices.invoice_id', 'invoices.total', 'invoices.discountAmount', 'invoices.comment', 'invoices.id', 'invoices.date')
+                    ->where('invoices.company_id', $companyId)
+                    ->where('invoices.date', date('Y-m-d'))
+                    ->leftJoin('customers', 'customers.id', '=', 'invoices.customer_id')
+                    ->orderBy('id', 'desc')
+                    ->paginate(50);
+                $status = true;
+                return response()->json(compact('status', 'invoices'));
+            } else {
+                $invoices = DB::table('invoices')
+                    ->select('customers.name AS customer_name', 'invoices.invoice_id', 'invoices.total', 'invoices.discountAmount', 'invoices.comment', 'invoices.id', 'invoices.date')
+                    ->where('invoices.company_id', $companyId)
+                    ->where('invoices.date', date('Y-m-d'))
+                    ->leftJoin('customers', 'customers.id', '=', 'invoices.customer_id')
+                    ->where('invoices.invoice_id', 'like', '%' . $name . '%')
+                    ->orWhere('customers.name', 'like', '%' . $name . '%')
+                    ->paginate(50);
+                $status = true;
+                return response()->json(compact('status', 'invoices'));
+            }
+        } else {
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
+    }
+
     public function getInvoice($id)
     {
         $companyId = $this->getCompanyId();

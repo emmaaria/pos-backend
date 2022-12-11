@@ -2112,7 +2112,7 @@ class ApiController extends Controller
                                     'type' => 'deposit',
                                     'deposit' => $request->bkash,
                                     'date' => $request->date,
-                                    'comment' => "Cash receive for Invoice No ($invoiceId)"
+                                    'comment' => "Cash receive for Invoice No ($request->invoice_id)"
                                 ));
                                 $txGenerator->setNextInvoiceNo();
                             }

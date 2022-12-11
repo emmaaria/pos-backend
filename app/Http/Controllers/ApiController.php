@@ -2108,7 +2108,7 @@ class ApiController extends Controller
                                 DB::table('bkash_transactions')->insert(array(
                                     'transaction_id' => $cashTxId,
                                     'company_id' => $companyId,
-                                    'reference_no' => "inv-$invoiceId",
+                                    'reference_no' => "inv-$request->invoice_id",
                                     'type' => 'deposit',
                                     'deposit' => $request->bkash,
                                     'date' => $request->date,

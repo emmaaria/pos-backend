@@ -1745,7 +1745,7 @@ class ApiController extends Controller
                         $invoice['subtotal'] = $total;
                         $invoice['grandTotal'] = $total - $request->discountAmount;
                         $paid = $request->cash + $request->bkash + $request->nagad + $request->card + $request->bank;
-                        $paid['paid'] = $request->cash + $request->bkash + $request->nagad + $request->card + $request->bank;
+                        $invoice['paid'] = $request->cash + $request->bkash + $request->nagad + $request->card + $request->bank;
                         $invoice['due'] = $total - $paid;
                         DB::table('invoices')->insert(
                             [

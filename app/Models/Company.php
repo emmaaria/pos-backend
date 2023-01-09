@@ -20,6 +20,7 @@ class Company extends Model
         'contact_mobile',
         'status',
         'payment_term',
-        'expiry_date'
+        'expiry_date',
+        'discount_type'
     ];
 }

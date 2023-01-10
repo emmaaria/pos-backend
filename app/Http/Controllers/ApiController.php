@@ -705,13 +705,15 @@ class ApiController extends Controller
                         DB::table('supplier_ledgers')->where('company_id', $companyId)->where('supplier_id', $id)->delete();
                         $purchases = DB::table('purchase')->where('supplier_id', $id)->where('company_id', $companyId)->get();
                         DB::table('supplier_products')->where('supplier_id', $id)->where('company_id', $companyId)->delete();
-                        foreach ($purchases as $purchase) {
-                            DB::table('purchase_items')->where('purchase_id', $purchase->purchase_id)->where('company_id', $companyId)->delete();
-                            DB::table('bkash_transactions')->where('reference_no', 'pur-' . $purchase->purchase_id)->where('company_id', $companyId)->delete();
-                            DB::table('card_transactions')->where('reference_no', 'pur-' . $purchase->purchase_id)->where('company_id', $companyId)->delete();
-                            DB::table('cash_books')->where('reference_no', 'pur-' . $purchase->purchase_id)->where('company_id', $companyId)->delete();
-                            DB::table('nagad_transactions')->where('reference_no', 'pur-' . $purchase->purchase_id)->where('company_id', $companyId)->delete();
-                            DB::table('purchase')->where('supplier_id', $id)->where('company_id', $companyId)->where('id', $purchase->id)->delete();
+                        if ($purchases){
+                            foreach ($purchases as $purchase) {
+                                DB::table('purchase_items')->where('purchase_id', $purchase->purchase_id)->where('company_id', $companyId)->delete();
+                                DB::table('bkash_transactions')->where('reference_no', 'pur-' . $purchase->purchase_id)->where('company_id', $companyId)->delete();
+                                DB::table('card_transactions')->where('reference_no', 'pur-' . $purchase->purchase_id)->where('company_id', $companyId)->delete();
+                                DB::table('cash_books')->where('reference_no', 'pur-' . $purchase->purchase_id)->where('company_id', $companyId)->delete();
+                                DB::table('nagad_transactions')->where('reference_no', 'pur-' . $purchase->purchase_id)->where('company_id', $companyId)->delete();
+                                DB::table('purchase')->where('supplier_id', $id)->where('company_id', $companyId)->where('id', $purchase->id)->delete();
+                            }
                         }
                     });
                 } catch (Exception $e) {

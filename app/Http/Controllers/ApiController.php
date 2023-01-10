@@ -699,8 +699,8 @@ class ApiController extends Controller
         if ($companyId) {
             $id = $request->id;
             if (!empty($id)) {
-                try {
-                    DB::transaction(function () use ($companyId, $id) {
+//                try {
+//                    DB::transaction(function () use ($companyId, $id) {
                         DB::table('suppliers')->where('id', $id)->where('company_id', $companyId)->delete();
                         DB::table('supplier_ledgers')->where('company_id', $companyId)->where('supplier_id', $id)->delete();
                         $purchases = DB::table('purchase')->where('supplier_id', $id)->where('company_id', $companyId)->get();
@@ -715,12 +715,12 @@ class ApiController extends Controller
                                 DB::table('purchase')->where('supplier_id', $id)->where('company_id', $companyId)->where('id', $purchase->id)->delete();
                             }
                         }
-                    });
-                } catch (Exception $e) {
-                    $status = false;
-                    $errors = 'Something went wrong';
-                    return response()->json(compact('status', 'errors'));
-                }
+//                    });
+//                } catch (Exception $e) {
+//                    $status = false;
+//                    $errors = 'Something went wrong';
+//                    return response()->json(compact('status', 'errors'));
+//                }
 
                 $status = true;
                 $message = 'Supplier deleted';

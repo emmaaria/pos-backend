@@ -2561,6 +2561,7 @@ class ApiController extends Controller
                         'logo' => $request->logo,
                         'vat_number' => $request->vat_number,
                         'mushok_number' => $request->mushok_number,
+                        'discount_type' => $request->discount_type,
                     ]
                 );
                 $status = true;
@@ -2575,6 +2576,7 @@ class ApiController extends Controller
                         'mobile' => $request->mobile,
                         'vat_number' => $request->vat_number,
                         'mushok_number' => $request->mushok_number,
+                        'discount_type' => $request->discount_type,
                     ]
                 );
                 $status = true;

@@ -699,29 +699,21 @@ class ApiController extends Controller
         if ($companyId) {
             $id = $request->id;
             if (!empty($id)) {
-                try {
-                    DB::transaction(function () use ($companyId, $id) {
-                        DB::table('suppliers')->where('id', $id)->where('company_id', $companyId)->delete();
-                        DB::table('supplier_ledgers')->where('company_id', $companyId)->where('customer_id', $id)->delete();
-                        $purchases = DB::table('purchase')->where('supplier_id', $id)->where('company_id', $companyId)->get();
-                        DB::table('supplier_products')->where('supplier_id', $id)->where('company_id', $companyId)->delete();
-                        foreach ($purchases as $purchase) {
-                            DB::table('purchase_items')->where('purchase_id', $purchase->purchase_id)->where('company_id', $companyId)->delete();
-                            DB::table('bkash_transactions')->where('reference_no', 'pur-' . $purchase->purchase_id)->where('company_id', $companyId)->delete();
-                            DB::table('card_transactions')->where('reference_no', 'pur-' . $purchase->purchase_id)->where('company_id', $companyId)->delete();
-                            DB::table('cash_books')->where('reference_no', 'pur-' . $purchase->purchase_id)->where('company_id', $companyId)->delete();
-                            DB::table('nagad_transactions')->where('reference_no', 'pur-' . $purchase->purchase_id)->where('company_id', $companyId)->delete();
-                            DB::table('purchase')->where('supplier_id', $id)->where('company_id', $companyId)->where('id', $purchase->id)->delete();
-                        }
-                    });
-                    $status = true;
-                    $message = 'Supplier deleted';
-                    return response()->json(compact('status', 'message'));
-                } catch (Exception $e) {
-                    $status = false;
-                    $errors = 'Something went wrong';
-                    return response()->json(compact('status', 'errors'));
+                DB::table('suppliers')->where('id', $id)->where('company_id', $companyId)->delete();
+                DB::table('supplier_ledgers')->where('company_id', $companyId)->where('customer_id', $id)->delete();
+                $purchases = DB::table('purchase')->where('supplier_id', $id)->where('company_id', $companyId)->get();
+                DB::table('supplier_products')->where('supplier_id', $id)->where('company_id', $companyId)->delete();
+                foreach ($purchases as $purchase) {
+                    DB::table('purchase_items')->where('purchase_id', $purchase->purchase_id)->where('company_id', $companyId)->delete();
+                    DB::table('bkash_transactions')->where('reference_no', 'pur-' . $purchase->purchase_id)->where('company_id', $companyId)->delete();
+                    DB::table('card_transactions')->where('reference_no', 'pur-' . $purchase->purchase_id)->where('company_id', $companyId)->delete();
+                    DB::table('cash_books')->where('reference_no', 'pur-' . $purchase->purchase_id)->where('company_id', $companyId)->delete();
+                    DB::table('nagad_transactions')->where('reference_no', 'pur-' . $purchase->purchase_id)->where('company_id', $companyId)->delete();
+                    DB::table('purchase')->where('supplier_id', $id)->where('company_id', $companyId)->where('id', $purchase->id)->delete();
                 }
+                $status = true;
+                $message = 'Supplier deleted';
+                return response()->json(compact('status', 'message'));
             } else {
                 $status = false;
                 $error = 'Supplier not found';
@@ -1675,10 +1667,10 @@ class ApiController extends Controller
                 $customerName = $customer->name;
             } else {
                 $customer = DB::table('customers')->where('name', 'Walking Customer')->where('company_id', $companyId)->first();
-                if ($customer){
+                if ($customer) {
                     $customerId = $customer->id;
                     $customerName = $customer->name;
-                }else{
+                } else {
                     $status = false;
                     $errors = 'No customer selected. Please select a customer or add Walking Customer.';
                     return response()->json(compact('status', 'errors'));
@@ -1944,10 +1936,10 @@ class ApiController extends Controller
                 $customerName = $customer->name;
             } else {
                 $customer = DB::table('customers')->where('name', 'Walking Customer')->where('company_id', $companyId)->first();
-                if ($customer){
+                if ($customer) {
                     $customerId = $customer->id;
                     $customerName = $customer->name;
-                }else{
+                } else {
                     $status = false;
                     $errors = 'No customer selected. Please select a customer or add Walking Customer.';
                     return response()->json(compact('status', 'errors'));
@@ -2014,7 +2006,7 @@ class ApiController extends Controller
                         $invoice['grandTotal'] = $total - $request->discountAmount;
                         $paid = $request->cash + $request->bkash + $request->nagad + $request->card + $request->bank;
                         $invoice['due'] = $total - $paid;
-                        DB::table('invoices')->where('invoice_id', $request->invoice_id)->where('company_id',$companyId )->update(
+                        DB::table('invoices')->where('invoice_id', $request->invoice_id)->where('company_id', $companyId)->update(
                             [
                                 'customer_id' => $customerId,
                                 'comment' => $request->comment,

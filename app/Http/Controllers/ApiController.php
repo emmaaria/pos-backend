@@ -711,17 +711,17 @@ class ApiController extends Controller
                             DB::table('card_transactions')->where('reference_no', 'pur-' . $purchase->purchase_id)->where('company_id', $companyId)->delete();
                             DB::table('cash_books')->where('reference_no', 'pur-' . $purchase->purchase_id)->where('company_id', $companyId)->delete();
                             DB::table('nagad_transactions')->where('reference_no', 'pur-' . $purchase->purchase_id)->where('company_id', $companyId)->delete();
+                            DB::table('purchase')->where('supplier_id', $id)->where('company_id', $companyId)->where('id', $purchase->id)->delete();
                         }
                     });
+                    $status = true;
+                    $message = 'Supplier deleted';
+                    return response()->json(compact('status', 'message'));
                 } catch (Exception $e) {
                     $status = false;
                     $errors = 'Something went wrong';
                     return response()->json(compact('status', 'errors'));
                 }
-
-                $status = true;
-                $message = 'Customer deleted';
-                return response()->json(compact('status', 'message'));
             } else {
                 $status = false;
                 $error = 'Supplier not found';

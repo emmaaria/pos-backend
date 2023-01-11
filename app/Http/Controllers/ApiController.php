@@ -637,20 +637,41 @@ class ApiController extends Controller
             try {
                 DB::transaction(function () use ($companyId, $request) {
                     $supplierId = DB::table('suppliers')->insertGetId(['name' => $request->name, 'mobile' => $request->mobile, 'address' => $request->address, 'company_id' => $companyId]);
-                    if (!empty($request->due)) {
-                        $txIdGenerator = new InvoiceNumberGeneratorService();
-                        $txId = $txIdGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('supplier_transaction');
-                        DB::table('supplier_ledgers')->insert(array(
-                            'supplier_id' => $supplierId,
-                            'transaction_id' => $txId,
-                            'type' => 'due',
-                            'due' => $request->due,
-                            'company_id' => $companyId,
-                            'deposit' => 0,
-                            'date' => date('Y-m-d'),
-                            'comment' => 'Previous Due'
-                        ));
-                        $txIdGenerator->setNextInvoiceNo();
+                    if (!empty($request->balanceType)){
+                        if ($request->balanceType == 'due'){
+                            if (!empty($request->balance)) {
+                                $txIdGenerator = new InvoiceNumberGeneratorService();
+                                $txId = $txIdGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('supplier_transaction');
+                                DB::table('supplier_ledgers')->insert(array(
+                                    'supplier_id' => $supplierId,
+                                    'transaction_id' => $txId,
+                                    'type' => 'due',
+                                    'due' => $request->balance,
+                                    'company_id' => $companyId,
+                                    'deposit' => 0,
+                                    'date' => date('Y-m-d'),
+                                    'comment' => 'Previous Due'
+                                ));
+                                $txIdGenerator->setNextInvoiceNo();
+                            }
+                        }
+                        if ($request->balanceType == 'advance'){
+                            if (!empty($request->balance)) {
+                                $txIdGenerator = new InvoiceNumberGeneratorService();
+                                $txId = $txIdGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('supplier_transaction');
+                                DB::table('supplier_ledgers')->insert(array(
+                                    'supplier_id' => $supplierId,
+                                    'transaction_id' => $txId,
+                                    'type' => 'deposit',
+                                    'deposit' => $request->balance,
+                                    'company_id' => $companyId,
+                                    'due' => 0,
+                                    'date' => date('Y-m-d'),
+                                    'comment' => 'Previous Advance Balance'
+                                ));
+                                $txIdGenerator->setNextInvoiceNo();
+                            }
+                        }
                     }
                 });
             } catch (Exception $e) {

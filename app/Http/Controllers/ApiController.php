@@ -812,7 +812,7 @@ class ApiController extends Controller
                 ->where('purchases.id', $id)
                 ->first();
             $paymentDetail = [];
-            $cash = DB::table('cash_books')->where('company_id', $companyId)->where('reference_no', 'pur-'.$id)->first();
+            $cash = DB::table('cash_books')->where('company_id', $companyId)->where('reference_no', 'pur-'.$purchaseData->purchase_id)->first();
             if ($cash){
                 $paymentDetail['cash'] = $cash->payment;
             }

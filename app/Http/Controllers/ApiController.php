@@ -870,6 +870,7 @@ class ApiController extends Controller
                                 'purchase_id' => $purchaseId,
                                 'date' => $request->date,
                                 'company_id' => $companyId,
+                                'payment_method' => $request->paymentMethod,
                             ]
                         );
                         for ($i = 0, $n = count($products); $i < $n; $i++) {
@@ -1182,6 +1183,7 @@ class ApiController extends Controller
                         'supplier_id' => $request->supplier_id,
                         'amount' => $request->total,
                         'paid' => $request->paid,
+                        'opening' => $request->openingStock ? $request->openingStock : 0,
                         'comment' => $request->comment,
                         'date' => $request->date,
                     ]
@@ -1213,26 +1215,37 @@ class ApiController extends Controller
                             ->update(['price' => number_format($averagePrice->totalPrice / $averagePrice->totalQuantity, 2, '.', '')]);
                     }
                 }
-                DB::table('supplier_ledgers')
-                    ->where('reference_no', "pur-$purchase->purchase_id")
-                    ->where('type', 'due')
-                    ->where('company_id', $companyId)
-                    ->update(array(
-                        'supplier_id' => $request->supplier_id,
-                        'due' => $request->total,
-                        'deposit' => 0,
-                        'date' => $request->date
-                    ));
-                DB::table('supplier_ledgers')
-                    ->where('reference_no', "pur-$purchase->purchase_id")
-                    ->where('type', 'deposit')
-                    ->where('company_id', $companyId)
-                    ->delete();
-                DB::table('cash_books')
-                    ->where('reference_no', "pur-$purchase->purchase_id")
-                    ->where('type', 'payment')
-                    ->where('company_id', $companyId)
-                    ->delete();
+                if (empty($request->openingStock) || $request->openingStock == 0) {
+                    DB::table('supplier_ledgers')
+                        ->where('reference_no', "pur-$purchase->purchase_id")
+                        ->where('type', 'due')
+                        ->where('company_id', $companyId)
+                        ->update(array(
+                            'supplier_id' => $request->supplier_id,
+                            'due' => $request->total,
+                            'deposit' => 0,
+                            'date' => $request->date
+                        ));
+                    DB::table('supplier_ledgers')
+                        ->where('reference_no', "pur-$purchase->purchase_id")
+                        ->where('type', 'deposit')
+                        ->where('company_id', $companyId)
+                        ->delete();
+                    DB::table('cash_books')
+                        ->where('reference_no', "pur-$purchase->purchase_id")
+                        ->where('type', 'payment')
+                        ->where('company_id', $companyId)
+                        ->delete();
+                }else{
+                    DB::table('supplier_ledgers')
+                        ->where('reference_no', "pur-$purchase->purchase_id")->where('company_id', $companyId)->delete();
+                    DB::table('cash_books')
+                        ->where('reference_no', "pur-$purchase->purchase_id")
+                        ->where('type', 'payment')
+                        ->where('company_id', $companyId)
+                        ->delete();
+                }
+
 
                 if (!empty($request->paid)) {
                     $txGenerator = new InvoiceNumberGeneratorService();

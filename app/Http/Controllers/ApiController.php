@@ -806,7 +806,7 @@ class ApiController extends Controller
         $companyId = $this->getCompanyId();
         if ($companyId) {
             $purchaseData = DB::table('purchases')
-                ->select('suppliers.name AS supplier_name', 'suppliers.id AS supplier_id', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id', 'purchases.date', 'purchases.paid', 'purchases.opening')
+                ->select('suppliers.name AS supplier_name', 'suppliers.id AS supplier_id', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id', 'purchases.date', 'purchases.paid', 'purchases.opening', 'purchases.payment_method')
                 ->join('suppliers', 'suppliers.id', '=', 'purchases.supplier_id')
                 ->where('purchases.company_id', $companyId)
                 ->where('purchases.id', $id)

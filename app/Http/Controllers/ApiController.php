@@ -817,7 +817,7 @@ class ApiController extends Controller
                 $paymentData['cash'] = $cash->payment;
             }
             $baksh = DB::table('bkash_transactions')->where('company_id', $companyId)->where('reference_no', 'pur-'.$purchaseData->purchase_id)->first();
-            if ($cash){
+            if ($baksh){
                 $paymentData['bkash'] = $baksh->withdraw;
             }
             $purchaseItems = DB::table('purchase_items')

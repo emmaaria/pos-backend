@@ -811,10 +811,10 @@ class ApiController extends Controller
                 ->where('purchases.company_id', $companyId)
                 ->where('purchases.id', $id)
                 ->first();
-            $paymentDetail = [];
+            $paymentData = [];
             $cash = DB::table('cash_books')->where('company_id', $companyId)->where('reference_no', 'pur-'.$purchaseData->purchase_id)->first();
             if ($cash){
-                $paymentDetail['cash'] = $cash->payment;
+                $paymentData['cash'] = $cash->payment;
             }
             $purchaseItems = DB::table('purchase_items')
                 ->select('products.name', 'purchase_items.price as purchase_price', 'purchase_items.total', 'purchase_items.quantity', 'products.product_id', 'products.price')
@@ -826,7 +826,7 @@ class ApiController extends Controller
             $purchase = array(
                 'purchaseData' => $purchaseData,
                 'purchaseItems' => $purchaseItems,
-                'paymentDetails' => $paymentDetail
+                'paymentData' => $paymentData
             );
             $status = true;
             return response()->json(compact('status', 'purchase'));

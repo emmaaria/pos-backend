@@ -637,8 +637,8 @@ class ApiController extends Controller
             try {
                 DB::transaction(function () use ($companyId, $request) {
                     $supplierId = DB::table('suppliers')->insertGetId(['name' => $request->name, 'mobile' => $request->mobile, 'address' => $request->address, 'company_id' => $companyId]);
-                    if (!empty($request->balanceType)){
-                        if ($request->balanceType == 'due'){
+                    if (!empty($request->balanceType)) {
+                        if ($request->balanceType == 'due') {
                             if (!empty($request->balance)) {
                                 $txIdGenerator = new InvoiceNumberGeneratorService();
                                 $txId = $txIdGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('supplier_transaction');
@@ -655,7 +655,7 @@ class ApiController extends Controller
                                 $txIdGenerator->setNextInvoiceNo();
                             }
                         }
-                        if ($request->balanceType == 'advance'){
+                        if ($request->balanceType == 'advance') {
                             if (!empty($request->balance)) {
                                 $txIdGenerator = new InvoiceNumberGeneratorService();
                                 $txId = $txIdGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('supplier_transaction');
@@ -726,7 +726,7 @@ class ApiController extends Controller
                         DB::table('supplier_ledgers')->where('company_id', $companyId)->where('supplier_id', $id)->delete();
                         $purchases = DB::table('purchases')->where('supplier_id', $id)->where('company_id', $companyId)->get();
                         DB::table('supplier_products')->where('supplier_id', $id)->where('company_id', $companyId)->delete();
-                        if ($purchases){
+                        if ($purchases) {
                             foreach ($purchases as $purchase) {
                                 DB::table('purchase_items')->where('purchase_id', $purchase->purchase_id)->where('company_id', $companyId)->delete();
                                 DB::table('bkash_transactions')->where('reference_no', 'pur-' . $purchase->purchase_id)->where('company_id', $companyId)->delete();
@@ -895,237 +895,239 @@ class ApiController extends Controller
                                     ->update(['price' => number_format($averagePrice->totalPrice / $averagePrice->totalQuantity, 2, '.', '')]);
                             }
                         }
-                        $supplierDueTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('supplier_transaction');
-                        DB::table('supplier_ledgers')->insert(array(
-                            'supplier_id' => $request->supplier_id,
-                            'transaction_id' => $supplierDueTxId,
-                            'reference_no' => 'pur-' . $purchaseId,
-                            'type' => 'due',
-                            'due' => $request->total,
-                            'deposit' => 0,
-                            'date' => $request->date,
-                            'company_id' => $companyId,
-                            'comment' => "Due for Purchase id ($purchaseId)"
-                        ));
-                        $txGenerator->setNextInvoiceNo();
-                        $paymentMethod = $request->paymentMethod;
-                        if ($paymentMethod == 'cash') {
-                            if (!empty($request->cash) && $request->cash > 0) {
-                                $supplierPaidTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('supplier_transaction');
-                                DB::table('supplier_ledgers')->insert(array(
-                                    'supplier_id' => $request->supplier_id,
-                                    'reference_no' => 'pur-' . $purchaseId,
-                                    'transaction_id' => $supplierPaidTxId,
-                                    'type' => 'deposit',
-                                    'due' => 0,
-                                    'deposit' => $request->cash,
-                                    'date' => $request->date,
-                                    'company_id' => $companyId,
-                                    'comment' => "Deposit for Purchase id ($purchaseId)"
-                                ));
-                                $txGenerator->setNextInvoiceNo();
-                                $cashTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('cash_transaction');
-                                DB::table('cash_books')->insert(array(
-                                    'transaction_id' => $cashTxId,
-                                    'reference_no' => 'pur-' . $purchaseId,
-                                    'type' => 'payment',
-                                    'payment' => $request->cash,
-                                    'date' => $request->date,
-                                    'company_id' => $companyId,
-                                    'comment' => "Paid for Purchase id ($purchaseId)"
-                                ));
-                                $txGenerator->setNextInvoiceNo();
-                            }
-                        } elseif ($paymentMethod == 'bkash') {
-                            if (!empty($request->bkash) && $request->bkash > 0) {
-                                $supplierPaidTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('supplier_transaction');
-                                DB::table('supplier_ledgers')->insert(array(
-                                    'supplier_id' => $request->supplier_id,
-                                    'reference_no' => 'pur-' . $purchaseId,
-                                    'transaction_id' => $supplierPaidTxId,
-                                    'type' => 'deposit',
-                                    'due' => 0,
-                                    'deposit' => $request->bkash,
-                                    'date' => $request->date,
-                                    'company_id' => $companyId,
-                                    'comment' => "Deposit for Purchase id ($purchaseId)"
-                                ));
-                                $txGenerator->setNextInvoiceNo();
-                                $bkashTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('bkash_transaction');
-                                DB::table('bkash_transaction')->insert(array(
-                                    'transaction_id' => $bkashTxId,
-                                    'reference_no' => 'pur-' . $purchaseId,
-                                    'type' => 'payment',
-                                    'payment' => $request->bkash,
-                                    'date' => $request->date,
-                                    'company_id' => $companyId,
-                                    'comment' => "Paid for Purchase id ($purchaseId)"
-                                ));
-                                $txGenerator->setNextInvoiceNo();
-                            }
-                        } elseif ($paymentMethod == 'nagad') {
-                            if (!empty($request->nagad) && $request->nagad > 0) {
-                                $supplierPaidTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('supplier_transaction');
-                                DB::table('supplier_ledgers')->insert(array(
-                                    'supplier_id' => $request->supplier_id,
-                                    'reference_no' => 'pur-' . $purchaseId,
-                                    'transaction_id' => $supplierPaidTxId,
-                                    'type' => 'deposit',
-                                    'due' => 0,
-                                    'deposit' => $request->nagad,
-                                    'date' => $request->date,
-                                    'company_id' => $companyId,
-                                    'comment' => "Deposit for Purchase id ($purchaseId)"
-                                ));
-                                $txGenerator->setNextInvoiceNo();
-                                $nagadTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('nagad_transaction');
-                                DB::table('nagad_transaction')->insert(array(
-                                    'transaction_id' => $nagadTxId,
-                                    'reference_no' => 'pur-' . $purchaseId,
-                                    'type' => 'payment',
-                                    'payment' => $request->nagad,
-                                    'date' => $request->date,
-                                    'company_id' => $companyId,
-                                    'comment' => "Paid for Purchase id ($purchaseId)"
-                                ));
-                                $txGenerator->setNextInvoiceNo();
-                            }
-                        } elseif ($paymentMethod == 'bank') {
-                            if (!empty($request->bank) && $request->bank > 0) {
-                                $supplierPaidTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('supplier_transaction');
-                                DB::table('supplier_ledgers')->insert(array(
-                                    'supplier_id' => $request->supplier_id,
-                                    'reference_no' => 'pur-' . $purchaseId,
-                                    'transaction_id' => $supplierPaidTxId,
-                                    'type' => 'deposit',
-                                    'due' => 0,
-                                    'deposit' => $request->bank,
-                                    'date' => $request->date,
-                                    'company_id' => $companyId,
-                                    'comment' => "Deposit for Purchase id ($purchaseId)"
-                                ));
-                                $txGenerator->setNextInvoiceNo();
-                                $bankTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('bank_transaction');
-                                DB::table('bank_ledgers')->insert(array(
-                                    'transaction_id' => $bankTxId,
-                                    'reference_no' => 'pur-' . $purchaseId,
-                                    'type' => 'withdraw',
-                                    'withdraw' => $request->bank,
-                                    'bank_id' => $request->bankId,
-                                    'date' => $request->date,
-                                    'company_id' => $companyId,
-                                    'comment' => "Paid for Purchase id ($purchaseId)"
-                                ));
-                                $txGenerator->setNextInvoiceNo();
-                            }
-                        } elseif ($paymentMethod == 'multiple') {
-                            if (!empty($request->cash) && $request->cash > 0) {
-                                $supplierPaidTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('supplier_transaction');
-                                DB::table('supplier_ledgers')->insert(array(
-                                    'supplier_id' => $request->supplier_id,
-                                    'reference_no' => 'pur-' . $purchaseId,
-                                    'transaction_id' => $supplierPaidTxId,
-                                    'type' => 'deposit',
-                                    'due' => 0,
-                                    'deposit' => $request->cash,
-                                    'date' => $request->date,
-                                    'company_id' => $companyId,
-                                    'comment' => "Deposit for Purchase id ($purchaseId)"
-                                ));
-                                $txGenerator->setNextInvoiceNo();
-                                $cashTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('cash_transaction');
-                                DB::table('cash_books')->insert(array(
-                                    'transaction_id' => $cashTxId,
-                                    'reference_no' => 'pur-' . $purchaseId,
-                                    'type' => 'payment',
-                                    'payment' => $request->cash,
-                                    'date' => $request->date,
-                                    'company_id' => $companyId,
-                                    'comment' => "Paid for Purchase id ($purchaseId)"
-                                ));
-                                $txGenerator->setNextInvoiceNo();
-                            }
+                        if (empty($request->openingStock) || $request->openingStock == 0) {
+                            $supplierDueTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('supplier_transaction');
+                            DB::table('supplier_ledgers')->insert(array(
+                                'supplier_id' => $request->supplier_id,
+                                'transaction_id' => $supplierDueTxId,
+                                'reference_no' => 'pur-' . $purchaseId,
+                                'type' => 'due',
+                                'due' => $request->total,
+                                'deposit' => 0,
+                                'date' => $request->date,
+                                'company_id' => $companyId,
+                                'comment' => "Due for Purchase id ($purchaseId)"
+                            ));
+                            $txGenerator->setNextInvoiceNo();
+                            $paymentMethod = $request->paymentMethod;
+                            if ($paymentMethod == 'cash') {
+                                if (!empty($request->cash) && $request->cash > 0) {
+                                    $supplierPaidTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('supplier_transaction');
+                                    DB::table('supplier_ledgers')->insert(array(
+                                        'supplier_id' => $request->supplier_id,
+                                        'reference_no' => 'pur-' . $purchaseId,
+                                        'transaction_id' => $supplierPaidTxId,
+                                        'type' => 'deposit',
+                                        'due' => 0,
+                                        'deposit' => $request->cash,
+                                        'date' => $request->date,
+                                        'company_id' => $companyId,
+                                        'comment' => "Deposit for Purchase id ($purchaseId)"
+                                    ));
+                                    $txGenerator->setNextInvoiceNo();
+                                    $cashTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('cash_transaction');
+                                    DB::table('cash_books')->insert(array(
+                                        'transaction_id' => $cashTxId,
+                                        'reference_no' => 'pur-' . $purchaseId,
+                                        'type' => 'payment',
+                                        'payment' => $request->cash,
+                                        'date' => $request->date,
+                                        'company_id' => $companyId,
+                                        'comment' => "Paid for Purchase id ($purchaseId)"
+                                    ));
+                                    $txGenerator->setNextInvoiceNo();
+                                }
+                            } elseif ($paymentMethod == 'bkash') {
+                                if (!empty($request->bkash) && $request->bkash > 0) {
+                                    $supplierPaidTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('supplier_transaction');
+                                    DB::table('supplier_ledgers')->insert(array(
+                                        'supplier_id' => $request->supplier_id,
+                                        'reference_no' => 'pur-' . $purchaseId,
+                                        'transaction_id' => $supplierPaidTxId,
+                                        'type' => 'deposit',
+                                        'due' => 0,
+                                        'deposit' => $request->bkash,
+                                        'date' => $request->date,
+                                        'company_id' => $companyId,
+                                        'comment' => "Deposit for Purchase id ($purchaseId)"
+                                    ));
+                                    $txGenerator->setNextInvoiceNo();
+                                    $bkashTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('bkash_transaction');
+                                    DB::table('bkash_transaction')->insert(array(
+                                        'transaction_id' => $bkashTxId,
+                                        'reference_no' => 'pur-' . $purchaseId,
+                                        'type' => 'payment',
+                                        'payment' => $request->bkash,
+                                        'date' => $request->date,
+                                        'company_id' => $companyId,
+                                        'comment' => "Paid for Purchase id ($purchaseId)"
+                                    ));
+                                    $txGenerator->setNextInvoiceNo();
+                                }
+                            } elseif ($paymentMethod == 'nagad') {
+                                if (!empty($request->nagad) && $request->nagad > 0) {
+                                    $supplierPaidTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('supplier_transaction');
+                                    DB::table('supplier_ledgers')->insert(array(
+                                        'supplier_id' => $request->supplier_id,
+                                        'reference_no' => 'pur-' . $purchaseId,
+                                        'transaction_id' => $supplierPaidTxId,
+                                        'type' => 'deposit',
+                                        'due' => 0,
+                                        'deposit' => $request->nagad,
+                                        'date' => $request->date,
+                                        'company_id' => $companyId,
+                                        'comment' => "Deposit for Purchase id ($purchaseId)"
+                                    ));
+                                    $txGenerator->setNextInvoiceNo();
+                                    $nagadTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('nagad_transaction');
+                                    DB::table('nagad_transaction')->insert(array(
+                                        'transaction_id' => $nagadTxId,
+                                        'reference_no' => 'pur-' . $purchaseId,
+                                        'type' => 'payment',
+                                        'payment' => $request->nagad,
+                                        'date' => $request->date,
+                                        'company_id' => $companyId,
+                                        'comment' => "Paid for Purchase id ($purchaseId)"
+                                    ));
+                                    $txGenerator->setNextInvoiceNo();
+                                }
+                            } elseif ($paymentMethod == 'bank') {
+                                if (!empty($request->bank) && $request->bank > 0) {
+                                    $supplierPaidTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('supplier_transaction');
+                                    DB::table('supplier_ledgers')->insert(array(
+                                        'supplier_id' => $request->supplier_id,
+                                        'reference_no' => 'pur-' . $purchaseId,
+                                        'transaction_id' => $supplierPaidTxId,
+                                        'type' => 'deposit',
+                                        'due' => 0,
+                                        'deposit' => $request->bank,
+                                        'date' => $request->date,
+                                        'company_id' => $companyId,
+                                        'comment' => "Deposit for Purchase id ($purchaseId)"
+                                    ));
+                                    $txGenerator->setNextInvoiceNo();
+                                    $bankTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('bank_transaction');
+                                    DB::table('bank_ledgers')->insert(array(
+                                        'transaction_id' => $bankTxId,
+                                        'reference_no' => 'pur-' . $purchaseId,
+                                        'type' => 'withdraw',
+                                        'withdraw' => $request->bank,
+                                        'bank_id' => $request->bankId,
+                                        'date' => $request->date,
+                                        'company_id' => $companyId,
+                                        'comment' => "Paid for Purchase id ($purchaseId)"
+                                    ));
+                                    $txGenerator->setNextInvoiceNo();
+                                }
+                            } elseif ($paymentMethod == 'multiple') {
+                                if (!empty($request->cash) && $request->cash > 0) {
+                                    $supplierPaidTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('supplier_transaction');
+                                    DB::table('supplier_ledgers')->insert(array(
+                                        'supplier_id' => $request->supplier_id,
+                                        'reference_no' => 'pur-' . $purchaseId,
+                                        'transaction_id' => $supplierPaidTxId,
+                                        'type' => 'deposit',
+                                        'due' => 0,
+                                        'deposit' => $request->cash,
+                                        'date' => $request->date,
+                                        'company_id' => $companyId,
+                                        'comment' => "Deposit for Purchase id ($purchaseId)"
+                                    ));
+                                    $txGenerator->setNextInvoiceNo();
+                                    $cashTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('cash_transaction');
+                                    DB::table('cash_books')->insert(array(
+                                        'transaction_id' => $cashTxId,
+                                        'reference_no' => 'pur-' . $purchaseId,
+                                        'type' => 'payment',
+                                        'payment' => $request->cash,
+                                        'date' => $request->date,
+                                        'company_id' => $companyId,
+                                        'comment' => "Paid for Purchase id ($purchaseId)"
+                                    ));
+                                    $txGenerator->setNextInvoiceNo();
+                                }
 
-                            if (!empty($request->bkash) && $request->bkash > 0) {
-                                $supplierPaidTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('supplier_transaction');
-                                DB::table('supplier_ledgers')->insert(array(
-                                    'supplier_id' => $request->supplier_id,
-                                    'reference_no' => 'pur-' . $purchaseId,
-                                    'transaction_id' => $supplierPaidTxId,
-                                    'type' => 'deposit',
-                                    'due' => 0,
-                                    'deposit' => $request->bkash,
-                                    'date' => $request->date,
-                                    'company_id' => $companyId,
-                                    'comment' => "Deposit for Purchase id ($purchaseId)"
-                                ));
-                                $txGenerator->setNextInvoiceNo();
-                                $bkashTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('bkash_transaction');
-                                DB::table('bkash_transaction')->insert(array(
-                                    'transaction_id' => $bkashTxId,
-                                    'reference_no' => 'pur-' . $purchaseId,
-                                    'type' => 'payment',
-                                    'payment' => $request->bkash,
-                                    'date' => $request->date,
-                                    'company_id' => $companyId,
-                                    'comment' => "Paid for Purchase id ($purchaseId)"
-                                ));
-                                $txGenerator->setNextInvoiceNo();
-                            }
+                                if (!empty($request->bkash) && $request->bkash > 0) {
+                                    $supplierPaidTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('supplier_transaction');
+                                    DB::table('supplier_ledgers')->insert(array(
+                                        'supplier_id' => $request->supplier_id,
+                                        'reference_no' => 'pur-' . $purchaseId,
+                                        'transaction_id' => $supplierPaidTxId,
+                                        'type' => 'deposit',
+                                        'due' => 0,
+                                        'deposit' => $request->bkash,
+                                        'date' => $request->date,
+                                        'company_id' => $companyId,
+                                        'comment' => "Deposit for Purchase id ($purchaseId)"
+                                    ));
+                                    $txGenerator->setNextInvoiceNo();
+                                    $bkashTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('bkash_transaction');
+                                    DB::table('bkash_transaction')->insert(array(
+                                        'transaction_id' => $bkashTxId,
+                                        'reference_no' => 'pur-' . $purchaseId,
+                                        'type' => 'payment',
+                                        'payment' => $request->bkash,
+                                        'date' => $request->date,
+                                        'company_id' => $companyId,
+                                        'comment' => "Paid for Purchase id ($purchaseId)"
+                                    ));
+                                    $txGenerator->setNextInvoiceNo();
+                                }
 
-                            if (!empty($request->nagad) && $request->nagad > 0) {
-                                $supplierPaidTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('supplier_transaction');
-                                DB::table('supplier_ledgers')->insert(array(
-                                    'supplier_id' => $request->supplier_id,
-                                    'reference_no' => 'pur-' . $purchaseId,
-                                    'transaction_id' => $supplierPaidTxId,
-                                    'type' => 'deposit',
-                                    'due' => 0,
-                                    'deposit' => $request->nagad,
-                                    'date' => $request->date,
-                                    'company_id' => $companyId,
-                                    'comment' => "Deposit for Purchase id ($purchaseId)"
-                                ));
-                                $txGenerator->setNextInvoiceNo();
-                                $nagadTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('nagad_transaction');
-                                DB::table('nagad_transaction')->insert(array(
-                                    'transaction_id' => $nagadTxId,
-                                    'reference_no' => 'pur-' . $purchaseId,
-                                    'type' => 'payment',
-                                    'payment' => $request->nagad,
-                                    'date' => $request->date,
-                                    'company_id' => $companyId,
-                                    'comment' => "Paid for Purchase id ($purchaseId)"
-                                ));
-                                $txGenerator->setNextInvoiceNo();
-                            }
+                                if (!empty($request->nagad) && $request->nagad > 0) {
+                                    $supplierPaidTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('supplier_transaction');
+                                    DB::table('supplier_ledgers')->insert(array(
+                                        'supplier_id' => $request->supplier_id,
+                                        'reference_no' => 'pur-' . $purchaseId,
+                                        'transaction_id' => $supplierPaidTxId,
+                                        'type' => 'deposit',
+                                        'due' => 0,
+                                        'deposit' => $request->nagad,
+                                        'date' => $request->date,
+                                        'company_id' => $companyId,
+                                        'comment' => "Deposit for Purchase id ($purchaseId)"
+                                    ));
+                                    $txGenerator->setNextInvoiceNo();
+                                    $nagadTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('nagad_transaction');
+                                    DB::table('nagad_transaction')->insert(array(
+                                        'transaction_id' => $nagadTxId,
+                                        'reference_no' => 'pur-' . $purchaseId,
+                                        'type' => 'payment',
+                                        'payment' => $request->nagad,
+                                        'date' => $request->date,
+                                        'company_id' => $companyId,
+                                        'comment' => "Paid for Purchase id ($purchaseId)"
+                                    ));
+                                    $txGenerator->setNextInvoiceNo();
+                                }
 
-                            if (!empty($request->bank) && $request->bank > 0) {
-                                $supplierPaidTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('supplier_transaction');
-                                DB::table('supplier_ledgers')->insert(array(
-                                    'supplier_id' => $request->supplier_id,
-                                    'reference_no' => 'pur-' . $purchaseId,
-                                    'transaction_id' => $supplierPaidTxId,
-                                    'type' => 'deposit',
-                                    'due' => 0,
-                                    'deposit' => $request->bank,
-                                    'date' => $request->date,
-                                    'company_id' => $companyId,
-                                    'comment' => "Deposit for Purchase id ($purchaseId)"
-                                ));
-                                $txGenerator->setNextInvoiceNo();
-                                $bankTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('bank_transaction');
-                                DB::table('bank_ledgers')->insert(array(
-                                    'transaction_id' => $bankTxId,
-                                    'reference_no' => 'pur-' . $purchaseId,
-                                    'type' => 'withdraw',
-                                    'withdraw' => $request->bank,
-                                    'bank_id' => $request->bankId,
-                                    'date' => $request->date,
-                                    'company_id' => $companyId,
-                                    'comment' => "Paid for Purchase id ($purchaseId)"
-                                ));
-                                $txGenerator->setNextInvoiceNo();
+                                if (!empty($request->bank) && $request->bank > 0) {
+                                    $supplierPaidTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('supplier_transaction');
+                                    DB::table('supplier_ledgers')->insert(array(
+                                        'supplier_id' => $request->supplier_id,
+                                        'reference_no' => 'pur-' . $purchaseId,
+                                        'transaction_id' => $supplierPaidTxId,
+                                        'type' => 'deposit',
+                                        'due' => 0,
+                                        'deposit' => $request->bank,
+                                        'date' => $request->date,
+                                        'company_id' => $companyId,
+                                        'comment' => "Deposit for Purchase id ($purchaseId)"
+                                    ));
+                                    $txGenerator->setNextInvoiceNo();
+                                    $bankTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('bank_transaction');
+                                    DB::table('bank_ledgers')->insert(array(
+                                        'transaction_id' => $bankTxId,
+                                        'reference_no' => 'pur-' . $purchaseId,
+                                        'type' => 'withdraw',
+                                        'withdraw' => $request->bank,
+                                        'bank_id' => $request->bankId,
+                                        'date' => $request->date,
+                                        'company_id' => $companyId,
+                                        'comment' => "Paid for Purchase id ($purchaseId)"
+                                    ));
+                                    $txGenerator->setNextInvoiceNo();
+                                }
                             }
                         }
                     });
@@ -1699,10 +1701,10 @@ class ApiController extends Controller
                 $customerName = $customer->name;
             } else {
                 $customer = DB::table('customers')->where('name', 'Walking Customer')->where('company_id', $companyId)->first();
-                if ($customer){
+                if ($customer) {
                     $customerId = $customer->id;
                     $customerName = $customer->name;
-                }else{
+                } else {
                     $status = false;
                     $errors = 'No customer selected. Please select a customer or add Walking Customer.';
                     return response()->json(compact('status', 'errors'));
@@ -1968,10 +1970,10 @@ class ApiController extends Controller
                 $customerName = $customer->name;
             } else {
                 $customer = DB::table('customers')->where('name', 'Walking Customer')->where('company_id', $companyId)->first();
-                if ($customer){
+                if ($customer) {
                     $customerId = $customer->id;
                     $customerName = $customer->name;
-                }else{
+                } else {
                     $status = false;
                     $errors = 'No customer selected. Please select a customer or add Walking Customer.';
                     return response()->json(compact('status', 'errors'));
@@ -2038,7 +2040,7 @@ class ApiController extends Controller
                         $invoice['grandTotal'] = $total - $request->discountAmount;
                         $paid = $request->cash + $request->bkash + $request->nagad + $request->card + $request->bank;
                         $invoice['due'] = $total - $paid;
-                        DB::table('invoices')->where('invoice_id', $request->invoice_id)->where('company_id',$companyId )->update(
+                        DB::table('invoices')->where('invoice_id', $request->invoice_id)->where('company_id', $companyId)->update(
                             [
                                 'customer_id' => $customerId,
                                 'comment' => $request->comment,

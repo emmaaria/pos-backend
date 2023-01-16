@@ -812,12 +812,12 @@ class ApiController extends Controller
                 ->where('purchases.id', $id)
                 ->first();
             $paymentData = [];
-            $cash = DB::table('cash_books')->where('company_id', $companyId)->where('reference_no', 'pur-'.$purchaseData->purchase_id)->first();
-            if ($cash){
+            $cash = DB::table('cash_books')->where('company_id', $companyId)->where('reference_no', 'pur-' . $purchaseData->purchase_id)->first();
+            if ($cash) {
                 $paymentData['cash'] = $cash->payment;
             }
-            $baksh = DB::table('bkash_transactions')->where('company_id', $companyId)->where('reference_no', 'pur-'.$purchaseData->purchase_id)->first();
-            if ($baksh){
+            $baksh = DB::table('bkash_transactions')->where('company_id', $companyId)->where('reference_no', 'pur-' . $purchaseData->purchase_id)->first();
+            if ($baksh) {
                 $paymentData['bkash'] = $baksh->withdraw;
             }
             $purchaseItems = DB::table('purchase_items')
@@ -1248,7 +1248,7 @@ class ApiController extends Controller
                         ->where('type', 'payment')
                         ->where('company_id', $companyId)
                         ->delete();
-                }else{
+                } else {
                     DB::table('supplier_ledgers')
                         ->where('reference_no', "pur-$purchase->purchase_id")->where('company_id', $companyId)->delete();
                     DB::table('cash_books')
@@ -1309,25 +1309,43 @@ class ApiController extends Controller
             $id = $request->id;
             if (!empty($id)) {
                 $purchase = DB::table('purchases')->where('id', $request->id)->where('company_id', $companyId)->first();
-                $deleted = DB::table('purchase_items')->where('purchase_id', $purchase->purchase_id)->where('company_id', $companyId)->delete();
-                $deleted = DB::table('supplier_ledgers')
-                    ->where('reference_no', "pur-$purchase->purchase_id")
-                    ->where('company_id', $companyId)
-                    ->delete();
-                $deleted = DB::table('cash_books')
-                    ->where('reference_no', "pur-$purchase->purchase_id")
-                    ->where('company_id', $companyId)
-                    ->delete();
-                $deleted = Db::table('purchases')->where('id', $id)->where('company_id', $companyId)->delete();
-                if ($deleted) {
-                    $status = true;
-                    $message = 'Purchase deleted';
-                    return response()->json(compact('status', 'message'));
-                } else {
+                try {
+                    DB::transaction(function () use ($request, $purchase, $companyId, $id) {
+                        DB::table('purchase_items')->where('purchase_id', $purchase->purchase_id)->where('company_id', $companyId)->delete();
+                        DB::table('supplier_ledgers')
+                            ->where('reference_no', "pur-$purchase->purchase_id")
+                            ->where('company_id', $companyId)
+                            ->delete();
+                        DB::table('cash_books')
+                            ->where('reference_no', "pur-$purchase->purchase_id")
+                            ->where('company_id', $companyId)
+                            ->delete();
+                        DB::table('bkash_transactions')
+                            ->where('reference_no', "pur-$purchase->purchase_id")
+                            ->where('company_id', $companyId)
+                            ->delete();
+                        DB::table('nagad_transactions')
+                            ->where('reference_no', "pur-$purchase->purchase_id")
+                            ->where('company_id', $companyId)
+                            ->delete();
+                        DB::table('card_transactions')
+                            ->where('reference_no', "pur-$purchase->purchase_id")
+                            ->where('company_id', $companyId)
+                            ->delete();
+                        DB::table('bank_ledgers')
+                            ->where('reference_no', "pur-$purchase->purchase_id")
+                            ->where('company_id', $companyId)
+                            ->delete();
+                        DB::table('purchases')->where('id', $id)->where('company_id', $companyId)->delete();
+                    });
+                } catch (Exception $e) {
                     $status = false;
-                    $error = 'Purchase not found';
-                    return response()->json(compact('status', 'error'));
+                    $errors = $e;
+                    return response()->json(compact('status', 'errors'));
                 }
+                $status = true;
+                $message = 'Purchase deleted';
+                return response()->json(compact('status', 'message'));
             } else {
                 $status = false;
                 $error = 'Purchase not found';
@@ -1350,7 +1368,8 @@ class ApiController extends Controller
     | Product Start
     |--------------------------------------------------------------------------
     */
-    public function getProducts(Request $request)
+    public
+    function getProducts(Request $request)
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
@@ -1380,7 +1399,8 @@ class ApiController extends Controller
         }
     }
 
-    public function getProduct($id)
+    public
+    function getProduct($id)
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
@@ -1400,7 +1420,8 @@ class ApiController extends Controller
         }
     }
 
-    public function getProductByBarcode(Request $request)
+    public
+    function getProductByBarcode(Request $request)
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
@@ -1420,7 +1441,8 @@ class ApiController extends Controller
         }
     }
 
-    public function storeProduct(Request $request)
+    public
+    function storeProduct(Request $request)
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
@@ -1483,7 +1505,8 @@ class ApiController extends Controller
         }
     }
 
-    public function updateProduct(Request $request)
+    public
+    function updateProduct(Request $request)
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
@@ -1531,7 +1554,8 @@ class ApiController extends Controller
         }
     }
 
-    public function deleteProduct(Request $request)
+    public
+    function deleteProduct(Request $request)
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
@@ -1564,6 +1588,7 @@ class ApiController extends Controller
             return response()->json(compact('status', 'errors'));
         }
     }
+
     /*
     |--------------------------------------------------------------------------
     | Product End
@@ -1575,7 +1600,8 @@ class ApiController extends Controller
     | Invoice Start
     |--------------------------------------------------------------------------
     */
-    public function getInvoices(Request $request)
+    public
+    function getInvoices(Request $request)
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
@@ -1607,7 +1633,8 @@ class ApiController extends Controller
         }
     }
 
-    public function getTodayInvoices(Request $request)
+    public
+    function getTodayInvoices(Request $request)
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
@@ -1641,7 +1668,8 @@ class ApiController extends Controller
         }
     }
 
-    public function getInvoice($id)
+    public
+    function getInvoice($id)
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
@@ -1699,7 +1727,8 @@ class ApiController extends Controller
         }
     }
 
-    public function storeInvoice(Request $request)
+    public
+    function storeInvoice(Request $request)
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
@@ -1967,7 +1996,8 @@ class ApiController extends Controller
         }
     }
 
-    public function updateInvoice(Request $request)
+    public
+    function updateInvoice(Request $request)
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
@@ -2238,7 +2268,8 @@ class ApiController extends Controller
         }
     }
 
-    public function deleteInvoice(Request $request)
+    public
+    function deleteInvoice(Request $request)
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
@@ -2267,7 +2298,8 @@ class ApiController extends Controller
         }
     }
 
-    public function getProductsWithStock(Request $request)
+    public
+    function getProductsWithStock(Request $request)
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
@@ -2298,6 +2330,7 @@ class ApiController extends Controller
             return response()->json(compact('status', 'errors'));
         }
     }
+
     /*
     |--------------------------------------------------------------------------
     | Invoice End
@@ -2309,7 +2342,8 @@ class ApiController extends Controller
     | Report Start
     |--------------------------------------------------------------------------
     */
-    public function getStock(Request $request)
+    public
+    function getStock(Request $request)
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
@@ -2342,6 +2376,7 @@ class ApiController extends Controller
             return response()->json(compact('status', 'errors'));
         }
     }
+
     /*
     |--------------------------------------------------------------------------
     | Report End
@@ -2354,7 +2389,8 @@ class ApiController extends Controller
     | Bank Start
     |--------------------------------------------------------------------------
     */
-    public function getBanks(Request $request)
+    public
+    function getBanks(Request $request)
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
@@ -2398,7 +2434,8 @@ class ApiController extends Controller
         }
     }
 
-    public function getBank($id)
+    public
+    function getBank($id)
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
@@ -2412,7 +2449,8 @@ class ApiController extends Controller
         }
     }
 
-    public function storeBank(Request $request)
+    public
+    function storeBank(Request $request)
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
@@ -2484,7 +2522,8 @@ class ApiController extends Controller
         }
     }
 
-    public function updateBank(Request $request)
+    public
+    function updateBank(Request $request)
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
@@ -2521,7 +2560,8 @@ class ApiController extends Controller
         }
     }
 
-    public function deleteBank(Request $request)
+    public
+    function deleteBank(Request $request)
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
@@ -2562,6 +2602,7 @@ class ApiController extends Controller
             return response()->json(compact('status', 'errors'));
         }
     }
+
     /*
     |--------------------------------------------------------------------------
     | Bank End
@@ -2575,7 +2616,8 @@ class ApiController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public function getCompany()
+    public
+    function getCompany()
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
@@ -2589,7 +2631,8 @@ class ApiController extends Controller
         }
     }
 
-    public function updateCompany(Request $request)
+    public
+    function updateCompany(Request $request)
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {

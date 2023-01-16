@@ -965,7 +965,7 @@ class ApiController extends Controller
                                     ));
                                     $txGenerator->setNextInvoiceNo();
                                     $bkashTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('bkash_transaction');
-                                    DB::table('bkash_transaction')->insert(array(
+                                    DB::table('bkash_transactions')->insert(array(
                                         'transaction_id' => $bkashTxId,
                                         'reference_no' => 'pur-' . $purchaseId,
                                         'type' => 'payment',

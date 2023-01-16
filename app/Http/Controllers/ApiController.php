@@ -993,11 +993,12 @@ class ApiController extends Controller
                                     ));
                                     $txGenerator->setNextInvoiceNo();
                                     $nagadTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('nagad_transaction');
-                                    DB::table('nagad_transaction')->insert(array(
+                                    DB::table('nagad_transactions')->insert(array(
                                         'transaction_id' => $nagadTxId,
                                         'reference_no' => 'pur-' . $purchaseId,
-                                        'type' => 'payment',
-                                        'payment' => $request->nagad,
+                                        'type' => 'withdraw',
+                                        'withdraw' => $request->nagad,
+                                        'deposit' => 0,
                                         'date' => $request->date,
                                         'company_id' => $companyId,
                                         'comment' => "Paid for Purchase id ($purchaseId)"

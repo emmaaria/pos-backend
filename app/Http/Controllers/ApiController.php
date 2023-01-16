@@ -1328,10 +1328,6 @@ class ApiController extends Controller
                             ->where('reference_no', "pur-$purchase->purchase_id")
                             ->where('company_id', $companyId)
                             ->delete();
-                        DB::table('card_transactions')
-                            ->where('reference_no', "pur-$purchase->purchase_id")
-                            ->where('company_id', $companyId)
-                            ->delete();
                         DB::table('bank_ledgers')
                             ->where('reference_no', "pur-$purchase->purchase_id")
                             ->where('company_id', $companyId)

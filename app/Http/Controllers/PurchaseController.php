@@ -457,19 +457,6 @@ class PurchaseController extends Controller
                                     ->delete();
 
                                 if (empty($request->openingStock) || $request->openingStock == 0) {
-                                    $supplierDueTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('supplier_transaction');
-                                    DB::table('supplier_ledgers')->insert(array(
-                                        'supplier_id' => $request->supplier_id,
-                                        'transaction_id' => $supplierDueTxId,
-                                        'reference_no' => 'pur-' . $purchase->purchase_id,
-                                        'type' => 'due',
-                                        'due' => $request->total,
-                                        'deposit' => 0,
-                                        'date' => $request->date,
-                                        'company_id' => $companyId,
-                                        'comment' => "Due for Purchase id ($purchase->purchase_id)"
-                                    ));
-                                    $txGenerator->setNextInvoiceNo();
                                     $paymentMethod = $request->paymentMethod;
                                     if ($paymentMethod == 'cash' || $paymentMethod == 'multiple') {
                                         if (!empty($request->cash) && $request->cash > 0) {

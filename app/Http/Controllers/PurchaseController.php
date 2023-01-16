@@ -3,15 +3,42 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Skycoder\InvoiceNumberGenerator\InvoiceNumberGeneratorService;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class PurchaseController extends Controller
 {
     public function __construct()
     {
         $this->middleware('auth.custom:api', ['except' => []]);
+    }
+    protected function guard()
+    {
+        return Auth::guard();
+    }
+
+    public function getCompanyId()
+    {
+        try {
+            $token = JWTAuth::getToken();
+            $token = JWTAuth::getPayload($token)->toArray();
+            if ($token['company_id']) {
+                try {
+                    $companyId = decrypt($token['company_id']);
+                    return $companyId;
+                } catch (Exception $e) {
+                    return null;
+                }
+            } else {
+                return null;
+            }
+
+        } catch (Exception $e) {
+            return null;
+        }
     }
     /*
     |--------------------------------------------------------------------------
@@ -339,80 +366,87 @@ class PurchaseController extends Controller
             $prices = $request->productPrices;
             if (count($products) > 0) {
                 try {
+                    DB::transaction(function () use ($prices, $quantities, $products, $request, $companyId) {
+                        $purchase = DB::table('purchases')->where('id', $request->purchase_id)->where('company_id', $companyId)->first();
 
+                        DB::table('purchases')->where('id', $request->purchase_id)->where('company_id', $companyId)->update(
+                            [
+                                'supplier_id' => $request->supplier_id,
+                                'amount' => $request->total,
+                                'paid' => $request->cash + $request->bkash + $request->nagad + $request->bank,
+                                'opening' => $request->openingStock ? $request->openingStock : 0,
+                                'comment' => $request->comment,
+                                'date' => $request->date,
+                            ]
+                        );
+
+                        DB::table('purchase_items')->where('purchase_id', $purchase->purchase_id)
+                            ->where('company_id', $companyId)
+                            ->delete();
+
+                        for ($i = 0, $n = count($products); $i < $n; $i++) {
+                            $productID = $products[$i];
+                            $quantity = $quantities[$i];
+                            $price = $prices[$i];
+                            if ($quantity > 0) {
+                                DB::table('purchase_items')->insert([
+                                    'purchase_id' => $purchase->purchase_id,
+                                    'product_id' => $productID,
+                                    'price' => $price,
+                                    'quantity' => $quantity,
+                                    'date' => $request->date,
+                                    'company_id' => $companyId,
+                                    'total' => $quantity * $price,
+                                ]);
+                                $averagePrice = DB::table('purchase_items')
+                                    ->select(
+                                        DB::raw('SUM(quantity) as totalQuantity'),
+                                        DB::raw('SUM(total) as totalPrice')
+                                    )->where('product_id', $productID)->where('company_id', $companyId)->first();
+
+                                DB::table('average_purchase_prices')->where('product_id', $productID)
+                                    ->where('company_id', $companyId)
+                                    ->update(['price' => number_format($averagePrice->totalPrice / $averagePrice->totalQuantity, 2, '.', '')]);
+
+                                if (empty($request->openingStock) || $request->openingStock == 0) {
+                                    DB::table('supplier_ledgers')
+                                        ->where('reference_no', "pur-$purchase->purchase_id")
+                                        ->where('type', 'due')
+                                        ->where('company_id', $companyId)
+                                        ->update(array(
+                                            'supplier_id' => $request->supplier_id,
+                                            'due' => $request->total,
+                                            'deposit' => 0,
+                                            'date' => $request->date
+                                        ));
+                                    DB::table('supplier_ledgers')
+                                        ->where('reference_no', "pur-$purchase->purchase_id")
+                                        ->where('type', 'deposit')
+                                        ->where('company_id', $companyId)
+                                        ->delete();
+                                    DB::table('cash_books')
+                                        ->where('reference_no', "pur-$purchase->purchase_id")
+                                        ->where('type', 'payment')
+                                        ->where('company_id', $companyId)
+                                        ->delete();
+                                } else {
+                                    DB::table('supplier_ledgers')
+                                        ->where('reference_no', "pur-$purchase->purchase_id")->where('company_id', $companyId)->delete();
+                                    DB::table('cash_books')
+                                        ->where('reference_no', "pur-$purchase->purchase_id")
+                                        ->where('type', 'payment')
+                                        ->where('company_id', $companyId)
+                                        ->delete();
+                                }
+                            }
+                        }
+                    });
                 }catch (Exception $e) {
                     $status = false;
                     $errors = $e;
                     return response()->json(compact('status', 'errors'));
                 }
-                $purchase = DB::table('purchases')->where('id', $request->purchase_id)->where('company_id', $companyId)->first();
-                DB::table('purchases')->where('id', $request->purchase_id)->where('company_id', $companyId)->update(
-                    [
-                        'supplier_id' => $request->supplier_id,
-                        'amount' => $request->total,
-                        'paid' => $request->paid,
-                        'opening' => $request->openingStock ? $request->openingStock : 0,
-                        'comment' => $request->comment,
-                        'date' => $request->date,
-                    ]
-                );
-                DB::table('purchase_items')->where('purchase_id', $purchase->purchase_id)
-                    ->where('company_id', $companyId)
-                    ->delete();
-                for ($i = 0, $n = count($products); $i < $n; $i++) {
-                    $productID = $products[$i];
-                    $quantity = $quantities[$i];
-                    $price = $prices[$i];
-                    if ($quantity > 0) {
-                        DB::table('purchase_items')->insert([
-                            'purchase_id' => $purchase->purchase_id,
-                            'product_id' => $productID,
-                            'price' => $price,
-                            'quantity' => $quantity,
-                            'date' => $request->date,
-                            'company_id' => $companyId,
-                            'total' => $quantity * $price,
-                        ]);
-                        $averagePrice = DB::table('purchase_items')
-                            ->select(
-                                DB::raw('SUM(quantity) as totalQuantity'),
-                                DB::raw('SUM(total) as totalPrice')
-                            )->where('product_id', $productID)->where('company_id', $companyId)->first();
-                        DB::table('average_purchase_prices')->where('product_id', $productID)
-                            ->where('company_id', $companyId)
-                            ->update(['price' => number_format($averagePrice->totalPrice / $averagePrice->totalQuantity, 2, '.', '')]);
-                    }
-                }
-                if (empty($request->openingStock) || $request->openingStock == 0) {
-                    DB::table('supplier_ledgers')
-                        ->where('reference_no', "pur-$purchase->purchase_id")
-                        ->where('type', 'due')
-                        ->where('company_id', $companyId)
-                        ->update(array(
-                            'supplier_id' => $request->supplier_id,
-                            'due' => $request->total,
-                            'deposit' => 0,
-                            'date' => $request->date
-                        ));
-                    DB::table('supplier_ledgers')
-                        ->where('reference_no', "pur-$purchase->purchase_id")
-                        ->where('type', 'deposit')
-                        ->where('company_id', $companyId)
-                        ->delete();
-                    DB::table('cash_books')
-                        ->where('reference_no', "pur-$purchase->purchase_id")
-                        ->where('type', 'payment')
-                        ->where('company_id', $companyId)
-                        ->delete();
-                } else {
-                    DB::table('supplier_ledgers')
-                        ->where('reference_no', "pur-$purchase->purchase_id")->where('company_id', $companyId)->delete();
-                    DB::table('cash_books')
-                        ->where('reference_no', "pur-$purchase->purchase_id")
-                        ->where('type', 'payment')
-                        ->where('company_id', $companyId)
-                        ->delete();
-                }
+
 
 
                 if (!empty($request->paid)) {

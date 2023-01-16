@@ -375,6 +375,7 @@ class PurchaseController extends Controller
                             [
                                 'supplier_id' => $request->supplier_id,
                                 'amount' => $request->total,
+                                'payment_method' => $request->paymentMethod,
                                 'paid' => $request->cash + $request->bkash + $request->nagad + $request->bank,
                                 'opening' => $request->openingStock ? $request->openingStock : 0,
                                 'comment' => $request->comment,

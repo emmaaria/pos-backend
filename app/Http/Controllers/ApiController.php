@@ -1004,7 +1004,7 @@ class ApiController extends Controller
                                     $txGenerator->setNextInvoiceNo();
                                 }
                             } elseif ($paymentMethod == 'bank') {
-                                if (!empty($request->bank) && $request->bank > 0) {
+                                if (!empty($request->bank) && $request->bank > 0 && !empty($request->bankId)) {
                                     $supplierPaidTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('supplier_transaction');
                                     DB::table('supplier_ledgers')->insert(array(
                                         'supplier_id' => $request->supplier_id,

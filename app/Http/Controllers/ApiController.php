@@ -968,8 +968,9 @@ class ApiController extends Controller
                                     DB::table('bkash_transactions')->insert(array(
                                         'transaction_id' => $bkashTxId,
                                         'reference_no' => 'pur-' . $purchaseId,
-                                        'type' => 'payment',
-                                        'payment' => $request->bkash,
+                                        'type' => 'withdraw',
+                                        'withdraw' => $request->bkash,
+                                        'deposit' => 0,
                                         'date' => $request->date,
                                         'company_id' => $companyId,
                                         'comment' => "Paid for Purchase id ($purchaseId)"

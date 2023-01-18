@@ -36,11 +36,11 @@ Route::group(['middleware' => 'api'], function ($router) {
     Route::post('/customer/update', [\App\Http\Controllers\CustomerController::class, 'updateCustomer']);
     Route::post('/customer/delete', [\App\Http\Controllers\CustomerController::class, 'deleteCustomer']);
 
-    Route::get('/supplier', [\App\Http\Controllers\ApiController::class, 'getSuppliers']);
-    Route::get('/supplier/{id}', [\App\Http\Controllers\ApiController::class, 'getSupplier']);
-    Route::post('/supplier/store', [\App\Http\Controllers\ApiController::class, 'storeSupplier']);
-    Route::post('/supplier/update', [\App\Http\Controllers\ApiController::class, 'updateSupplier']);
-    Route::post('/supplier/delete', [\App\Http\Controllers\ApiController::class, 'deleteSupplier']);
+    Route::get('/supplier', [\App\Http\Controllers\SupplierController::class, 'getSuppliers']);
+    Route::get('/supplier/{id}', [\App\Http\Controllers\SupplierController::class, 'getSupplier']);
+    Route::post('/supplier/store', [\App\Http\Controllers\SupplierController::class, 'storeSupplier']);
+    Route::post('/supplier/update', [\App\Http\Controllers\SupplierController::class, 'updateSupplier']);
+    Route::post('/supplier/delete', [\App\Http\Controllers\SupplierController::class, 'deleteSupplier']);
 
     Route::get('/purchase', [\App\Http\Controllers\PurchaseController::class, 'getPurchases']);
     Route::get('/purchase/{id}', [\App\Http\Controllers\PurchaseController::class, 'getPurchase']);

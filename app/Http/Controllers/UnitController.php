@@ -9,12 +9,13 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
-class CategoryController extends Controller
+class UnitController extends Controller
 {
     public function __construct()
     {
         $this->middleware('auth.custom:api', ['except' => []]);
     }
+
     protected function guard()
     {
         return Auth::guard();
@@ -40,29 +41,30 @@ class CategoryController extends Controller
             return null;
         }
     }
+
     /*
     |--------------------------------------------------------------------------
-    | Category Start
+    | Unit Start
     |--------------------------------------------------------------------------
     */
-    public function getCategories(Request $request)
+    public function getUnits(Request $request)
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
             $name = $request->name;
             $all = $request->allData;
             if (empty($name) && empty($all)) {
-                $categories = DB::table('categories')->select('id', 'name')->where('company_id', $companyId)->paginate(50);
+                $units = DB::table('units')->select('id', 'name')->where('company_id', $companyId)->paginate(50);
                 $status = true;
-                return response()->json(compact('status', 'categories'));
+                return response()->json(compact('status', 'units'));
             } elseif (!empty($all)) {
-                $categories = DB::table('categories')->where('company_id', $companyId)->get();
+                $units = DB::table('units')->where('company_id', $companyId)->get();
                 $status = true;
-                return response()->json(compact('status', 'categories'));
+                return response()->json(compact('status', 'units'));
             } else {
-                $categories = DB::table('categories')->select('id', 'name')->where('name', 'like', '%' . $name . '%')->where('company_id', $companyId)->paginate(50);
+                $units = DB::table('units')->select('id', 'name')->where('name', 'like', '%' . $name . '%')->where('company_id', $companyId)->paginate(50);
                 $status = true;
-                return response()->json(compact('status', 'categories'));
+                return response()->json(compact('status', 'units'));
             }
         } else {
             $status = false;
@@ -71,13 +73,13 @@ class CategoryController extends Controller
         }
     }
 
-    public function getCategory($id)
+    public function getUnit($id)
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
-            $category = DB::table('categories')->where('id', $id)->where('company_id', $companyId)->first();
+            $unit = DB::table('units')->where('id', $id)->where('company_id', $companyId)->first();
             $status = true;
-            return response()->json(compact('status', 'category'));
+            return response()->json(compact('status', 'unit'));
         } else {
             $status = false;
             $errors = 'You are not authorized';
@@ -85,7 +87,7 @@ class CategoryController extends Controller
         }
     }
 
-    public function storeCategory(Request $request)
+    public function storeUnit(Request $request)
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
@@ -99,8 +101,8 @@ class CategoryController extends Controller
                 $errors = $validator->errors();
                 return response()->json(compact('status', 'errors'));
             }
-            $categoty = DB::table('categories')->insert(['name' => $request->name, 'company_id' => $companyId]);
-            if ($categoty) {
+            $unit = DB::table('units')->insert(['name' => $request->name, 'company_id' => $companyId]);
+            if ($unit) {
                 $status = true;
                 return response()->json(compact('status'));
             } else {
@@ -114,7 +116,7 @@ class CategoryController extends Controller
         }
     }
 
-    public function updateCategory(Request $request)
+    public function updateUnit(Request $request)
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
@@ -129,7 +131,7 @@ class CategoryController extends Controller
                 $errors = $validator->errors();
                 return response()->json(compact('status', 'errors'));
             }
-            DB::table('categories')->where('id', $request->id)->where('company_id', $companyId)->update(['name' => $request->name]);
+            DB::table('units')->where('id', $request->id)->where('company_id', $companyId)->update(['name' => $request->name]);
             $status = true;
             $message = 'Updated';
             return response()->json(compact('status', 'message'));
@@ -140,25 +142,25 @@ class CategoryController extends Controller
         }
     }
 
-    public function deleteCategory(Request $request)
+    public function deleteUnit(Request $request)
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
             $id = $request->id;
             if (!empty($id)) {
-                $deleted = DB::table('categories')->where('id', $id)->where('company_id', $companyId)->delete();
+                $deleted = DB::table('units')->where('id', $id)->where('company_id', $companyId)->delete();
                 if ($deleted) {
                     $status = true;
-                    $message = 'Category deleted';
+                    $message = 'Unit deleted';
                     return response()->json(compact('status', 'message'));
                 } else {
                     $status = false;
-                    $error = 'Category not found';
+                    $error = 'Unit not found';
                     return response()->json(compact('status', 'error'));
                 }
             } else {
                 $status = false;
-                $error = 'Category not found';
+                $error = 'Unit not found';
                 return response()->json(compact('status', 'error'));
             }
         } else {
@@ -169,7 +171,7 @@ class CategoryController extends Controller
     }
     /*
     |--------------------------------------------------------------------------
-    | Category End
+    | Unit End
     |--------------------------------------------------------------------------
     */
 }

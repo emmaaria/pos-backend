@@ -24,17 +24,17 @@ Route::group(['middleware' => 'api'], function ($router) {
     Route::post('/category/update', [\App\Http\Controllers\CategoryController::class, 'updateCategory']);
     Route::post('/category/delete', [\App\Http\Controllers\CategoryController::class, 'deleteCategory']);
 
-    Route::get('/unit', [\App\Http\Controllers\ApiController::class, 'getUnits']);
-    Route::get('/unit/{id}', [\App\Http\Controllers\ApiController::class, 'getUnit']);
-    Route::post('/unit/store', [\App\Http\Controllers\ApiController::class, 'storeUnit']);
-    Route::post('/unit/update', [\App\Http\Controllers\ApiController::class, 'updateUnit']);
-    Route::post('/unit/delete', [\App\Http\Controllers\ApiController::class, 'deleteUnit']);
+    Route::get('/unit', [\App\Http\Controllers\UnitController::class, 'getUnits']);
+    Route::get('/unit/{id}', [\App\Http\Controllers\UnitController::class, 'getUnit']);
+    Route::post('/unit/store', [\App\Http\Controllers\UnitController::class, 'storeUnit']);
+    Route::post('/unit/update', [\App\Http\Controllers\UnitController::class, 'updateUnit']);
+    Route::post('/unit/delete', [\App\Http\Controllers\UnitController::class, 'deleteUnit']);
 
-    Route::get('/customer', [\App\Http\Controllers\ApiController::class, 'getCustomers']);
-    Route::get('/customer/{id}', [\App\Http\Controllers\ApiController::class, 'getCustomer']);
-    Route::post('/customer/store', [\App\Http\Controllers\ApiController::class, 'storeCustomer']);
-    Route::post('/customer/update', [\App\Http\Controllers\ApiController::class, 'updateCustomer']);
-    Route::post('/customer/delete', [\App\Http\Controllers\ApiController::class, 'deleteCustomer']);
+    Route::get('/customer', [\App\Http\Controllers\CustomerController::class, 'getCustomers']);
+    Route::get('/customer/{id}', [\App\Http\Controllers\CustomerController::class, 'getCustomer']);
+    Route::post('/customer/store', [\App\Http\Controllers\CustomerController::class, 'storeCustomer']);
+    Route::post('/customer/update', [\App\Http\Controllers\CustomerController::class, 'updateCustomer']);
+    Route::post('/customer/delete', [\App\Http\Controllers\CustomerController::class, 'deleteCustomer']);
 
     Route::get('/supplier', [\App\Http\Controllers\ApiController::class, 'getSuppliers']);
     Route::get('/supplier/{id}', [\App\Http\Controllers\ApiController::class, 'getSupplier']);

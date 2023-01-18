@@ -2,15 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AveragePurchasePrice;
-use App\Models\Product;
-use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
-use Skycoder\InvoiceNumberGenerator\InvoiceNumberGeneratorService;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 

@@ -14,6 +14,7 @@ require_once('unit.php');
 require_once('customer.php');
 require_once('supplier.php');
 require_once('purchase.php');
+require_once('product.php');
 require_once('invoice.php');
 Route::group(['middleware' => 'api'], function ($router) {
     Route::post('login', [\App\Http\Controllers\ApiController::class, 'login']);

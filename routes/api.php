@@ -21,12 +21,6 @@ Route::group(['middleware' => 'api'], function ($router) {
 
     Route::get('/stock', [\App\Http\Controllers\ApiController::class, 'getStock']);
 
-    Route::get('/bank', [\App\Http\Controllers\BankController::class, 'getBanks']);
-    Route::get('/bank/{id}', [\App\Http\Controllers\BankController::class, 'getBank']);
-    Route::post('/bank/store', [\App\Http\Controllers\BankController::class, 'storeBank']);
-    Route::post('/bank/update', [\App\Http\Controllers\BankController::class, 'updateBank']);
-    Route::post('/bank/delete', [\App\Http\Controllers\BankController::class, 'deleteBank']);
-
     Route::get('/company', [\App\Http\Controllers\ApiController::class, 'getCompany']);
     Route::post('/company/update', [\App\Http\Controllers\ApiController::class, 'updateCompany']);
 });

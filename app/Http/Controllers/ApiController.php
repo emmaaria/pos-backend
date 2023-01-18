@@ -83,6 +83,7 @@ class ApiController extends Controller
             }
             $company = array(
                 'company_name' => $company->name,
+                'discount_type' => $company->discount_type,
                 'company_address' => $company->address,
                 'company_mobile' => $company->mobile,
                 'vat_number' => $company->vat_number,

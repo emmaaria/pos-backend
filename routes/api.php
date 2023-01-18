@@ -55,12 +55,12 @@ Route::group(['middleware' => 'api'], function ($router) {
     Route::post('/invoice/update', [\App\Http\Controllers\ApiController::class, 'updateInvoice']);
     Route::post('/invoice/delete', [\App\Http\Controllers\ApiController::class, 'deleteInvoice']);
 
-    Route::get('/product', [\App\Http\Controllers\ApiController::class, 'getProducts']);
-    Route::get('/product/{id}', [\App\Http\Controllers\ApiController::class, 'getProduct']);
-    Route::post('/product/store', [\App\Http\Controllers\ApiController::class, 'storeProduct']);
-    Route::post('/product/update', [\App\Http\Controllers\ApiController::class, 'updateProduct']);
-    Route::post('/product/delete', [\App\Http\Controllers\ApiController::class, 'deleteProduct']);
-    Route::get('/product-by-barcode', [\App\Http\Controllers\ApiController::class, 'getProductByBarcode']);
+    Route::get('/product', [\App\Http\Controllers\ProductController::class, 'getProducts']);
+    Route::get('/product/{id}', [\App\Http\Controllers\ProductController::class, 'getProduct']);
+    Route::post('/product/store', [\App\Http\Controllers\ProductController::class, 'storeProduct']);
+    Route::post('/product/update', [\App\Http\Controllers\ProductController::class, 'updateProduct']);
+    Route::post('/product/delete', [\App\Http\Controllers\ProductController::class, 'deleteProduct']);
+    Route::get('/product-by-barcode', [\App\Http\Controllers\ProductController::class, 'getProductByBarcode']);
 
     Route::get('/stock', [\App\Http\Controllers\ApiController::class, 'getStock']);
     Route::get('/products-with-stock', [\App\Http\Controllers\ApiController::class, 'getProductsWithStock']);

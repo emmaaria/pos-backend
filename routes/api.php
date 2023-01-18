@@ -48,12 +48,12 @@ Route::group(['middleware' => 'api'], function ($router) {
     Route::post('/purchase/update', [\App\Http\Controllers\PurchaseController::class, 'updatePurchase']);
     Route::post('/purchase/delete', [\App\Http\Controllers\PurchaseController::class, 'deletePurchase']);
 
-    Route::get('/invoice', [\App\Http\Controllers\ApiController::class, 'getInvoices']);
-    Route::get('/today-invoices', [\App\Http\Controllers\ApiController::class, 'getTodayInvoices']);
-    Route::get('/invoice/{id}', [\App\Http\Controllers\ApiController::class, 'getInvoice']);
-    Route::post('/invoice/store', [\App\Http\Controllers\ApiController::class, 'storeInvoice']);
-    Route::post('/invoice/update', [\App\Http\Controllers\ApiController::class, 'updateInvoice']);
-    Route::post('/invoice/delete', [\App\Http\Controllers\ApiController::class, 'deleteInvoice']);
+    Route::get('/invoice', [\App\Http\Controllers\InvoiceController::class, 'getInvoices']);
+    Route::get('/today-invoices', [\App\Http\Controllers\InvoiceController::class, 'getTodayInvoices']);
+    Route::get('/invoice/{id}', [\App\Http\Controllers\InvoiceController::class, 'getInvoice']);
+    Route::post('/invoice/store', [\App\Http\Controllers\InvoiceController::class, 'storeInvoice']);
+    Route::post('/invoice/update', [\App\Http\Controllers\InvoiceController::class, 'updateInvoice']);
+    Route::post('/invoice/delete', [\App\Http\Controllers\InvoiceController::class, 'deleteInvoice']);
 
     Route::get('/product', [\App\Http\Controllers\ProductController::class, 'getProducts']);
     Route::get('/product/{id}', [\App\Http\Controllers\ProductController::class, 'getProduct']);
@@ -63,7 +63,7 @@ Route::group(['middleware' => 'api'], function ($router) {
     Route::get('/product-by-barcode', [\App\Http\Controllers\ProductController::class, 'getProductByBarcode']);
 
     Route::get('/stock', [\App\Http\Controllers\ApiController::class, 'getStock']);
-    Route::get('/products-with-stock', [\App\Http\Controllers\ApiController::class, 'getProductsWithStock']);
+    Route::get('/products-with-stock', [\App\Http\Controllers\ProductController::class, 'getProductsWithStock']);
 
     Route::get('/bank', [\App\Http\Controllers\ApiController::class, 'getBanks']);
     Route::get('/bank/{id}', [\App\Http\Controllers\ApiController::class, 'getBank']);

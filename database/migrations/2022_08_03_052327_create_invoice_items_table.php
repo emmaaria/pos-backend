@@ -17,6 +17,9 @@ class CreateInvoiceItemsTable extends Migration
             $table->id();
             $table->string('invoice_id');
             $table->string('product_id');
+            $table->string('discount_type');
+            $table->string('discount');
+            $table->string('discount_amount');
             $table->string('price');
             $table->string('quantity');
             $table->string('total');

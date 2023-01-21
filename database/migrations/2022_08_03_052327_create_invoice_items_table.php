@@ -23,6 +23,7 @@ class CreateInvoiceItemsTable extends Migration
             $table->string('price');
             $table->string('quantity');
             $table->string('total');
+            $table->string('grand_total');
             $table->string('company_id')->nullable();
             $table->string('date');
             $table->timestamps();

@@ -16,6 +16,7 @@ class InvoiceController extends Controller
     {
         $this->middleware('auth.custom:api', ['except' => []]);
     }
+
     protected function guard()
     {
         return Auth::guard();
@@ -192,9 +193,6 @@ class InvoiceController extends Controller
                 $errors = $validator->errors();
                 return response()->json(compact('status', 'errors'));
             }
-            $products = $request->productIds;
-            $quantities = $request->productQuantities;
-            $prices = $request->productPrices;
             $customerName = '';
 
             if (!empty($request->customer_id)) {
@@ -219,13 +217,19 @@ class InvoiceController extends Controller
                     return response()->json(compact('status', 'errors'));
                 }
             }
+            $products = $request->productIds;
+            $quantities = $request->productQuantities;
+            $prices = $request->productPrices;
+            $discountTypes = $request->productDiscountTypes;
+            $productDiscounts = $request->productDiscounts;
+            $productDiscountedAmounts = $request->productDiscountedAmounts;
             if (count($products) > 0) {
                 try {
-                    $invoice = DB::transaction(function () use ($request, $companyId, $products, $quantities, $prices, $customerId, $customerName) {
+                    $invoice = DB::transaction(function () use ($productDiscountedAmounts, $request, $companyId, $products, $quantities, $prices, $customerId, $customerName, $productDiscounts, $discountTypes) {
                         $invoice = array();
                         $invoice['customer_name'] = $customerName;
                         $txGenerator = new InvoiceNumberGeneratorService();
-                        $invoiceId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('transaction');
+                        $invoiceId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('invoice');
                         $txGenerator->setNextInvoiceNo();
                         $invoice['invoice_id'] = $invoiceId;
                         $invoice['date'] = $request->date;
@@ -237,7 +241,21 @@ class InvoiceController extends Controller
                             $quantity = $quantities[$i];
                             $price = $prices[$i];
                             $total += $quantity * $price;
+                            $prDisType = '';
+                            $prDis = '';
+                            $prDisAmount = 0;
+                            if ($discountTypes[$i]) {
+                                $prDisType = $discountTypes[$i];
+                            }
+                            if ($productDiscounts[$i] && $productDiscounts[$i] !== '') {
+                                $prDis = $productDiscounts[$i];
+                            }
+                            if ($productDiscountedAmounts[$i] && $productDiscountedAmounts[$i] !== '') {
+                                $prDisAmount = $productDiscountedAmounts[$i];
+                            }
+
                             if ($quantity > 0) {
+                                $ttl = $quantity * $price;
                                 $invoiceItemData = array(
                                     'name' => $product->name,
                                     'invoice_id' => $invoiceId,
@@ -256,7 +274,11 @@ class InvoiceController extends Controller
                                     'company_id' => $companyId,
                                     'quantity' => $quantity,
                                     'date' => $request->date,
+                                    'discount_type' => $prDisType,
+                                    'discount_amount' => $prDisAmount,
+                                    'discount' => $prDis,
                                     'total' => $quantity * $price,
+                                    'grand_total' => $ttl - $prDisAmount,
                                 ]);
                                 $purchasePrice = DB::table('average_purchase_prices')->where('product_id', $productID)->where('company_id', $companyId)->first();
                                 $profit += ($quantity * $price) - ($quantity * $purchasePrice->price);
@@ -290,7 +312,7 @@ class InvoiceController extends Controller
                                 'profit' => $profit - $request->discountAmount,
                             ]
                         );
-                        $customerDueTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('customer_transaction');
+                        $customerDueTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('customer_transaction');
                         $grandTotal = $total - $request->discountAmount;
                         DB::table('customer_ledgers')->insert(array(
                             'customer_id' => $customerId,
@@ -308,7 +330,7 @@ class InvoiceController extends Controller
                             $paid = $grandTotal;
                         }
                         if ($paid > 0) {
-                            $customerPaidTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('transaction');
+                            $customerPaidTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('customer_transaction');
                             DB::table('customer_ledgers')->insert(array(
                                 'customer_id' => $customerId,
                                 'reference_no' => "inv-$invoiceId",
@@ -327,7 +349,7 @@ class InvoiceController extends Controller
                                 $dueAfterOnlinePayment = $grandTotal - $onlinePayments;
                                 $cashPaid = $request->cash;
                                 $change = $grandTotal - ($dueAfterOnlinePayment - $cashPaid);
-                                $cashTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('cash_transaction');
+                                $cashTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('cash_transaction');
 
                                 if ($change > 0) {
                                     DB::table('cash_books')->insert(array(
@@ -365,7 +387,7 @@ class InvoiceController extends Controller
                             }
 
                             if (!empty($request->bkash) && $request->bkash > 0) {
-                                $cashTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('bkash_transaction');
+                                $cashTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('bkash_transaction');
                                 DB::table('bkash_transactions')->insert(array(
                                     'transaction_id' => $cashTxId,
                                     'company_id' => $companyId,
@@ -379,7 +401,7 @@ class InvoiceController extends Controller
                             }
 
                             if (!empty($request->nagad) && $request->nagad > 0) {
-                                $cashTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('nagad_transaction');
+                                $cashTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('nagad_transaction');
                                 DB::table('nagad_transactions')->insert(array(
                                     'transaction_id' => $cashTxId,
                                     'reference_no' => "inv-$invoiceId",
@@ -393,7 +415,7 @@ class InvoiceController extends Controller
                             }
 
                             if (!empty($request->card) && $request->card > 0) {
-                                $cashTxId = $txGenerator->prefix('')->setCompanyId('1')->startAt(10000)->getInvoiceNumber('card_transaction');
+                                $cashTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('card_transaction');
                                 DB::table('card_transactions')->insert(array(
                                     'transaction_id' => $cashTxId,
                                     'company_id' => $companyId,

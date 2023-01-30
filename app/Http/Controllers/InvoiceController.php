@@ -290,11 +290,13 @@ class InvoiceController extends Controller
                         $paid = $request->cash + $request->bkash + $request->nagad + $request->card + $request->bank;
                         $invoice['paid'] = $paid;
                         $invoice['due'] = ($total - $request->discountAmount) - ($request->cash + $request->bkash + $request->nagad + $request->card + $request->bank);
+                        $setting = DB::table('companies')->where('company_id', $companyId)->first();
                         DB::table('invoices')->insert(
                             [
                                 'customer_id' => $customerId,
                                 'invoice_id' => $invoiceId,
                                 'comment' => $request->comment,
+                                'discount_setting' => $setting->discount_type,
                                 'date' => $request->date,
                                 'discount' => $request->discount,
                                 'discountAmount' => $request->discountAmount,

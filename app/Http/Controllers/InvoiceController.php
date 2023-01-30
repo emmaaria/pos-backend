@@ -121,13 +121,13 @@ class InvoiceController extends Controller
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
-            $purchaseData = DB::table('invoices')
+            $invoiceData = DB::table('invoices')
                 ->where('invoices.company_id', $companyId)
                 ->select('customers.name AS customer_name', 'invoices.*')
                 ->leftJoin('customers', 'customers.id', '=', 'invoices.customer_id')
                 ->where('invoices.invoice_id', $id)
                 ->first();
-            $purchaseItems = DB::table('invoice_items')
+            $invoiceItems = DB::table('invoice_items')
                 ->select('products.name', 'invoice_items.*')
                 ->where('invoice_items.company_id', $companyId)
                 ->join('products', 'products.product_id', '=', 'invoice_items.product_id')
@@ -162,8 +162,8 @@ class InvoiceController extends Controller
                 'card' => $card ? $card->deposit : 0,
             );
             $invoice = array(
-                'invoiceData' => $purchaseData,
-                'invoiceItems' => $purchaseItems,
+                'invoiceData' => $invoiceData,
+                'invoiceItems' => $invoiceItems,
                 'payments' => $payments
             );
             $status = true;
@@ -175,8 +175,7 @@ class InvoiceController extends Controller
         }
     }
 
-    public
-    function storeInvoice(Request $request)
+    public function storeInvoice(Request $request)
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
@@ -258,12 +257,8 @@ class InvoiceController extends Controller
                                 $ttl = $quantity * $price;
                                 $invoiceItemData = array(
                                     'name' => $product->name,
-                                    'invoice_id' => $invoiceId,
-                                    'product_id' => $productID,
                                     'price' => $price,
-                                    'company_id' => $companyId,
                                     'quantity' => $quantity,
-                                    'date' => $request->date,
                                     'total' => $quantity * $price,
                                 );
                                 $invoice['items'][] = $invoiceItemData;
@@ -465,8 +460,7 @@ class InvoiceController extends Controller
         }
     }
 
-    public
-    function updateInvoice(Request $request)
+    public function updateInvoice(Request $request)
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {

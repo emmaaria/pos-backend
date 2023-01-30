@@ -295,8 +295,8 @@ class InvoiceController extends Controller
                         $invoice['subtotal'] = $total;
                         $invoice['grandTotal'] = $total - $request->discountAmount;
                         $paid = $request->cash + $request->bkash + $request->nagad + $request->card + $request->bank;
-                        $invoice['paid'] = $request->cash + $request->bkash + $request->nagad + $request->card + $request->bank;
-                        $invoice['due'] = ($total - $request->discountAmount) - $paid;
+                        $invoice['paid'] = $paid;
+                        $invoice['due'] = ($total - $request->discountAmount) - ($request->cash + $request->bkash + $request->nagad + $request->card + $request->bank);
                         DB::table('invoices')->insert(
                             [
                                 'customer_id' => $customerId,

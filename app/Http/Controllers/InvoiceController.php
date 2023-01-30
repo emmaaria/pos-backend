@@ -48,15 +48,14 @@ class InvoiceController extends Controller
     | Invoice Start
     |--------------------------------------------------------------------------
     */
-    public
-    function getInvoices(Request $request)
+    public function getInvoices(Request $request)
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
             $name = $request->keyword;
             if (empty($name)) {
                 $invoices = DB::table('invoices')
-                    ->select('customers.name AS customer_name', 'invoices.invoice_id', 'invoices.total', 'invoices.discountAmount', 'invoices.comment', 'invoices.id', 'invoices.date')
+                    ->select('customers.name AS customer_name', 'invoices.invoice_id', 'invoices.grand_total', 'invoices.discountAmount', 'invoices.comment', 'invoices.id', 'invoices.date')
                     ->where('invoices.company_id', $companyId)
                     ->leftJoin('customers', 'customers.id', '=', 'invoices.customer_id')
                     ->orderBy('id', 'desc')
@@ -65,7 +64,7 @@ class InvoiceController extends Controller
                 return response()->json(compact('status', 'invoices'));
             } else {
                 $invoices = DB::table('invoices')
-                    ->select('customers.name AS customer_name', 'invoices.invoice_id', 'invoices.total', 'invoices.discountAmount', 'invoices.comment', 'invoices.id', 'invoices.date')
+                    ->select('customers.name AS customer_name', 'invoices.invoice_id', 'invoices.grand_total', 'invoices.discountAmount', 'invoices.comment', 'invoices.id', 'invoices.date')
                     ->where('invoices.company_id', $companyId)
                     ->leftJoin('customers', 'customers.id', '=', 'invoices.customer_id')
                     ->where('invoices.invoice_id', 'like', '%' . $name . '%')
@@ -116,8 +115,7 @@ class InvoiceController extends Controller
         }
     }
 
-    public
-    function getInvoice($id)
+    public function getInvoice($id)
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
@@ -302,6 +300,7 @@ class InvoiceController extends Controller
                                 'discountAmount' => $request->discountAmount,
                                 'discountType' => $request->discountType,
                                 'total' => $total,
+                                'grand_total' => $total - $request->discountAmount,
                                 'paid_amount' => $paid,
                                 'company_id' => $companyId,
                                 'profit' => $profit - $request->discountAmount,

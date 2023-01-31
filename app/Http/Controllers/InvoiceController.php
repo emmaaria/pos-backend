@@ -282,7 +282,7 @@ class InvoiceController extends Controller
                                     'grand_total' => $ttl - $prDisAmount,
                                 ]);
                                 $purchasePrice = DB::table('average_purchase_prices')->where('product_id', $productID)->where('company_id', $companyId)->first();
-                                $profit += ($quantity * $price) - ($quantity * $purchasePrice->price);
+                                $profit += ($quantity * $price) - ($quantity * $purchasePrice->price) - $prDisAmount;
                             }
                         }
                         $invoice['cash'] = $request->cash;
@@ -572,7 +572,7 @@ class InvoiceController extends Controller
                                     'grand_total' => $ttl - $prDisAmount,
                                 ]);
                                 $purchasePrice = DB::table('average_purchase_prices')->where('product_id', $productID)->where('company_id', $companyId)->first();
-                                $profit += ($quantity * $price) - ($quantity * $purchasePrice->price);
+                                $profit += ($quantity * $price) - ($quantity * $purchasePrice->price) - $prDisAmount;
                             }
                         }
                         $invoice['cash'] = $request->cash;

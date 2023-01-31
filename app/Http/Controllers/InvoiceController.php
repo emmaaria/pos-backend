@@ -294,6 +294,7 @@ class InvoiceController extends Controller
                         DB::table('invoices')->insert(
                             [
                                 'customer_id' => $customerId,
+                                'payment_method' => $request->payment_method,
                                 'invoice_id' => $invoiceId,
                                 'comment' => $request->comment,
                                 'discount_setting' => $setting->discount_type,
@@ -583,6 +584,7 @@ class InvoiceController extends Controller
                         DB::table('invoices')->where('invoice_id', $invoiceId)->where('company_id', $companyId)->update(
                             [
                                 'customer_id' => $customerId,
+                                'payment_method' => $request->payment_method,
                                 'comment' => $request->comment,
                                 'discount_setting' => $setting->discount_type,
                                 'date' => $request->date,

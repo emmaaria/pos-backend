@@ -160,12 +160,12 @@ class InvoiceController extends Controller
                 ->first();
 
             $payments = array(
-                'cash' => $cash->receive,
-                'bkash' => $bkash ? $bkash->deposit : 0,
-                'nagad' => $nagad ? $nagad->deposit : 0,
-                'card' => $card ? $card->deposit : 0,
+                'cash' => $cash ? $cash->receive : null,
+                'bkash' => $bkash ? $bkash->deposit : null,
+                'nagad' => $nagad ? $nagad->deposit : null,
+                'card' => $card ? $card->deposit : null,
                 'bankId' => $bank ? $bank->bank_id : null,
-                'bank' => $bank ? $bank->deposit : 0,
+                'bank' => $bank ? $bank->deposit : null,
             );
             $invoice = array(
                 'invoiceData' => $invoiceData,

@@ -153,11 +153,19 @@ class InvoiceController extends Controller
                 ->where('company_id', $companyId)
                 ->first();
 
+            $bank = DB::table('bank_ledgers')
+                ->where('reference_no', "inv-$id")
+                ->where('type', 'deposit')
+                ->where('company_id', $companyId)
+                ->first();
+
             $payments = array(
                 'cash' => $cash->receive,
                 'bkash' => $bkash ? $bkash->deposit : 0,
                 'nagad' => $nagad ? $nagad->deposit : 0,
                 'card' => $card ? $card->deposit : 0,
+                'bankId' => $bank ? $bank->bank_id : null,
+                'bank' => $bank ? $bank->deposit : 0,
             );
             $invoice = array(
                 'invoiceData' => $invoiceData,

@@ -1,6 +1,6 @@
 <?php
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\ApiController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,12 +16,13 @@ require_once('supplier.php');
 require_once('purchase.php');
 require_once('product.php');
 require_once('invoice.php');
+require_once('sale-return.php');
 Route::group(['middleware' => 'api'], function ($router) {
-    Route::post('login', [\App\Http\Controllers\ApiController::class, 'login']);
-    Route::get('/profile', [\App\Http\Controllers\ApiController::class, 'profile']);
+    Route::post('login', [ApiController::class, 'login']);
+    Route::get('/profile', [ApiController::class, 'profile']);
 
-    Route::get('/stock', [\App\Http\Controllers\ApiController::class, 'getStock']);
+    Route::get('/stock', [ApiController::class, 'getStock']);
 
-    Route::get('/company', [\App\Http\Controllers\ApiController::class, 'getCompany']);
-    Route::post('/company/update', [\App\Http\Controllers\ApiController::class, 'updateCompany']);
+    Route::get('/company', [ApiController::class, 'getCompany']);
+    Route::post('/company/update', [ApiController::class, 'updateCompany']);
 });

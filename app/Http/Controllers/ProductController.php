@@ -282,13 +282,8 @@ class ProductController extends Controller
                     ->where('products.company_id', $companyId)
                     ->groupBy('products.product_id')
                     ->get();
-                $sql = DB::table('products')
-                    ->selectRaw("products.name AS name, products.product_id, products.price,(select sum(quantity) from invoice_items where product_id= `products`.`product_id`) as 'sale',(select sum(quantity) from purchase_items where product_id= `products`.`product_id`) as 'purchase'")
-                    ->where('products.company_id', $companyId)
-                    ->groupBy('products.product_id')
-                    ->toSql();
                 $status = true;
-                return response()->json(compact('status', 'products', 'sql'));
+                return response()->json(compact('status', 'products'));
             } else {
                 $products = DB::table('products')
                     ->selectRaw("products.name AS name, products.product_id, products.price,(select sum(quantity) from invoice_items where product_id= `products`.`product_id`) as 'sale',(select sum(quantity) from purchase_items where product_id= `products`.`product_id`) as 'purchase'")

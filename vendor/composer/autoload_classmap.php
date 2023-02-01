@@ -52,6 +52,7 @@ return array(
     'App\\Models\\Purchase' => $baseDir . '/app/Models/Purchase.php',
     'App\\Models\\PurchaseItem' => $baseDir . '/app/Models/PurchaseItem.php',
     'App\\Models\\SaleReturn' => $baseDir . '/app/Models/SaleReturn.php',
+    'App\\Models\\SaleReturnItem' => $baseDir . '/app/Models/SaleReturnItem.php',
     'App\\Models\\Supplier' => $baseDir . '/app/Models/Supplier.php',
     'App\\Models\\SupplierLedger' => $baseDir . '/app/Models/SupplierLedger.php',
     'App\\Models\\SupplierProduct' => $baseDir . '/app/Models/SupplierProduct.php',

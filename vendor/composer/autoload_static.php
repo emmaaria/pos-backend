@@ -577,6 +577,7 @@ class ComposerStaticInitdf8e0732c33bb66ed26c29372ec37aaf
         'App\\Models\\Purchase' => __DIR__ . '/../..' . '/app/Models/Purchase.php',
         'App\\Models\\PurchaseItem' => __DIR__ . '/../..' . '/app/Models/PurchaseItem.php',
         'App\\Models\\SaleReturn' => __DIR__ . '/../..' . '/app/Models/SaleReturn.php',
+        'App\\Models\\SaleReturnItem' => __DIR__ . '/../..' . '/app/Models/SaleReturnItem.php',
         'App\\Models\\Supplier' => __DIR__ . '/../..' . '/app/Models/Supplier.php',
         'App\\Models\\SupplierLedger' => __DIR__ . '/../..' . '/app/Models/SupplierLedger.php',
         'App\\Models\\SupplierProduct' => __DIR__ . '/../..' . '/app/Models/SupplierProduct.php',

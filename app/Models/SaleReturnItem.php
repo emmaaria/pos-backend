@@ -8,4 +8,5 @@ use Illuminate\Database\Eloquent\Model;
 class SaleReturnItem extends Model
 {
     use HasFactory;
+    protected $fillable = ['return_id','invoice_id','product_id','date','returnQuantity','returnAmount','company_id'];
 }

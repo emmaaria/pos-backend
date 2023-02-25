@@ -100,7 +100,7 @@ class SaleReturnController extends Controller
                 $errors = $validator->errors();
                 return response()->json(compact('status', 'errors'));
             }
-            if ($request->account) {
+            if ($request->account == 'bank') {
                 if (empty($request->bankId)) {
                     $status = false;
                     $errors = 'Please select bank account';
@@ -121,7 +121,6 @@ class SaleReturnController extends Controller
                             $productID = $products[$i];
                             $quantity = $quantities[$i];
                             $price = $prices[$i];
-                            $total += $quantity * $price;
 
                             if ($quantity > 0) {
                                 DB::table('sale_return_items')->insert([

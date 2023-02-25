@@ -289,6 +289,7 @@ class ProductController extends Controller
                     ->selectRaw("products.name AS name, products.product_id, products.price,(select sum(quantity) from invoice_items where product_id= `products`.`product_id`) as 'sale',(select sum(quantity) from purchase_items where product_id= `products`.`product_id`) as 'purchase'")
                     ->where('products.company_id', $companyId)
                     ->where('products.name', 'like', '%' . $name . '%')
+                    ->orWhere('products.product_id', 'like', '%' . $name . '%')
                     ->leftJoin('invoice_items', 'invoice_items.product_id', '=', 'products.product_id')
                     ->leftJoin('purchase_items', 'purchase_items.product_id', '=', 'products.product_id')
                     ->groupBy('products.product_id')

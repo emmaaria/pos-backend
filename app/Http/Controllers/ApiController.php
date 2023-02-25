@@ -114,39 +114,7 @@ class ApiController extends Controller
     | Report Start
     |--------------------------------------------------------------------------
     */
-    public function getStock(Request $request)
-    {
-        $companyId = $this->getCompanyId();
-        if ($companyId) {
-            $name = $request->name;
-            if (empty($name)) {
-                $products = DB::table('products')
-                    ->selectRaw("products.name AS name, products.product_id, products.price,(select sum(quantity) from invoice_items where product_id= `products`.`product_id`) as 'sale',(select sum(quantity) from purchase_items where product_id= `products`.`product_id`) as 'purchase'")
-                    ->where('products.company_id', $companyId)
-                    ->leftJoin('invoice_items', 'invoice_items.product_id', '=', 'products.product_id')
-                    ->leftJoin('purchase_items', 'purchase_items.product_id', '=', 'products.product_id')
-                    ->groupBy('products.product_id', 'products.name')
-                    ->paginate(50);
-                $status = true;
-                return response()->json(compact('status', 'products'));
-            } else {
-                $products = DB::table('products')
-                    ->selectRaw("products.name AS name, products.product_id, products.price,(select sum(quantity) from invoice_items where product_id= `products`.`product_id`) as 'sale',(select sum(quantity) from purchase_items where product_id= `products`.`product_id`) as 'purchase'")
-                    ->where('products.company_id', $companyId)
-                    ->where('products.name', 'like', '%' . $name . '%')
-                    ->leftJoin('invoice_items', 'invoice_items.product_id', '=', 'products.product_id')
-                    ->leftJoin('purchase_items', 'purchase_items.product_id', '=', 'products.product_id')
-                    ->groupBy('products.product_id', 'products.name')
-                    ->paginate(50);
-                $status = true;
-                return response()->json(compact('status', 'products'));
-            }
-        } else {
-            $status = false;
-            $errors = 'You are not authorized';
-            return response()->json(compact('status', 'errors'));
-        }
-    }
+
 
     /*
     |--------------------------------------------------------------------------

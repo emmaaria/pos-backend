@@ -17,4 +17,5 @@ Route::group(['middleware' => 'api'], function ($router) {
     Route::post('/product/delete', [ProductController::class, 'deleteProduct']);
     Route::get('/product-by-barcode', [ProductController::class, 'getProductByBarcode']);
     Route::get('/products-with-stock', [ProductController::class, 'getProductsWithStock']);
+    Route::get('/stock', [ProductController::class, 'stock']);
 });

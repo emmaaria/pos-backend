@@ -20,6 +20,7 @@ class CreateSaleReturnsTable extends Migration
             $table->string('return_amount')->default(0);
             $table->string('note')->nullable();
             $table->string('date');
+            $table->string('account');
             $table->string('company_id');
             $table->timestamps();
         });

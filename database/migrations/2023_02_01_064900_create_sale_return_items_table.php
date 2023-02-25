@@ -16,11 +16,12 @@ class CreateSaleReturnItemsTable extends Migration
         Schema::create('sale_return_items', function (Blueprint $table) {
             $table->id();
             $table->string('return_id');
-            $table->string('invoice_id');
+            $table->string('invoice_id')->nullable();
             $table->string('product_id');
+            $table->string('price');
             $table->string('date');
-            $table->string('returnQuantity');
-            $table->string('returnAmount');
+            $table->string('quantity');
+            $table->string('total');
             $table->string('company_id');
             $table->timestamps();
         });

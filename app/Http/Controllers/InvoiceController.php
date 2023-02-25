@@ -392,9 +392,9 @@ class InvoiceController extends Controller
                             }
 
                             if (!empty($request->bkash) && $request->bkash > 0) {
-                                $cashTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('bkash_transaction');
+                                $bkashTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('bkash_transaction');
                                 DB::table('bkash_transactions')->insert(array(
-                                    'transaction_id' => $cashTxId,
+                                    'transaction_id' => $bkashTxId,
                                     'company_id' => $companyId,
                                     'reference_no' => "inv-$invoiceId",
                                     'type' => 'deposit',
@@ -406,9 +406,9 @@ class InvoiceController extends Controller
                             }
 
                             if (!empty($request->nagad) && $request->nagad > 0) {
-                                $cashTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('nagad_transaction');
+                                $nagadTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('nagad_transaction');
                                 DB::table('nagad_transactions')->insert(array(
-                                    'transaction_id' => $cashTxId,
+                                    'transaction_id' => $nagadTxId,
                                     'reference_no' => "inv-$invoiceId",
                                     'company_id' => $companyId,
                                     'type' => 'deposit',
@@ -420,9 +420,9 @@ class InvoiceController extends Controller
                             }
 
                             if (!empty($request->card) && $request->card > 0) {
-                                $cashTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('card_transaction');
+                                $cardTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('card_transaction');
                                 DB::table('card_transactions')->insert(array(
-                                    'transaction_id' => $cashTxId,
+                                    'transaction_id' => $cardTxId,
                                     'company_id' => $companyId,
                                     'reference_no' => "inv-$invoiceId",
                                     'type' => 'deposit',
@@ -692,9 +692,9 @@ class InvoiceController extends Controller
                             }
 
                             if (!empty($request->bkash) && $request->bkash > 0) {
-                                $cashTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('bkash_transaction');
+                                $bkashTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('bkash_transaction');
                                 DB::table('bkash_transactions')->insert(array(
-                                    'transaction_id' => $cashTxId,
+                                    'transaction_id' => $bkashTxId,
                                     'company_id' => $companyId,
                                     'reference_no' => "inv-$invoiceId",
                                     'type' => 'deposit',
@@ -706,9 +706,9 @@ class InvoiceController extends Controller
                             }
 
                             if (!empty($request->nagad) && $request->nagad > 0) {
-                                $cashTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('nagad_transaction');
+                                $nagadTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('nagad_transaction');
                                 DB::table('nagad_transactions')->insert(array(
-                                    'transaction_id' => $cashTxId,
+                                    'transaction_id' => $nagadTxId,
                                     'reference_no' => "inv-$invoiceId",
                                     'company_id' => $companyId,
                                     'type' => 'deposit',
@@ -720,9 +720,9 @@ class InvoiceController extends Controller
                             }
 
                             if (!empty($request->card) && $request->card > 0) {
-                                $cashTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('card_transaction');
+                                $cardTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('card_transaction');
                                 DB::table('card_transactions')->insert(array(
-                                    'transaction_id' => $cashTxId,
+                                    'transaction_id' => $cardTxId,
                                     'company_id' => $companyId,
                                     'reference_no' => "inv-$invoiceId",
                                     'type' => 'deposit',

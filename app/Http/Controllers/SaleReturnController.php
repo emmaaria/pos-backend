@@ -81,6 +81,161 @@ class SaleReturnController extends Controller
         }
     }
 
+    public function storeReturn(Request $request)
+    {
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $validator = Validator::make($request->all(),
+                [
+                    'date' => 'required',
+                    'productIds' => 'required',
+                    'productQuantities' => 'required',
+                    'productPrices' => 'required',
+                    'total' => 'required',
+                    'account' => 'required',
+                ]
+            );
+            if ($validator->fails()) {
+                $status = false;
+                $errors = $validator->errors();
+                return response()->json(compact('status', 'errors'));
+            }
+            if ($request->account) {
+                if (empty($request->bankId)) {
+                    $status = false;
+                    $errors = 'Please select bank account';
+                    return response()->json(compact('status', 'errors'));
+                }
+            }
+            $customerId = $request->customerId;
+            $products = $request->productIds;
+            $quantities = $request->productQuantities;
+            $prices = $request->productPrices;
+            if (count($products) > 0) {
+                try {
+                    DB::transaction(function () use ($request, $companyId, $products, $quantities, $prices, $customerId) {
+                        $txGenerator = new InvoiceNumberGeneratorService();
+                        $returnId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('return');
+                        $txGenerator->setNextInvoiceNo();
+                        for ($i = 0, $n = count($products); $i < $n; $i++) {
+                            $productID = $products[$i];
+                            $quantity = $quantities[$i];
+                            $price = $prices[$i];
+                            $total += $quantity * $price;
+
+                            if ($quantity > 0) {
+                                DB::table('sale_return_items')->insert([
+                                    'return_id' => $returnId,
+                                    'product_id' => $productID,
+                                    'price' => $price,
+                                    'company_id' => $companyId,
+                                    'quantity' => $quantity,
+                                    'date' => $request->date,
+                                    'total' => $quantity * $price,
+                                ]);
+                            }
+                        }
+                        DB::table('sale_returns')->insert(
+                            [
+                                'return_id' => $returnId,
+                                'return_amount' => $request->total,
+                                'note' => $request->note,
+                                'date' => $request->date,
+                                'account' => $request->account,
+                                'company_id' => $companyId,
+                            ]
+                        );
+                        if ($request->account == 'cash' && !empty($request->total)){
+                            $cashTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('customer_transaction');
+                            DB::table('cash_books')->insert(array(
+                                'transaction_id' => $cashTxId,
+                                'company_id' => $companyId,
+                                'reference_no' => "ret-$returnId",
+                                'type' => 'payment',
+                                'payment' => $request->total,
+                                'date' => $request->date,
+                                'comment' => "Cash deduct for Return No ($returnId)"
+                            ));
+                        }
+
+                        if ($request->account == 'bkash' && !empty($request->total)) {
+                            $bkashTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('bkash_transaction');
+                            DB::table('bkash_transactions')->insert(array(
+                                'transaction_id' => $bkashTxId,
+                                'company_id' => $companyId,
+                                'reference_no' => "ret-$returnId",
+                                'type' => 'withdraw',
+                                'withdraw' => $request->total,
+                                'date' => $request->date,
+                                'comment' => "Deduct for Return No ($returnId)"
+                            ));
+                            $txGenerator->setNextInvoiceNo();
+                        }
+
+                        if ($request->account == 'nagad' && !empty($request->total)) {
+                            $nagadTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('nagad_transaction');
+                            DB::table('nagad_transactions')->insert(array(
+                                'transaction_id' => $nagadTxId,
+                                'company_id' => $companyId,
+                                'reference_no' => "ret-$returnId",
+                                'type' => 'withdraw',
+                                'withdraw' => $request->total,
+                                'date' => $request->date,
+                                'comment' => "Deduct for Return No ($returnId)"
+                            ));
+                            $txGenerator->setNextInvoiceNo();
+                        }
+
+                        if ($request->account == 'bank' && !empty($request->bankId) && !empty($request->total)) {
+                            $bankTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('bank_transaction');
+                            DB::table('bank_ledgers')->insert(array(
+                                'transaction_id' => $bankTxId,
+                                'reference_no' => 'ret-' . $returnId,
+                                'type' => 'withdraw',
+                                'withdraw' => $request->total,
+                                'bank_id' => $request->bankId,
+                                'date' => $request->date,
+                                'company_id' => $companyId,
+                                'comment' => "Deduct for Return No ($returnId)"
+                            ));
+                            $txGenerator->setNextInvoiceNo();
+                        }
+
+                        if ($request->account == 'customer' && !empty($request->total)) {
+                            $customerTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('customer_transaction');
+                            DB::table('customer_ledgers')->insert(array(
+                                'customer_id' => $customerId,
+                                'transaction_id' => $customerTxId,
+                                'reference_no' => "ret-$returnId",
+                                'type' => 'deposit',
+                                'company_id' => $companyId,
+                                'deposit' => $request->total,
+                                'date' => $request->date,
+                                'comment' => "Due Deduct for Return No ($returnId)"
+                            ));
+                            $txGenerator->setNextInvoiceNo();
+                        }
+                    });
+                    $status = true;
+                    $message = 'Return saved';
+                    return response()->json(compact('status', 'message'));
+                } catch (Exception $e) {
+                    $status = false;
+                    $errors = $e;
+                    return response()->json(compact('status', 'errors'));
+                }
+            } else {
+                $status = false;
+                $error = 'Please add at least one product';
+                return response()->json(compact('status', 'error'));
+            }
+        } else {
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Return End

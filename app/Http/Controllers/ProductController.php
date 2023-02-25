@@ -321,7 +321,7 @@ class ProductController extends Controller
                 return response()->json(compact('status', 'products'));
             } else {
                 $products = DB::table('products')
-                    ->selectRaw("products.name AS name, products.product_id, products.price,(select sum(quantity) from invoice_items where product_id= `products`.`product_id`) + (select sum(quantity) from sale_return_items where product_id= `products`.`product_id`) as 'sale',(select sum(quantity) from purchase_items where product_id= `products`.`product_id`) as 'purchase'")
+                    ->selectRaw("products.name AS name, products.product_id, products.price,(select sum(quantity) from invoice_items where product_id= `products`.`product_id`) - (select sum(quantity) from sale_return_items where product_id= `products`.`product_id`) as 'sale',(select sum(quantity) from purchase_items where product_id= `products`.`product_id`) as 'purchase'")
                     ->where('products.company_id', $companyId)
                     ->where('products.name', 'like', '%' . $name . '%')
                     ->orWhere('products.product_id', 'like', '%' . $name . '%')

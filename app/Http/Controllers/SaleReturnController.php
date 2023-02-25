@@ -141,6 +141,7 @@ class SaleReturnController extends Controller
                                 'note' => $request->note,
                                 'date' => $request->date,
                                 'account' => $request->account,
+                                'type' => 'dsr',
                                 'company_id' => $companyId,
                             ]
                         );

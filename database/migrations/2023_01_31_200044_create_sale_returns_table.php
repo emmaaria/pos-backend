@@ -21,6 +21,7 @@ class CreateSaleReturnsTable extends Migration
             $table->string('note')->nullable();
             $table->string('date');
             $table->string('account');
+            $table->string('type');
             $table->string('company_id');
             $table->timestamps();
         });

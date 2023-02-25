@@ -770,8 +770,7 @@ class InvoiceController extends Controller
         }
     }
 
-    public
-    function deleteInvoice(Request $request)
+    public function deleteInvoice(Request $request)
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {

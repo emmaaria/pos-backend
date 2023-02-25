@@ -231,6 +231,34 @@ class SaleReturnController extends Controller
         }
     }
 
+    public function delete(Request $request)
+    {
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $id = $request->id;
+            if (!empty($id)) {
+                DB::table('sale_returns')->where('return_id', $id)->where('company_id', $companyId)->delete();
+                DB::table('sale_return_items')->where('return_id', $id)->where('company_id', $companyId)->delete();
+                DB::table('customer_ledgers')->where('reference_no', "ret-$id")->where('company_id', $companyId)->delete();
+                DB::table('nagad_transactions')->where('reference_no', "ret-$id")->where('company_id', $companyId)->delete();
+                DB::table('bkash_transactions')->where('reference_no', "ret-$id")->where('company_id', $companyId)->delete();
+                DB::table('cash_books')->where('reference_no', "ret-$id")->where('company_id', $companyId)->delete();
+                DB::table('bank_ledgers')->where('reference_no', "ret-$id")->where('company_id', $companyId)->delete();
+                $status = true;
+                $message = 'Return deleted';
+                return response()->json(compact('status', 'message'));
+            } else {
+                $status = false;
+                $error = 'Return not found';
+                return response()->json(compact('status', 'error'));
+            }
+        } else {
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Return End

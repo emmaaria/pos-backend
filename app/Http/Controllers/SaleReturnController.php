@@ -55,24 +55,19 @@ class SaleReturnController extends Controller
         if ($companyId) {
             $name = $request->keyword;
             if (empty($name)) {
-                $invoices = DB::table('invoices')
-                    ->select('customers.name AS customer_name', 'invoices.invoice_id', 'invoices.grand_total', 'invoices.discountAmount', 'invoices.comment', 'invoices.id', 'invoices.date')
-                    ->where('invoices.company_id', $companyId)
-                    ->leftJoin('customers', 'customers.id', '=', 'invoices.customer_id')
+                $returns = DB::table('sale_returns')
+                    ->where('sale_returns.company_id', $companyId)
                     ->orderBy('id', 'desc')
                     ->paginate(50);
                 $status = true;
-                return response()->json(compact('status', 'invoices'));
+                return response()->json(compact('status', 'returns'));
             } else {
-                $invoices = DB::table('invoices')
-                    ->select('customers.name AS customer_name', 'invoices.invoice_id', 'invoices.grand_total', 'invoices.discountAmount', 'invoices.comment', 'invoices.id', 'invoices.date')
-                    ->where('invoices.company_id', $companyId)
-                    ->leftJoin('customers', 'customers.id', '=', 'invoices.customer_id')
-                    ->where('invoices.invoice_id', 'like', '%' . $name . '%')
-                    ->orWhere('customers.name', 'like', '%' . $name . '%')
+                $returns = DB::table('sale_returns')
+                    ->where('sale_returns.company_id', $companyId)
+                    ->where('sale_returns.return_id', 'like', '%' . $name . '%')
                     ->paginate(50);
                 $status = true;
-                return response()->json(compact('status', 'invoices'));
+                return response()->json(compact('status', 'returns'));
             }
         } else {
             $status = false;

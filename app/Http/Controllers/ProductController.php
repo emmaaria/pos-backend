@@ -289,9 +289,6 @@ class ProductController extends Controller
                     ->where('products.company_id', $companyId)
                     ->where('products.name', 'like', '%' . $name . '%')
                     ->orWhere('products.product_id', 'like', '%' . $name . '%')
-                    ->leftJoin('invoice_items', 'invoice_items.product_id', '=', 'products.product_id')
-                    ->leftJoin('purchase_items', 'purchase_items.product_id', '=', 'products.product_id')
-                    ->groupBy('products.product_id')
                     ->get();
                 $status = true;
                 return response()->json(compact('status', 'products'));
@@ -311,11 +308,6 @@ class ProductController extends Controller
             if (empty($name)) {
                 $products = DB::table('products')
                     ->selectRaw("products.name AS name, products.product_id, products.price,(select sum(quantity) from invoice_items where product_id= `products`.`product_id`) - (select sum(quantity) from sale_return_items where product_id= `products`.`product_id`) as 'sale',(select sum(quantity) from purchase_items where product_id= `products`.`product_id`) as 'purchase'")
-                    ->where('products.company_id', $companyId)
-                    ->leftJoin('invoice_items', 'invoice_items.product_id', '=', 'products.product_id')
-                    ->leftJoin('purchase_items', 'purchase_items.product_id', '=', 'products.product_id')
-                    ->leftJoin('sale_return_items', 'sale_return_items.product_id', '=', 'products.product_id')
-                    ->groupBy('products.product_id', 'products.name')
                     ->paginate(50);
                 $status = true;
                 return response()->json(compact('status', 'products'));
@@ -325,10 +317,6 @@ class ProductController extends Controller
                     ->where('products.company_id', $companyId)
                     ->where('products.name', 'like', '%' . $name . '%')
                     ->orWhere('products.product_id', 'like', '%' . $name . '%')
-                    ->leftJoin('invoice_items', 'invoice_items.product_id', '=', 'products.product_id')
-                    ->leftJoin('purchase_items', 'purchase_items.product_id', '=', 'products.product_id')
-                    ->leftJoin('sale_return_items', 'sale_return_items.product_id', '=', 'products.product_id')
-                    ->groupBy('products.product_id', 'products.name')
                     ->paginate(50);
                 $status = true;
                 return response()->json(compact('status', 'products'));

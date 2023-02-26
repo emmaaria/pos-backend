@@ -190,15 +190,33 @@ class ExpenseController extends Controller
             $name = $request->name;
             $all = $request->allData;
             if (empty($name) && empty($all)) {
-                $expenses = DB::table('expenses')->select('expense_id', 'note', 'amount')->where('company_id', $companyId)->orderBy('id', 'desc')->paginate(50);
+                $expenses = DB::table('expenses')
+                            ->select('expenses.expense_id', 'expenses.note', 'expenses.amount', 'expense_categories.name as title')
+                            ->leftJoin('expense_categories', 'expense_categories.id', '=', 'expenses.category')
+                            ->where('company_id', $companyId)
+                            ->orderBy('id', 'desc')
+                            ->paginate(50);
                 $status = true;
                 return response()->json(compact('status', 'expenses'));
             } elseif (!empty($all)) {
-                $expenses = DB::table('expenses')->where('company_id', $companyId)->orderBy('id', 'desc')->get();
+                $expenses = DB::table('expenses')
+                    ->where('company_id', $companyId)
+                    ->select('expenses.expense_id', 'expenses.note', 'expenses.amount', 'expense_categories.name as title')
+                    ->leftJoin('expense_categories', 'expense_categories.id', '=', 'expenses.category')
+                    ->orderBy('id', 'desc')
+                    ->get();
                 $status = true;
                 return response()->json(compact('status', 'expenses'));
             } else {
-                $expenses = DB::table('expenses')->select('id', 'name')->orderBy('id', 'desc')->where('name', 'like', '%' . $name . '%')->where('company_id', $companyId)->paginate(50);
+                $expenses = DB::table('expenses')
+                    ->select('expenses.expense_id', 'expenses.note', 'expenses.amount', 'expense_categories.name as title')
+                    ->leftJoin('expense_categories', 'expense_categories.id', '=', 'expenses.category')
+                    ->where('expenses.expense_id', 'like', '%' . $name . '%')
+                    ->orWhere('expense_categories.name', 'like', '%' . $name . '%')
+                    ->orderBy('id', 'desc')
+                    ->where('name', 'like', '%' . $name . '%')
+                    ->where('company_id', $companyId)
+                    ->paginate(50);
                 $status = true;
                 return response()->json(compact('status', 'expenses'));
             }

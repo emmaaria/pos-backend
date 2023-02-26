@@ -190,7 +190,7 @@ class ExpenseController extends Controller
             $name = $request->name;
             $all = $request->allData;
             if (empty($name) && empty($all)) {
-                $expenses = DB::table('expenses')->select('id', 'name')->where('company_id', $companyId)->orderBy('id', 'desc')->paginate(50);
+                $expenses = DB::table('expenses')->select('expense_id', 'note', 'amount')->where('company_id', $companyId)->orderBy('id', 'desc')->paginate(50);
                 $status = true;
                 return response()->json(compact('status', 'expenses'));
             } elseif (!empty($all)) {

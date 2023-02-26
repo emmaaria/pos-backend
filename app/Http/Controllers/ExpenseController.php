@@ -188,17 +188,17 @@ class ExpenseController extends Controller
             $name = $request->name;
             $all = $request->allData;
             if (empty($name) && empty($all)) {
-                $categories = DB::table('expenses')->select('id', 'name')->where('company_id', $companyId)->orderBy('id', 'desc')->paginate(50);
+                $expenses = DB::table('expenses')->select('id', 'name')->where('company_id', $companyId)->orderBy('id', 'desc')->paginate(50);
                 $status = true;
-                return response()->json(compact('status', 'categories'));
+                return response()->json(compact('status', 'expenses'));
             } elseif (!empty($all)) {
-                $categories = DB::table('expenses')->where('company_id', $companyId)->orderBy('id', 'desc')->get();
+                $expenses = DB::table('expenses')->where('company_id', $companyId)->orderBy('id', 'desc')->get();
                 $status = true;
-                return response()->json(compact('status', 'categories'));
+                return response()->json(compact('status', 'expenses'));
             } else {
-                $categories = DB::table('expenses')->select('id', 'name')->orderBy('id', 'desc')->where('name', 'like', '%' . $name . '%')->where('company_id', $companyId)->paginate(50);
+                $expenses = DB::table('expenses')->select('id', 'name')->orderBy('id', 'desc')->where('name', 'like', '%' . $name . '%')->where('company_id', $companyId)->paginate(50);
                 $status = true;
-                return response()->json(compact('status', 'categories'));
+                return response()->json(compact('status', 'expenses'));
             }
         } else {
             $status = false;

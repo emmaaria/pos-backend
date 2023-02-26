@@ -193,14 +193,14 @@ class ExpenseController extends Controller
                 $expenses = DB::table('expenses')
                             ->select('expenses.expense_id', 'expenses.note', 'expenses.amount', 'expense_categories.name as title')
                             ->leftJoin('expense_categories', 'expense_categories.id', '=', 'expenses.category')
-                            ->where('company_id', $companyId)
+                    ->where('expenses.company_id', $companyId)
                             ->orderBy('id', 'desc')
                             ->paginate(50);
                 $status = true;
                 return response()->json(compact('status', 'expenses'));
             } elseif (!empty($all)) {
                 $expenses = DB::table('expenses')
-                    ->where('company_id', $companyId)
+                    ->where('expenses.company_id', $companyId)
                     ->select('expenses.expense_id', 'expenses.note', 'expenses.amount', 'expense_categories.name as title')
                     ->leftJoin('expense_categories', 'expense_categories.id', '=', 'expenses.category')
                     ->orderBy('id', 'desc')
@@ -215,7 +215,7 @@ class ExpenseController extends Controller
                     ->orWhere('expense_categories.name', 'like', '%' . $name . '%')
                     ->orderBy('id', 'desc')
                     ->where('name', 'like', '%' . $name . '%')
-                    ->where('company_id', $companyId)
+                    ->where('expenses.company_id', $companyId)
                     ->paginate(50);
                 $status = true;
                 return response()->json(compact('status', 'expenses'));

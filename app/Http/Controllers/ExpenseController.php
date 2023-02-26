@@ -77,9 +77,9 @@ class ExpenseController extends Controller
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
-            $unit = DB::table('expense_categories')->where('id', $id)->where('company_id', $companyId)->first();
+            $category = DB::table('expense_categories')->where('id', $id)->where('company_id', $companyId)->first();
             $status = true;
-            return response()->json(compact('status', 'unit'));
+            return response()->json(compact('status', 'category'));
         } else {
             $status = false;
             $errors = 'You are not authorized';

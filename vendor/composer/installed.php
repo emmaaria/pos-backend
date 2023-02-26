@@ -3,7 +3,7 @@
         'name' => 'laravel/laravel',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '25258f7f4285146e85bb0e5d1d4620d50ef8863d',
+        'reference' => 'baa6543f14a90ca386ad1e3e23cea0078b3d068f',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -397,7 +397,7 @@
         'laravel/laravel' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '25258f7f4285146e85bb0e5d1d4620d50ef8863d',
+            'reference' => 'baa6543f14a90ca386ad1e3e23cea0078b3d068f',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
@@ -971,6 +971,24 @@
             'aliases' => array(
                 0 => '2.x-dev',
             ),
+            'dev_requirement' => false,
+        ),
+        'spatie/laravel-activitylog' => array(
+            'pretty_version' => '4.7.3',
+            'version' => '4.7.3.0',
+            'reference' => 'ec65a478a909b8df1b4f0c3c45de2592ca7639e5',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../spatie/laravel-activitylog',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'spatie/laravel-package-tools' => array(
+            'pretty_version' => '1.12.1',
+            'version' => '1.12.1.0',
+            'reference' => '09f80fa240d44fafb1c70657c74ee44ffa929357',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../spatie/laravel-package-tools',
+            'aliases' => array(),
             'dev_requirement' => false,
         ),
         'swiftmailer/swiftmailer' => array(

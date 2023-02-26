@@ -20,6 +20,7 @@ class CreateExpensesTable extends Migration
             $table->string('note')->nullable();
             $table->string('account');
             $table->string('amount');
+            $table->string('date');
             $table->string('company_id');
             $table->timestamps();
         });

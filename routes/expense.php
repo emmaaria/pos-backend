@@ -11,4 +11,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::group(['middleware' => 'api'], function ($router) {
     Route::get('/expense/category', [ExpenseController::class, 'categoryIndex']);
+    Route::get('/expense/category/{id}', [ExpenseController::class, 'singleCategory']);
+    Route::post('/expense/category/store', [ExpenseController::class, 'storeCategory']);
+    Route::post('/expense/category/update', [ExpenseController::class, 'updateCategory']);
+    Route::post('/expense/category/delete', [ExpenseController::class, 'deleteCategory']);
 });

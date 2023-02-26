@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class ExpenseController extends Controller
@@ -64,6 +65,103 @@ class ExpenseController extends Controller
                 $categories = DB::table('expense_categories')->select('id', 'name')->where('name', 'like', '%' . $name . '%')->where('company_id', $companyId)->paginate(50);
                 $status = true;
                 return response()->json(compact('status', 'categories'));
+            }
+        } else {
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
+    }
+
+    public function singleCategory($id)
+    {
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $unit = DB::table('expense_categories')->where('id', $id)->where('company_id', $companyId)->first();
+            $status = true;
+            return response()->json(compact('status', 'unit'));
+        } else {
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
+    }
+
+    public function storeCategory(Request $request)
+    {
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $validator = Validator::make($request->all(),
+                [
+                    'name' => 'required',
+                ]
+            );
+            if ($validator->fails()) {
+                $status = false;
+                $errors = $validator->errors();
+                return response()->json(compact('status', 'errors'));
+            }
+            $unit = DB::table('expense_categories')->insert(['name' => $request->name, 'company_id' => $companyId]);
+            if ($unit) {
+                $status = true;
+                return response()->json(compact('status'));
+            } else {
+                $status = false;
+                return response()->json(compact('status'));
+            }
+        } else {
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
+    }
+
+    public function updateCategory(Request $request)
+    {
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $validator = Validator::make($request->all(),
+                [
+                    'id' => 'required',
+                    'name' => 'required',
+                ]
+            );
+            if ($validator->fails()) {
+                $status = false;
+                $errors = $validator->errors();
+                return response()->json(compact('status', 'errors'));
+            }
+            DB::table('expense_categories')->where('id', $request->id)->where('company_id', $companyId)->update(['name' => $request->name]);
+            $status = true;
+            $message = 'Updated';
+            return response()->json(compact('status', 'message'));
+        } else {
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
+    }
+
+    public function deleteCategory(Request $request)
+    {
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $id = $request->id;
+            if (!empty($id)) {
+                $deleted = DB::table('expense_categories')->where('id', $id)->where('company_id', $companyId)->delete();
+                if ($deleted) {
+                    $status = true;
+                    $message = 'Category deleted';
+                    return response()->json(compact('status', 'message'));
+                } else {
+                    $status = false;
+                    $error = 'Category not found';
+                    return response()->json(compact('status', 'error'));
+                }
+            } else {
+                $status = false;
+                $error = 'Category not found';
+                return response()->json(compact('status', 'error'));
             }
         } else {
             $status = false;

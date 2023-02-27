@@ -159,13 +159,13 @@ class SupplierController extends Controller
                         }
                     }
                 });
+                $status = true;
+                return response()->json(compact('status'));
             } catch (Exception $e) {
                 $status = false;
                 $errors = 'Something went wrong';
                 return response()->json(compact('status', 'errors'));
             }
-            $status = true;
-            return response()->json(compact('status'));
         } else {
             $status = false;
             $errors = 'You are not authorized';

@@ -272,7 +272,7 @@ class ExpenseController extends Controller
                             'type' => 'payment',
                             'payment' => $request->amount,
                             'date' => $request->date,
-                            'comment' => $request->note !== '' ? $request->note : "Cash deduct for $categoryName->name (Expense ID : $expenseId"
+                            'comment' => $request->note !== '' ? $request->note." (Expense ID : $expenseId)" : "Deduct for $categoryName->name (Expense ID : $expenseId)"
                         ));
                     }
 
@@ -285,7 +285,7 @@ class ExpenseController extends Controller
                             'type' => 'withdraw',
                             'withdraw' => $request->amount,
                             'date' => $request->date,
-                            'comment' => $request->note !== '' ? $request->note : "Deduct for $categoryName->name (Expense ID : $expenseId"
+                            'comment' => $request->note !== '' ? $request->note." (Expense ID : $expenseId)" : "Deduct for $categoryName->name (Expense ID : $expenseId)"
                         ));
                         $txGenerator->setNextInvoiceNo();
                     }
@@ -299,7 +299,7 @@ class ExpenseController extends Controller
                             'type' => 'withdraw',
                             'withdraw' => $request->amount,
                             'date' => $request->date,
-                            'comment' => $request->note !== '' ? $request->note : "Deduct for $categoryName->name (Expense ID : $expenseId"
+                            'comment' => $request->note !== '' ? $request->note." (Expense ID : $expenseId)" : "Deduct for $categoryName->name (Expense ID : $expenseId)"
                         ));
                         $txGenerator->setNextInvoiceNo();
                     }
@@ -314,7 +314,7 @@ class ExpenseController extends Controller
                             'bank_id' => $request->bankId,
                             'date' => $request->date,
                             'company_id' => $companyId,
-                            'comment' => $request->note !== '' ? $request->note : "Deduct for $categoryName->name (Expense ID : $expenseId"
+                            'comment' => $request->note !== '' ? $request->note." (Expense ID : $expenseId)" : "Deduct for $categoryName->name (Expense ID : $expenseId)"
                         ));
                         $txGenerator->setNextInvoiceNo();
                     }

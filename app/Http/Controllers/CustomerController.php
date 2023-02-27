@@ -63,7 +63,7 @@ class CustomerController extends Controller
                     ->paginate(50);
                 $status = true;
                 return response()->json(compact('status', 'customers'));
-            }elseif ($all){
+            } elseif ($all) {
                 $customers = DB::table('customers')
                     ->select('customers.id', 'customers.name', 'customers.mobile', 'customers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
                     ->leftJoin('customer_ledgers', 'customer_ledgers.customer_id', '=', 'customers.id')
@@ -218,6 +218,139 @@ class CustomerController extends Controller
             } else {
                 $status = false;
                 $error = 'Customer not found';
+                return response()->json(compact('status', 'error'));
+            }
+        } else {
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
+    }
+
+    public function storePayment(Request $request)
+    {
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $validator = Validator::make($request->all(),
+                [
+                    'name' => 'required',
+                    'customer' => 'required',
+                    'date' => 'required',
+                    'amount' => 'required',
+                    'account' => 'required',
+                    'bankId' => 'required_if:account,==,bank',
+                ]
+            );
+            if ($validator->fails()) {
+                $status = false;
+                $errors = $validator->errors();
+                return response()->json(compact('status', 'errors'));
+            }
+            try {
+                DB::transaction(function () use ($request, $companyId) {
+                    $txGenerator = new InvoiceNumberGeneratorService();
+                    $paidId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('customer_transaction');
+                    $txGenerator->setNextInvoiceNo();
+                    DB::table('customer_ledgers')->insert(array(
+                        'customer_id' => $request->customer,
+                        'transaction_id' => $paidId,
+                        'reference_no' => "c-rec-$paidId",
+                        'type' => 'deposit',
+                        'company_id' => $companyId,
+                        'due' => 0,
+                        'deposit' => $request->amount,
+                        'date' => $request->date,
+                        'comment' => $request->note !== '' ? $request->note." (Paid ID : $paidId)" : "Due paid (Paid ID : $paidId)"
+                    ));
+
+                    if ($request->account == 'cash') {
+                        $cashTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('customer_transaction');
+                        DB::table('cash_books')->insert(array(
+                            'transaction_id' => $cashTxId,
+                            'company_id' => $companyId,
+                            'reference_no' => "c-rec-$paidId",
+                            'type' => 'receive',
+                            'receive' => $request->amount,
+                            'date' => $request->date,
+                            'comment' => $request->note !== '' ? $request->note." (Paid ID : $paidId)" : "Due paid (Paid ID : $paidId)"
+                        ));
+                    }
+
+                    if ($request->account == 'bkash') {
+                        $bkashTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('bkash_transaction');
+                        DB::table('bkash_transactions')->insert(array(
+                            'transaction_id' => $bkashTxId,
+                            'company_id' => $companyId,
+                            'reference_no' => "c-rec-$paidId",
+                            'type' => 'deposit',
+                            'deposit' => $request->amount,
+                            'date' => $request->date,
+                            'comment' => $request->note !== '' ? $request->note." (Paid ID : $paidId)" : "Due paid (Paid ID : $paidId)"
+                        ));
+                        $txGenerator->setNextInvoiceNo();
+                    }
+
+                    if ($request->account == 'nagad') {
+                        $nagadTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('nagad_transaction');
+                        DB::table('nagad_transactions')->insert(array(
+                            'transaction_id' => $nagadTxId,
+                            'company_id' => $companyId,
+                            'reference_no' => "c-rec-$paidId",
+                            'type' => 'deposit',
+                            'deposit' => $request->amount,
+                            'date' => $request->date,
+                            'comment' => $request->note !== '' ? $request->note." (Paid ID : $paidId)" : "Due paid (Paid ID : $paidId)"
+                        ));
+                        $txGenerator->setNextInvoiceNo();
+                    }
+
+                    if ($request->account == 'bank' && !empty($request->bankId)) {
+                        $bankTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('bank_transaction');
+                        DB::table('bank_ledgers')->insert(array(
+                            'transaction_id' => $bankTxId,
+                            'reference_no' => "c-rec-$paidId",
+                            'type' => 'deposit',
+                            'deposit' => $request->deposit,
+                            'bank_id' => $request->bankId,
+                            'date' => $request->date,
+                            'company_id' => $companyId,
+                            'comment' => $request->note !== '' ? $request->note." (Paid ID : $paidId)" : "Due paid (Paid ID : $paidId)"
+                        ));
+                        $txGenerator->setNextInvoiceNo();
+                    }
+                });
+                $status = true;
+                $message = 'Customer payment saved';
+                return response()->json(compact('status', 'message'));
+            } catch (Exception $e) {
+                $status = false;
+                $errors = $e;
+                return response()->json(compact('status', 'errors'));
+            }
+        } else {
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
+    }
+
+    public function deletePayment(Request $request)
+    {
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $id = $request->id;
+            if (!empty($id)) {
+                DB::table('customer_ledgers')->where('reference_no', "c-rec-$id")->where('company_id', $companyId)->delete();
+                DB::table('nagad_transactions')->where('reference_no', "c-rec-$id")->where('company_id', $companyId)->delete();
+                DB::table('bkash_transactions')->where('reference_no', "c-rec-$id")->where('company_id', $companyId)->delete();
+                DB::table('cash_books')->where('reference_no', "c-rec-$id")->where('company_id', $companyId)->delete();
+                DB::table('bank_ledgers')->where('reference_no', "c-rec-$id")->where('company_id', $companyId)->delete();
+                $status = true;
+                $message = 'Customer payment deleted';
+                return response()->json(compact('status', 'message'));
+            } else {
+                $status = false;
+                $error = 'Customer payment not found';
                 return response()->json(compact('status', 'error'));
             }
         } else {

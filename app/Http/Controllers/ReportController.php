@@ -101,7 +101,7 @@ class ReportController extends Controller
             }
             $query = DB::table('customers')
                 ->select('customers.name', 'customer_ledgers.transaction_id', 'customer_ledgers.date', 'customer_ledgers.type', 'customer_ledgers.due', 'customer_ledgers.deposit', 'customer_ledgers.reference_no')
-                ->where('customers.id', $request->customer_id)
+                ->where('customers.id', $request->customer)
                 ->where('customers.company_id', $companyId)
                 ->where('customer_ledgers.company_id', $companyId)
                 ->leftJoin('customer_ledgers', 'customer_ledgers.customer_id', '=', 'customers.id')

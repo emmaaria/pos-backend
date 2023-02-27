@@ -234,7 +234,6 @@ class CustomerController extends Controller
         if ($companyId) {
             $validator = Validator::make($request->all(),
                 [
-                    'name' => 'required',
                     'customer' => 'required',
                     'date' => 'required',
                     'amount' => 'required',

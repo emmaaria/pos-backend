@@ -91,7 +91,7 @@ class ReportController extends Controller
         if ($companyId) {
             $validator = Validator::make($request->all(),
                 [
-                    'customer_id' => 'required'
+                    'customer' => 'required'
                 ]
             );
             if ($validator->fails()) {

@@ -105,8 +105,7 @@ class ReportController extends Controller
                 ->where('customers.company_id', $companyId)
                 ->where('customer_ledgers.company_id', $companyId)
                 ->leftJoin('customers', 'customers.id', '=', 'customer_ledgers.customer_id')
-                ->orderBy('customer_ledgers.date', 'desc')
-                ->groupBy('customers.id');
+                ->orderBy('customer_ledgers.date', 'desc');
             if (!empty($request->startDate)){
                 $query->where('customer_ledgers.date', '>=', $request->startDate);
             }

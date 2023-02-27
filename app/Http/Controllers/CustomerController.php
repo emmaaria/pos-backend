@@ -121,7 +121,7 @@ class CustomerController extends Controller
                 return response()->json(compact('status', 'errors'));
             }
             try {
-                DB::transaction(function () use ($companyId, $request) {
+                $customer = DB::transaction(function () use ($companyId, $request) {
                     $customerId = DB::table('customers')->insertGetId(['name' => $request->name, 'mobile' => $request->mobile, 'address' => $request->address, 'company_id' => $companyId]);
                     if (!empty($request->due)) {
                         $txIdGenerator = new InvoiceNumberGeneratorService();
@@ -145,10 +145,11 @@ class CustomerController extends Controller
                         ->where('customers.id', $customerId)
                         ->groupBy('customers.id', 'customers.name', 'customers.mobile', 'customers.address')
                         ->first();
-                    $status = true;
-                    $message = 'Successfully saved';
-                    return response()->json(compact('status', 'message', 'customer'));
+                    return $customer;
                 });
+                $status = true;
+                $message = 'Successfully saved';
+                return response()->json(compact('status', 'message', 'customer'));
             } catch (Exception $e) {
                 $status = false;
                 $errors = 'Something went wrong';

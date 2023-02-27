@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Exception;
 
@@ -13,6 +14,7 @@ class ReportController extends Controller
     {
         $this->middleware('auth.custom:api', ['except' => []]);
     }
+
     protected function guard()
     {
         return Auth::guard();
@@ -36,6 +38,27 @@ class ReportController extends Controller
 
         } catch (Exception $e) {
             return null;
+        }
+    }
+
+    public function sales(Request $request)
+    {
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $data = DB::table('invoices')
+                ->select('customers.name AS customer_name', 'invoices.invoice_id', 'invoices.grand_total', 'invoices.discountAmount', 'invoices.comment', 'invoices.id', 'invoices.date')
+                ->where('invoices.company_id', $companyId)
+                ->where('invoices.date','>=', $request->startDate)
+                ->where('invoices.date','<=', $request->endDate)
+                ->leftJoin('customers', 'customers.id', '=', 'invoices.customer_id')
+                ->orderBy('id', 'desc')
+                ->get();
+            $status = true;
+            return response()->json(compact('status', 'data'));
+        } else {
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
         }
     }
 }

@@ -18,4 +18,5 @@ Route::group(['middleware' => 'api'], function ($router) {
 
     Route::get('/expense', [ExpenseController::class, 'index']);
     Route::post('/expense/store', [ExpenseController::class, 'store']);
+    Route::post('/expense/delete', [ExpenseController::class, 'delete']);
 });

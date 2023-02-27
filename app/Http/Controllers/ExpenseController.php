@@ -333,6 +333,33 @@ class ExpenseController extends Controller
             return response()->json(compact('status', 'errors'));
         }
     }
+
+    public function delete(Request $request)
+    {
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $id = $request->id;
+            if (!empty($id)) {
+                DB::table('expenses')->where('return_id', $id)->where('company_id', $companyId)->delete();
+                DB::table('customer_ledgers')->where('reference_no', "exp-$id")->where('company_id', $companyId)->delete();
+                DB::table('nagad_transactions')->where('reference_no', "exp-$id")->where('company_id', $companyId)->delete();
+                DB::table('bkash_transactions')->where('reference_no', "exp-$id")->where('company_id', $companyId)->delete();
+                DB::table('cash_books')->where('reference_no', "exp-$id")->where('company_id', $companyId)->delete();
+                DB::table('bank_ledgers')->where('reference_no', "exp-$id")->where('company_id', $companyId)->delete();
+                $status = true;
+                $message = 'Expense deleted';
+                return response()->json(compact('status', 'message'));
+            } else {
+                $status = false;
+                $error = 'Return not found';
+                return response()->json(compact('status', 'error'));
+            }
+        } else {
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
+    }
     /*
     |--------------------------------------------------------------------------
     | Expense End

@@ -100,7 +100,7 @@ class ReportController extends Controller
                 return response()->json(compact('status', 'errors'));
             }
             $query = DB::table('customer_ledgers')
-                ->select('customers.name', 'customer_ledgers.transaction_id', 'customer_ledgers.date', 'customer_ledgers.type', 'customer_ledgers.due', 'customer_ledgers.deposit', 'customer_ledgers.reference_no')
+                ->select('customers.name', 'customer_ledgers.transaction_id', 'customer_ledgers.date', 'customer_ledgers.type', 'customer_ledgers.due', 'customer_ledgers.deposit', 'customer_ledgers.reference_no', 'customer_ledgers.comment')
                 ->where('customer_ledgers.customer_id', $request->customer)
                 ->where('customer_ledgers.company_id', $companyId)
                 ->leftJoin('customers', 'customers.id', '=', 'customer_ledgers.customer_id')

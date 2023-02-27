@@ -57,7 +57,7 @@ class PurchaseController extends Controller
                     ->where('purchases.company_id', $companyId)
                     ->where('suppliers.company_id', $companyId)
                     ->leftJoin('suppliers', 'suppliers.id', '=', 'purchases.supplier_id')
-                    ->orderBy('id', 'desc')
+                    ->orderBy('purchases.id', 'desc')
                     ->paginate(50);
                 $status = true;
                 return response()->json(compact('status', 'purchases'));
@@ -68,6 +68,7 @@ class PurchaseController extends Controller
                     ->where('purchases.company_id', $companyId)
                     ->where('purchases.purchase_id', 'like', '%' . $name . '%')
                     ->orWhere('suppliers.name', 'like', '%' . $name . '%')
+                    ->orderBy('purchases.id', 'desc')
                     ->paginate(50);
                 $status = true;
                 return response()->json(compact('status', 'purchases'));

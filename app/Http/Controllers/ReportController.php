@@ -48,10 +48,30 @@ class ReportController extends Controller
             $data = DB::table('invoices')
                 ->select('customers.name AS customer_name', 'invoices.invoice_id', 'invoices.grand_total', 'invoices.discountAmount', 'invoices.comment', 'invoices.id', 'invoices.date')
                 ->where('invoices.company_id', $companyId)
-                ->where('invoices.date','>=', $request->startDate)
-                ->where('invoices.date','<=', $request->endDate)
+                ->where('invoices.date', '>=', $request->startDate)
+                ->where('invoices.date', '<=', $request->endDate)
                 ->leftJoin('customers', 'customers.id', '=', 'invoices.customer_id')
                 ->orderBy('id', 'desc')
+                ->get();
+            $status = true;
+            return response()->json(compact('status', 'data'));
+        } else {
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
+    }
+
+    public function purchase(Request $request)
+    {
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $data = DB::table('purchases')
+                ->select('suppliers.name AS supplier_name', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id', 'purchases.date')
+                ->where('purchases.company_id', $companyId)
+                ->where('suppliers.company_id', $companyId)
+                ->leftJoin('suppliers', 'suppliers.id', '=', 'purchases.supplier_id')
+                ->orderBy('purchases.id', 'desc')
                 ->get();
             $status = true;
             return response()->json(compact('status', 'data'));

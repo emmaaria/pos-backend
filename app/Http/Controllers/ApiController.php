@@ -98,15 +98,16 @@ class ApiController extends Controller
         }
     }
 
+    public function logout() {
+        Auth::logout();
+        $status = true;
+        $message = 'Successfully logged out';
+        return response()->json(compact('status', $message));
+    }
+
     public function profile()
     {
         return response()->json($this->guard()->user());
-    }
-
-    public function logout()
-    {
-        auth()->logout(true);
-        return response()->json(['message' => 'Successfully logged out'], 200);
     }
 
     /*

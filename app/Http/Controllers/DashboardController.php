@@ -54,7 +54,7 @@ class DashboardController extends Controller
         if ($companyId) {
             $data = [];
             $data['totalProducts'] = DB::table('products')
-                ->where('banks.company_id', $companyId)
+                ->where('company_id', $companyId)
                 ->count();
             $status = true;
             return response()->json(compact('status', 'data'));

@@ -62,6 +62,12 @@ class DashboardController extends Controller
             $data['totalSupplier'] = DB::table('suppliers')
                 ->where('company_id', $companyId)
                 ->count();
+            $data['totalPurchase'] = DB::table('purchases')
+                ->where('company_id', $companyId)
+                ->count();
+            $data['totalInvoice'] = DB::table('invoices')
+                ->where('company_id', $companyId)
+                ->count();
             $status = true;
             return response()->json(compact('status', 'data'));
         } else {

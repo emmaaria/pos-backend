@@ -17,6 +17,7 @@ class CreateCardTransactionsTable extends Migration
             $table->id();
             $table->string('transaction_id');
             $table->string('reference_no')->nullable();
+            $table->string('user_id')->nullable();
             $table->string('comment')->nullable();
             $table->string('type');
             $table->string('withdraw')->default(0);

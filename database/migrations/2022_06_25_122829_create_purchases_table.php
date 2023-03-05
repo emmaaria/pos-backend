@@ -17,6 +17,7 @@ class CreatePurchasesTable extends Migration
             $table->id();
             $table->string('supplier_id');
             $table->string('purchase_id');
+            $table->string('user_id')->nullable();
             $table->string('amount');
             $table->string('paid')->default(0);
             $table->string('opening')->default(0);

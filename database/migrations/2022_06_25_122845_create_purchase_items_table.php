@@ -17,6 +17,7 @@ class CreatePurchaseItemsTable extends Migration
             $table->id();
             $table->string('purchase_id');
             $table->string('product_id');
+            $table->string('user_id')->nullable();
             $table->string('price');
             $table->string('quantity');
             $table->string('total');

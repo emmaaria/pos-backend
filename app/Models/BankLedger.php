@@ -9,5 +9,5 @@ class BankLedger extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['transaction_id', 'type', 'withdraw', 'deposit', 'date', 'reference_no', 'comment', 'company_id', 'bank_id'];
+    protected $fillable = ['transaction_id', 'type', 'withdraw', 'deposit', 'date', 'reference_no', 'comment', 'company_id', 'bank_id', 'user_id'];
 }

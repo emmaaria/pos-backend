@@ -22,6 +22,7 @@ class CreateInvoicesTable extends Migration
             $table->string('date');
             $table->string('discount')->nullable();
             $table->string('discountAmount')->nullable();
+            $table->string('user_id')->nullable();
             $table->string('discountType')->nullable();
             $table->string('profit')->default(0);
             $table->string('paid_amount')->default(0);

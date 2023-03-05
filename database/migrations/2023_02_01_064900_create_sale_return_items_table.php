@@ -18,6 +18,7 @@ class CreateSaleReturnItemsTable extends Migration
             $table->string('return_id');
             $table->string('invoice_id')->nullable();
             $table->string('product_id');
+            $table->string('user_id')->nullable();
             $table->string('price');
             $table->string('date');
             $table->string('quantity');

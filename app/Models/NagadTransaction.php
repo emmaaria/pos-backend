@@ -8,5 +8,5 @@ use Illuminate\Database\Eloquent\Model;
 class NagadTransaction extends Model
 {
     use HasFactory;
-    protected $fillable = ['transaction_id','type','withdraw','deposit','date','reference_no','comment','company_id'];
+    protected $fillable = ['transaction_id','type','withdraw','deposit','date','reference_no','comment','company_id', 'user_id'];
 }

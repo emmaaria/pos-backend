@@ -16,6 +16,7 @@ class CreateNagadTransactionsTable extends Migration
         Schema::create('nagad_transactions', function (Blueprint $table) {
             $table->id();
             $table->string('transaction_id');
+            $table->string('user_id')->nullable();
             $table->string('reference_no')->nullable();
             $table->string('comment')->nullable();
             $table->string('type');

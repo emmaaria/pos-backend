@@ -19,6 +19,7 @@ class CreateSaleReturnsTable extends Migration
             $table->string('invoice_id')->nullable();
             $table->string('return_amount')->default(0);
             $table->string('note')->nullable();
+            $table->string('user_id')->nullable();
             $table->string('date');
             $table->string('account');
             $table->string('type');

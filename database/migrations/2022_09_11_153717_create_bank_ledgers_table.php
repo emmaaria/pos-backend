@@ -19,6 +19,7 @@ class CreateBankLedgersTable extends Migration
             $table->string('transaction_id');
             $table->string('reference_no')->nullable();
             $table->string('comment')->nullable();
+            $table->string('user_id')->nullable();
             $table->string('type');
             $table->string('withdraw')->default(0);
             $table->string('deposit')->default(0);

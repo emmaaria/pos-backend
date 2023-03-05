@@ -18,6 +18,7 @@ class CreateExpensesTable extends Migration
             $table->string('expense_id');
             $table->string('category');
             $table->string('note')->nullable();
+            $table->string('user_id')->nullable();
             $table->string('account');
             $table->string('amount');
             $table->string('date');

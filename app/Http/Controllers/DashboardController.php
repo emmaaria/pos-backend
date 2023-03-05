@@ -126,6 +126,10 @@ class DashboardController extends Controller
                 ->where('company_id', $companyId)
                 ->sum(DB::raw('deposit - withdraw'));
 
+            $data['totalNagad'] = DB::table('nagad_transactions')
+                ->where('company_id', $companyId)
+                ->sum(DB::raw('deposit - withdraw'));
+
             $status = true;
             return response()->json(compact('status', 'data'));
         } else {

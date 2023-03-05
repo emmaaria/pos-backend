@@ -53,59 +53,79 @@ class DashboardController extends Controller
         $companyId = $this->getCompanyId();
         if ($companyId) {
             $data = [];
+
             $data['totalProduct'] = DB::table('products')
                 ->where('company_id', $companyId)
                 ->count();
+
             $data['totalCustomer'] = DB::table('customers')
                 ->where('company_id', $companyId)
                 ->count();
+
             $data['totalSupplier'] = DB::table('suppliers')
                 ->where('company_id', $companyId)
                 ->count();
+
             $data['totalPurchase'] = DB::table('purchases')
                 ->where('company_id', $companyId)
                 ->count();
+
             $data['totalInvoice'] = DB::table('invoices')
                 ->where('company_id', $companyId)
                 ->count();
+
             $data['totalReturn'] = DB::table('sale_returns')
                 ->where('company_id', $companyId)
                 ->count();
+
             $data['todayTotalInvoice'] = DB::table('invoices')
                 ->where('company_id', $companyId)
                 ->where('date', date('Y-m-d'))
                 ->count();
+
             $data['todayTotalSaleAmount'] = DB::table('invoices')
                 ->where('company_id', $companyId)
                 ->where('date', date('Y-m-d'))
                 ->sum('grand_total');
+
             $data['todayTotalPurchase'] = DB::table('purchases')
                 ->where('company_id', $companyId)
                 ->where('date', date('Y-m-d'))
                 ->count();
+
             $data['todayTotalPurchaseAmount'] = DB::table('purchases')
                 ->where('company_id', $companyId)
                 ->where('date', date('Y-m-d'))
                 ->sum('amount');
+
             $data['todayTotalReturn'] = DB::table('sale_returns')
                 ->where('company_id', $companyId)
                 ->where('date', date('Y-m-d'))
                 ->count();
+
             $data['todayTotalReturnAmount'] = DB::table('sale_returns')
                 ->where('company_id', $companyId)
                 ->where('date', date('Y-m-d'))
                 ->sum('return_amount');
+
             $data['todayTotalCash'] = DB::table('cash_books')
                 ->where('company_id', $companyId)
                 ->where('date', date('Y-m-d'))
                 ->sum(DB::raw('receive - payment'));
+
             $data['todayCash'] = DB::table('cash_books')
                 ->where('company_id', $companyId)
                 ->sum(DB::raw('receive - payment'));
+
             $data['todayTotalBkash'] = DB::table('bkash_transactions')
                 ->where('company_id', $companyId)
                 ->where('date', date('Y-m-d'))
                 ->sum(DB::raw('deposit - withdraw'));
+
+            $data['totalBkash'] = DB::table('bkash_transactions')
+                ->where('company_id', $companyId)
+                ->sum(DB::raw('deposit - withdraw'));
+
             $status = true;
             return response()->json(compact('status', 'data'));
         } else {

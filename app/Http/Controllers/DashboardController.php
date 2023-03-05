@@ -87,6 +87,14 @@ class DashboardController extends Controller
                 ->where('company_id', $companyId)
                 ->where('date', date('Y-m-d'))
                 ->sum('amount');
+            $data['todayTotalReturn'] = DB::table('sale_returns')
+                ->where('company_id', $companyId)
+                ->where('date', date('Y-m-d'))
+                ->count();
+            $data['todayTotalReturnAmount'] = DB::table('sale_returns')
+                ->where('company_id', $companyId)
+                ->where('date', date('Y-m-d'))
+                ->sum('return_amount');
             $status = true;
             return response()->json(compact('status', 'data'));
         } else {

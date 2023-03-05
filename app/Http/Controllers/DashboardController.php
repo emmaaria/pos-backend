@@ -71,6 +71,10 @@ class DashboardController extends Controller
             $data['totalReturn'] = DB::table('sale_returns')
                 ->where('company_id', $companyId)
                 ->count();
+            $data['totalTodayInvoice'] = DB::table('invoices')
+                ->where('company_id', $companyId)
+                ->where('date', date('Y-m-d'))
+                ->count();
             $status = true;
             return response()->json(compact('status', 'data'));
         } else {

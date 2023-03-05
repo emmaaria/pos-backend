@@ -134,6 +134,10 @@ class DashboardController extends Controller
                 ->where('company_id', $companyId)
                 ->sum(DB::raw('deposit - withdraw'));
 
+            $data['totalCard'] = DB::table('card_transactions')
+                ->where('company_id', $companyId)
+                ->sum(DB::raw('deposit - withdraw'));
+
             $status = true;
             return response()->json(compact('status', 'data'));
         } else {

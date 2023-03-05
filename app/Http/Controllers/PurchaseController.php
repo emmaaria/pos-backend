@@ -161,6 +161,7 @@ class PurchaseController extends Controller
                             [
                                 'supplier_id' => $request->supplier_id,
                                 'amount' => $request->total,
+                                'user_id' => Auth::id(),
                                 'paid' => $request->cash + $request->bkash + $request->nagad + $request->bank,
                                 'comment' => $request->comment,
                                 'opening' => $request->openingStock ? $request->openingStock : 0,
@@ -178,6 +179,7 @@ class PurchaseController extends Controller
                                 DB::table('purchase_items')->insert([
                                     'purchase_id' => $purchaseId,
                                     'product_id' => $productID,
+                                    'user_id' => Auth::id(),
                                     'price' => $price,
                                     'quantity' => $quantity,
                                     'date' => $request->date,
@@ -199,6 +201,7 @@ class PurchaseController extends Controller
                             DB::table('supplier_ledgers')->insert(array(
                                 'supplier_id' => $request->supplier_id,
                                 'transaction_id' => $supplierDueTxId,
+                                'user_id' => Auth::id(),
                                 'reference_no' => 'pur-' . $purchaseId,
                                 'type' => 'due',
                                 'due' => $request->total,
@@ -214,6 +217,7 @@ class PurchaseController extends Controller
                                     $supplierPaidTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('supplier_transaction');
                                     DB::table('supplier_ledgers')->insert(array(
                                         'supplier_id' => $request->supplier_id,
+                                        'user_id' => Auth::id(),
                                         'reference_no' => 'pur-' . $purchaseId,
                                         'transaction_id' => $supplierPaidTxId,
                                         'type' => 'deposit',
@@ -227,6 +231,7 @@ class PurchaseController extends Controller
                                     $cashTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('cash_transaction');
                                     DB::table('cash_books')->insert(array(
                                         'transaction_id' => $cashTxId,
+                                        'user_id' => Auth::id(),
                                         'reference_no' => 'pur-' . $purchaseId,
                                         'type' => 'payment',
                                         'payment' => $request->cash,
@@ -243,6 +248,7 @@ class PurchaseController extends Controller
                                         'supplier_id' => $request->supplier_id,
                                         'reference_no' => 'pur-' . $purchaseId,
                                         'transaction_id' => $supplierPaidTxId,
+                                        'user_id' => Auth::id(),
                                         'type' => 'deposit',
                                         'due' => 0,
                                         'deposit' => $request->bkash,
@@ -256,6 +262,7 @@ class PurchaseController extends Controller
                                         'transaction_id' => $bkashTxId,
                                         'reference_no' => 'pur-' . $purchaseId,
                                         'type' => 'withdraw',
+                                        'user_id' => Auth::id(),
                                         'withdraw' => $request->bkash,
                                         'deposit' => 0,
                                         'date' => $request->date,
@@ -272,6 +279,7 @@ class PurchaseController extends Controller
                                         'reference_no' => 'pur-' . $purchaseId,
                                         'transaction_id' => $supplierPaidTxId,
                                         'type' => 'deposit',
+                                        'user_id' => Auth::id(),
                                         'due' => 0,
                                         'deposit' => $request->nagad,
                                         'date' => $request->date,
@@ -284,6 +292,7 @@ class PurchaseController extends Controller
                                         'transaction_id' => $nagadTxId,
                                         'reference_no' => 'pur-' . $purchaseId,
                                         'type' => 'withdraw',
+                                        'user_id' => Auth::id(),
                                         'withdraw' => $request->nagad,
                                         'deposit' => 0,
                                         'date' => $request->date,
@@ -300,6 +309,7 @@ class PurchaseController extends Controller
                                         'reference_no' => 'pur-' . $purchaseId,
                                         'transaction_id' => $supplierPaidTxId,
                                         'type' => 'deposit',
+                                        'user_id' => Auth::id(),
                                         'due' => 0,
                                         'deposit' => $request->bank,
                                         'date' => $request->date,
@@ -312,6 +322,7 @@ class PurchaseController extends Controller
                                         'transaction_id' => $bankTxId,
                                         'reference_no' => 'pur-' . $purchaseId,
                                         'type' => 'withdraw',
+                                        'user_id' => Auth::id(),
                                         'withdraw' => $request->bank,
                                         'bank_id' => $request->bankId,
                                         'date' => $request->date,
@@ -376,6 +387,7 @@ class PurchaseController extends Controller
                             [
                                 'supplier_id' => $request->supplier_id,
                                 'amount' => $request->total,
+                                'user_id' => Auth::id(),
                                 'payment_method' => $request->paymentMethod,
                                 'paid' => $request->cash + $request->bkash + $request->nagad + $request->bank,
                                 'opening' => $request->openingStock ? $request->openingStock : 0,
@@ -397,6 +409,7 @@ class PurchaseController extends Controller
                                     'purchase_id' => $purchase->purchase_id,
                                     'product_id' => $productID,
                                     'price' => $price,
+                                    'user_id' => Auth::id(),
                                     'quantity' => $quantity,
                                     'date' => $request->date,
                                     'company_id' => $companyId,
@@ -420,6 +433,7 @@ class PurchaseController extends Controller
                                         ->update(array(
                                             'supplier_id' => $request->supplier_id,
                                             'due' => $request->total,
+                                            'user_id' => Auth::id(),
                                             'deposit' => 0,
                                             'date' => $request->date
                                         ));
@@ -465,6 +479,7 @@ class PurchaseController extends Controller
                                             $supplierPaidTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('supplier_transaction');
                                             DB::table('supplier_ledgers')->insert(array(
                                                 'supplier_id' => $request->supplier_id,
+                                                'user_id' => Auth::id(),
                                                 'reference_no' => 'pur-' . $purchase->purchase_id,
                                                 'transaction_id' => $supplierPaidTxId,
                                                 'type' => 'deposit',
@@ -478,6 +493,7 @@ class PurchaseController extends Controller
                                             $cashTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('cash_transaction');
                                             DB::table('cash_books')->insert(array(
                                                 'transaction_id' => $cashTxId,
+                                                'user_id' => Auth::id(),
                                                 'reference_no' => 'pur-' . $purchase->purchase_id,
                                                 'type' => 'payment',
                                                 'payment' => $request->cash,
@@ -492,6 +508,7 @@ class PurchaseController extends Controller
                                             $supplierPaidTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('supplier_transaction');
                                             DB::table('supplier_ledgers')->insert(array(
                                                 'supplier_id' => $request->supplier_id,
+                                                'user_id' => Auth::id(),
                                                 'reference_no' => 'pur-' . $purchase->purchase_id,
                                                 'transaction_id' => $supplierPaidTxId,
                                                 'type' => 'deposit',
@@ -507,6 +524,7 @@ class PurchaseController extends Controller
                                                 'transaction_id' => $bkashTxId,
                                                 'reference_no' => 'pur-' . $purchase->purchase_id,
                                                 'type' => 'withdraw',
+                                                'user_id' => Auth::id(),
                                                 'withdraw' => $request->bkash,
                                                 'deposit' => 0,
                                                 'date' => $request->date,
@@ -524,6 +542,7 @@ class PurchaseController extends Controller
                                                 'transaction_id' => $supplierPaidTxId,
                                                 'type' => 'deposit',
                                                 'due' => 0,
+                                                'user_id' => Auth::id(),
                                                 'deposit' => $request->nagad,
                                                 'date' => $request->date,
                                                 'company_id' => $companyId,
@@ -537,6 +556,7 @@ class PurchaseController extends Controller
                                                 'type' => 'withdraw',
                                                 'withdraw' => $request->nagad,
                                                 'deposit' => 0,
+                                                'user_id' => Auth::id(),
                                                 'date' => $request->date,
                                                 'company_id' => $companyId,
                                                 'comment' => "Paid for Purchase id ($purchase->purchase_id)"
@@ -552,6 +572,7 @@ class PurchaseController extends Controller
                                                 'transaction_id' => $supplierPaidTxId,
                                                 'type' => 'deposit',
                                                 'due' => 0,
+                                                'user_id' => Auth::id(),
                                                 'deposit' => $request->bank,
                                                 'date' => $request->date,
                                                 'company_id' => $companyId,
@@ -563,6 +584,7 @@ class PurchaseController extends Controller
                                                 'transaction_id' => $bankTxId,
                                                 'reference_no' => 'pur-' . $purchase->purchase_id,
                                                 'type' => 'withdraw',
+                                                'user_id' => Auth::id(),
                                                 'withdraw' => $request->bank,
                                                 'bank_id' => $request->bankId,
                                                 'date' => $request->date,

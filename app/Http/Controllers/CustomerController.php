@@ -129,6 +129,7 @@ class CustomerController extends Controller
                         DB::table('customer_ledgers')->insert(array(
                             'customer_id' => $customerId,
                             'transaction_id' => $txId,
+                            'user_id' => Auth::id(),
                             'company_id' => $companyId,
                             'type' => 'due',
                             'due' => $request->due,

@@ -259,6 +259,7 @@ class ExpenseController extends Controller
                         'account' => $request->account,
                         'amount' => $request->amount,
                         'date' => $request->date,
+                        'user_id' => Auth::id(),
                     ]);
 
                     $categoryName = DB::table('expense_categories')->select('name')->where('company_id', $companyId)->where('id', $request->category)->first();
@@ -270,6 +271,7 @@ class ExpenseController extends Controller
                             'company_id' => $companyId,
                             'reference_no' => "exp-$expenseId",
                             'type' => 'payment',
+                            'user_id' => Auth::id(),
                             'payment' => $request->amount,
                             'date' => $request->date,
                             'comment' => $request->note !== '' ? $request->note." (Expense ID : $expenseId)" : "Deduct for $categoryName->name (Expense ID : $expenseId)"
@@ -281,6 +283,7 @@ class ExpenseController extends Controller
                         DB::table('bkash_transactions')->insert(array(
                             'transaction_id' => $bkashTxId,
                             'company_id' => $companyId,
+                            'user_id' => Auth::id(),
                             'reference_no' => "exp-$expenseId",
                             'type' => 'withdraw',
                             'withdraw' => $request->amount,
@@ -295,6 +298,7 @@ class ExpenseController extends Controller
                         DB::table('nagad_transactions')->insert(array(
                             'transaction_id' => $nagadTxId,
                             'company_id' => $companyId,
+                            'user_id' => Auth::id(),
                             'reference_no' => "exp-$expenseId",
                             'type' => 'withdraw',
                             'withdraw' => $request->amount,
@@ -308,6 +312,7 @@ class ExpenseController extends Controller
                         $bankTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('bank_transaction');
                         DB::table('bank_ledgers')->insert(array(
                             'transaction_id' => $bankTxId,
+                            'user_id' => Auth::id(),
                             'reference_no' => 'exp-' . $expenseId,
                             'type' => 'withdraw',
                             'withdraw' => $request->amount,

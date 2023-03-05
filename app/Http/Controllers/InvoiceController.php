@@ -271,6 +271,7 @@ class InvoiceController extends Controller
                                 DB::table('invoice_items')->insert([
                                     'invoice_id' => $invoiceId,
                                     'product_id' => $productID,
+                                    'user_id' => Auth::id(),
                                     'price' => $price,
                                     'company_id' => $companyId,
                                     'quantity' => $quantity,
@@ -302,6 +303,7 @@ class InvoiceController extends Controller
                         DB::table('invoices')->insert(
                             [
                                 'customer_id' => $customerId,
+                                'user_id' => Auth::id(),
                                 'payment_method' => $request->payment_method,
                                 'invoice_id' => $invoiceId,
                                 'comment' => $request->comment,
@@ -321,6 +323,7 @@ class InvoiceController extends Controller
                         $grandTotal = $total - $request->discountAmount;
                         DB::table('customer_ledgers')->insert(array(
                             'customer_id' => $customerId,
+                            'user_id' => Auth::id(),
                             'transaction_id' => $customerDueTxId,
                             'reference_no' => "inv-$invoiceId",
                             'type' => 'due',
@@ -338,6 +341,7 @@ class InvoiceController extends Controller
                             $customerPaidTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('customer_transaction');
                             DB::table('customer_ledgers')->insert(array(
                                 'customer_id' => $customerId,
+                                'user_id' => Auth::id(),
                                 'reference_no' => "inv-$invoiceId",
                                 'transaction_id' => $customerPaidTxId,
                                 'type' => 'deposit',
@@ -359,6 +363,7 @@ class InvoiceController extends Controller
                                 if ($change > 0) {
                                     DB::table('cash_books')->insert(array(
                                         'transaction_id' => $cashTxId,
+                                        'user_id' => Auth::id(),
                                         'company_id' => $companyId,
                                         'reference_no' => "inv-$invoiceId",
                                         'type' => 'receive',
@@ -369,6 +374,7 @@ class InvoiceController extends Controller
                                 } elseif ($change < 0) {
                                     DB::table('cash_books')->insert(array(
                                         'transaction_id' => $cashTxId,
+                                        'user_id' => Auth::id(),
                                         'company_id' => $companyId,
                                         'reference_no' => "inv-$invoiceId",
                                         'type' => 'receive',
@@ -380,6 +386,7 @@ class InvoiceController extends Controller
                                     DB::table('cash_books')->insert(array(
                                         'transaction_id' => $cashTxId,
                                         'company_id' => $companyId,
+                                        'user_id' => Auth::id(),
                                         'reference_no' => "inv-$invoiceId",
                                         'type' => 'receive',
                                         'receive' => $cashPaid,
@@ -396,6 +403,7 @@ class InvoiceController extends Controller
                                 DB::table('bkash_transactions')->insert(array(
                                     'transaction_id' => $bkashTxId,
                                     'company_id' => $companyId,
+                                    'user_id' => Auth::id(),
                                     'reference_no' => "inv-$invoiceId",
                                     'type' => 'deposit',
                                     'deposit' => $request->bkash,
@@ -409,6 +417,7 @@ class InvoiceController extends Controller
                                 $nagadTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('nagad_transaction');
                                 DB::table('nagad_transactions')->insert(array(
                                     'transaction_id' => $nagadTxId,
+                                    'user_id' => Auth::id(),
                                     'reference_no' => "inv-$invoiceId",
                                     'company_id' => $companyId,
                                     'type' => 'deposit',
@@ -423,6 +432,7 @@ class InvoiceController extends Controller
                                 $cardTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('card_transaction');
                                 DB::table('card_transactions')->insert(array(
                                     'transaction_id' => $cardTxId,
+                                    'user_id' => Auth::id(),
                                     'company_id' => $companyId,
                                     'reference_no' => "inv-$invoiceId",
                                     'type' => 'deposit',
@@ -437,6 +447,7 @@ class InvoiceController extends Controller
                                 $bankTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('bank_transaction');
                                 DB::table('bank_ledgers')->insert(array(
                                     'transaction_id' => $bankTxId,
+                                    'user_id' => Auth::id(),
                                     'reference_no' => 'inv-' . $invoiceId,
                                     'type' => 'deposit',
                                     'deposit' => $request->bank,
@@ -560,6 +571,7 @@ class InvoiceController extends Controller
                                 $invoice['items'][] = $invoiceItemData;
                                 DB::table('invoice_items')->insert([
                                     'invoice_id' => $invoiceId,
+                                    'user_id' => Auth::id(),
                                     'product_id' => $productID,
                                     'price' => $price,
                                     'company_id' => $companyId,
@@ -592,6 +604,7 @@ class InvoiceController extends Controller
                         DB::table('invoices')->where('invoice_id', $invoiceId)->where('company_id', $companyId)->update(
                             [
                                 'customer_id' => $customerId,
+                                'user_id' => Auth::id(),
                                 'payment_method' => $request->payment_method,
                                 'comment' => $request->comment,
                                 'discount_setting' => $setting->discount_type,
@@ -611,6 +624,7 @@ class InvoiceController extends Controller
                         $grandTotal = $total - $request->discountAmount;
                         DB::table('customer_ledgers')->insert(array(
                             'customer_id' => $customerId,
+                            'user_id' => Auth::id(),
                             'transaction_id' => $customerDueTxId,
                             'reference_no' => "inv-$invoiceId",
                             'type' => 'due',
@@ -641,6 +655,7 @@ class InvoiceController extends Controller
                                 'reference_no' => "inv-$invoiceId",
                                 'transaction_id' => $customerPaidTxId,
                                 'type' => 'deposit',
+                                'user_id' => Auth::id(),
                                 'company_id' => $companyId,
                                 'due' => 0,
                                 'deposit' => $paid,
@@ -662,6 +677,7 @@ class InvoiceController extends Controller
                                         'company_id' => $companyId,
                                         'reference_no' => "inv-$invoiceId",
                                         'type' => 'receive',
+                                        'user_id' => Auth::id(),
                                         'receive' => $dueAfterOnlinePayment,
                                         'date' => $request->date,
                                         'comment' => "Cash receive for Invoice No ($invoiceId)"
@@ -672,6 +688,7 @@ class InvoiceController extends Controller
                                         'company_id' => $companyId,
                                         'reference_no' => "inv-$invoiceId",
                                         'type' => 'receive',
+                                        'user_id' => Auth::id(),
                                         'receive' => $cashPaid,
                                         'date' => $request->date,
                                         'comment' => "Cash receive for Invoice No ($invoiceId)"
@@ -682,6 +699,7 @@ class InvoiceController extends Controller
                                         'company_id' => $companyId,
                                         'reference_no' => "inv-$invoiceId",
                                         'type' => 'receive',
+                                        'user_id' => Auth::id(),
                                         'receive' => $cashPaid,
                                         'date' => $request->date,
                                         'comment' => "Cash receive for Invoice No ($invoiceId)"
@@ -698,6 +716,7 @@ class InvoiceController extends Controller
                                     'company_id' => $companyId,
                                     'reference_no' => "inv-$invoiceId",
                                     'type' => 'deposit',
+                                    'user_id' => Auth::id(),
                                     'deposit' => $request->bkash,
                                     'date' => $request->date,
                                     'comment' => "Cash receive for Invoice No ($invoiceId)"
@@ -712,6 +731,7 @@ class InvoiceController extends Controller
                                     'reference_no' => "inv-$invoiceId",
                                     'company_id' => $companyId,
                                     'type' => 'deposit',
+                                    'user_id' => Auth::id(),
                                     'deposit' => $request->nagad,
                                     'date' => $request->date,
                                     'comment' => "Cash receive for Invoice No ($invoiceId)"
@@ -726,6 +746,7 @@ class InvoiceController extends Controller
                                     'company_id' => $companyId,
                                     'reference_no' => "inv-$invoiceId",
                                     'type' => 'deposit',
+                                    'user_id' => Auth::id(),
                                     'deposit' => $request->card,
                                     'date' => $request->date,
                                     'comment' => "Cash receive for Invoice No ($invoiceId)"
@@ -739,6 +760,7 @@ class InvoiceController extends Controller
                                     'transaction_id' => $bankTxId,
                                     'reference_no' => 'inv-' . $invoiceId,
                                     'type' => 'deposit',
+                                    'user_id' => Auth::id(),
                                     'deposit' => $request->bank,
                                     'bank_id' => $request->bankId,
                                     'date' => $request->date,

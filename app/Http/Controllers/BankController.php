@@ -140,6 +140,7 @@ class BankController extends Controller
                             DB::table('bank_ledgers')->insert(array(
                                 'bank_id' => $bankId,
                                 'transaction_id' => $txId,
+                                'user_id' => Auth::id(),
                                 'comment' => "Previous balance",
                                 'type' => 'deposit',
                                 'withdraw' => 0,
@@ -151,6 +152,7 @@ class BankController extends Controller
                             DB::table('bank_ledgers')->insert(array(
                                 'bank_id' => $bankId,
                                 'transaction_id' => $txId,
+                                'user_id' => Auth::id(),
                                 'comment' => "Previous balance",
                                 'type' => 'withdraw',
                                 'withdraw' => $request->balance,

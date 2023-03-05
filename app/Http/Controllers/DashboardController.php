@@ -99,6 +99,10 @@ class DashboardController extends Controller
                 ->where('company_id', $companyId)
                 ->where('date', date('Y-m-d'))
                 ->sum(DB::raw('receive - payment'));
+            $data['todayTotalBkash'] = DB::table('cash_books')
+                ->where('company_id', $companyId)
+                ->where('date', date('Y-m-d'))
+                ->sum(DB::raw('deposit - withdraw'));
             $status = true;
             return response()->json(compact('status', 'data'));
         } else {

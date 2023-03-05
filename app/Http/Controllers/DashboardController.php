@@ -53,7 +53,10 @@ class DashboardController extends Controller
         $companyId = $this->getCompanyId();
         if ($companyId) {
             $data = [];
-            $data['totalProducts'] = DB::table('products')
+            $data['totalProduct'] = DB::table('products')
+                ->where('company_id', $companyId)
+                ->count();
+            $data['totalCustomer'] = DB::table('customers')
                 ->where('company_id', $companyId)
                 ->count();
             $status = true;

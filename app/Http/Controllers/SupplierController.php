@@ -59,6 +59,7 @@ class SupplierController extends Controller
                     ->where('suppliers.company_id', $companyId)
                     ->leftJoin('supplier_ledgers', 'supplier_ledgers.supplier_id', '=', 'suppliers.id')
                     ->groupBy('suppliers.id', 'suppliers.name', 'suppliers.mobile', 'suppliers.address')
+                    ->orderBy('suppliers.id', 'desc')
                     ->paginate(50);
                 $status = true;
                 return response()->json(compact('status', 'suppliers'));
@@ -68,6 +69,7 @@ class SupplierController extends Controller
                     ->where('suppliers.company_id', $companyId)
                     ->leftJoin('supplier_ledgers', 'supplier_ledgers.supplier_id', '=', 'suppliers.id')
                     ->groupBy('suppliers.id', 'suppliers.name', 'suppliers.mobile', 'suppliers.address')
+                    ->orderBy('suppliers.id', 'desc')
                     ->get();
                 $status = true;
                 return response()->json(compact('status', 'suppliers'));

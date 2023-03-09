@@ -57,11 +57,11 @@ class ProductController extends Controller
             $name = $request->name;
             $all = $request->all;
             if (empty($name) && empty($all)) {
-                $products = DB::table('products')->select('*')->where('company_id', $companyId)->paginate(50);
+                $products = DB::table('products')->select('*')->orderBy('id', 'desc')->where('company_id', $companyId)->paginate(50);
                 $status = true;
                 return response()->json(compact('status', 'products', 'companyId'));
             } elseif (!empty($all)) {
-                $products = DB::table('products')->select('*')->where('company_id', $companyId)->get();
+                $products = DB::table('products')->select('*')->where('company_id', $companyId)->orderBy('id', 'desc')->get();
                 $status = true;
                 return response()->json(compact('status', 'products'));
             } else {
@@ -69,6 +69,7 @@ class ProductController extends Controller
                     ->select('*')
                     ->where('company_id', $companyId)
                     ->where('name', 'like', '%' . $name . '%')
+                    ->orderBy('id', 'desc')
                     ->paginate(50);
                 $status = true;
                 return response()->json(compact('status', 'products'));

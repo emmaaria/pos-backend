@@ -74,6 +74,10 @@ class DashboardController extends Controller
                 ->where('company_id', $companyId)
                 ->count();
 
+            $data['totalPurchaseAmount'] = DB::table('purchases')
+                ->where('company_id', $companyId)
+                ->sum('amount');
+
             $data['totalReturn'] = DB::table('sale_returns')
                 ->where('company_id', $companyId)
                 ->count();

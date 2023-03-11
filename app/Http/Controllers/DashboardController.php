@@ -173,7 +173,14 @@ class DashboardController extends Controller
                 ->sum(DB::raw('deposit - deduct'));
 
             $data['salesChart'] = DB::table('invoices')
-                ->select(DB::raw("SUM(grand_total) as total"), DB::raw("MONTHNAME(date) as month"), DB::raw('(sum(return_amount) from sale_returns as return'))
+                ->select(DB::raw("SUM(grand_total) as total"), DB::raw("MONTHNAME(date) as month"))
+                ->whereYear('date', date('Y'))
+                ->groupBy(DB::raw("month"))
+                ->orderBy('date','ASC')
+                ->get();
+
+            $data['returnChart'] = DB::table('sale_returns')
+                ->select(DB::raw("SUM(return_amount) as total"), DB::raw("MONTHNAME(date) as month"))
                 ->whereYear('date', date('Y'))
                 ->groupBy(DB::raw("month"))
                 ->orderBy('date','ASC')

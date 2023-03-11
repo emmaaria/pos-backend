@@ -319,6 +319,14 @@ class InvoiceController extends Controller
                                 'profit' => $profit - $request->discountAmount,
                             ]
                         );
+                        DB::table('profits')->insert(
+                            [
+                                'date' => $request->date,
+                                'deposit' => $profit - $request->discountAmount,
+                                'company_id' => $companyId,
+                                'reference_no' => "inv-$invoiceId",
+                            ]
+                        );
                         $customerDueTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('customer_transaction');
                         $grandTotal = $total - $request->discountAmount;
                         DB::table('customer_ledgers')->insert(array(
@@ -619,6 +627,14 @@ class InvoiceController extends Controller
                                 'profit' => $profit - $request->discountAmount,
                             ]
                         );
+                        DB::table('profits')->where('reference_no', "inv-$invoiceId")->where('company_id', $companyId)->updateOrInsert(
+                            [
+                                'reference_no' => "inv-$invoiceId",
+                                'date' => $request->date,
+                                'deposit' => $profit - $request->discountAmount,
+                                'company_id' => $companyId,
+                            ]
+                        );
                         DB::table('customer_ledgers')->where('reference_no', "inv-$invoiceId")->where('company_id', $companyId)->delete();
                         $customerDueTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('customer_transaction');
                         $grandTotal = $total - $request->discountAmount;
@@ -801,6 +817,7 @@ class InvoiceController extends Controller
                 DB::table('invoices')->where('invoice_id', $id)->where('company_id', $companyId)->delete();
                 DB::table('invoice_items')->where('invoice_id', $id)->where('company_id', $companyId)->delete();
                 DB::table('customer_ledgers')->where('reference_no', "inv-$id")->where('company_id', $companyId)->delete();
+                DB::table('profits')->where('reference_no', "inv-$id")->where('company_id', $companyId)->delete();
                 DB::table('card_transactions')->where('reference_no', "inv-$id")->where('company_id', $companyId)->delete();
                 DB::table('nagad_transactions')->where('reference_no', "inv-$id")->where('company_id', $companyId)->delete();
                 DB::table('bkash_transactions')->where('reference_no', "inv-$id")->where('company_id', $companyId)->delete();

@@ -24,7 +24,6 @@ class CreateInvoicesTable extends Migration
             $table->string('discountAmount')->nullable();
             $table->string('user_id')->nullable();
             $table->string('discountType')->nullable();
-            $table->string('profit')->default(0);
             $table->string('paid_amount')->default(0);
             $table->string('payment_method')->default('cash');
             $table->string('grand_total');

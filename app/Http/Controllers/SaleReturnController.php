@@ -128,8 +128,18 @@ class SaleReturnController extends Controller
                                     'date' => $request->date,
                                     'total' => $quantity * $price,
                                 ]);
+                                $purchasePrice = DB::table('average_purchase_prices')->where('product_id', $productID)->where('company_id', $companyId)->first();
+                                $profit += ($quantity * $price) - ($quantity * $purchasePrice->price);
                             }
                         }
+                        DB::table('profits')->insert(
+                            [
+                                'date' => $request->date,
+                                'deduct' => $profit,
+                                'company_id' => $companyId,
+                                'reference_no' => "ret-$returnId",
+                            ]
+                        );
                         DB::table('sale_returns')->insert(
                             [
                                 'return_id' => $returnId,
@@ -245,6 +255,7 @@ class SaleReturnController extends Controller
             $id = $request->id;
             if (!empty($id)) {
                 DB::table('sale_returns')->where('return_id', $id)->where('company_id', $companyId)->delete();
+                DB::table('profits')->where('reference_no', "ret-$id")->where('company_id', $companyId)->delete();
                 DB::table('sale_return_items')->where('return_id', $id)->where('company_id', $companyId)->delete();
                 DB::table('customer_ledgers')->where('reference_no', "ret-$id")->where('company_id', $companyId)->delete();
                 DB::table('nagad_transactions')->where('reference_no', "ret-$id")->where('company_id', $companyId)->delete();

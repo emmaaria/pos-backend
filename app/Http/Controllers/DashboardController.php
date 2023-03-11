@@ -172,6 +172,10 @@ class DashboardController extends Controller
                 ->where('date', date('Y-m-d'))
                 ->sum(DB::raw('deposit - deduct'));
 
+            $data['salesChart'] = DB::table('invoices')
+                ->select(DB::raw("COUNT(*) as count"), DB::raw("MONTHNAME(date) as month"))
+                ->pluck('count', 'month');
+
             $status = true;
             return response()->json(compact('status', 'data'));
         } else {

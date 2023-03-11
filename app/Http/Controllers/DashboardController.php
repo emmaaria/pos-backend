@@ -189,19 +189,17 @@ class DashboardController extends Controller
             $salesChart = [];
 
             foreach ($sales as $sale) {
+                $month = $sale->month;
+                $total = $sale->total;
                 foreach ($returns as $return) {
-                    if ($sale->month == $return->month) {
-                        $salesChart[] = [
-                            "month" => $sale->month,
-                            "total" => $sale->total - $return->total,
-                        ];
-                    }else{
-                        $salesChart[] = [
-                            "month" => $sale->month,
-                            "total" => $sale->total,
-                        ];
+                    if ($month == $return->month) {
+                        $total = $sale->total - $return->total;
                     }
                 }
+                $salesChart[] = [
+                    "month" => $month,
+                    "total" => $total,
+                ];
             }
 
             $data["salesChart"] = $salesChart;

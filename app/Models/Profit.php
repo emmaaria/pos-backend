@@ -8,5 +8,5 @@ use Illuminate\Database\Eloquent\Model;
 class Profit extends Model
 {
     use HasFactory;
-    protected $fillable = ['company_id', 'deposit', 'withdraw', 'date'];
+    protected $fillable = ['company_id', 'deposit', 'deduct', 'date'];
 }

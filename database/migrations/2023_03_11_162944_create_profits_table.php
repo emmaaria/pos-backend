@@ -17,7 +17,7 @@ class CreateProfitsTable extends Migration
             $table->id();
             $table->string('company_id');
             $table->decimal('deposit', 10, 3)->default(0);
-            $table->decimal('withdraw', 10, 3)->default(0);
+            $table->decimal('deduct', 10, 3)->default(0);
             $table->string('date');
             $table->timestamps();
         });

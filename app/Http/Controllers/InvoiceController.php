@@ -788,7 +788,7 @@ class InvoiceController extends Controller
                         return $invoice;
                     });
                     $status = true;
-                    $message = 'Invoice saved';
+                    $message = 'Invoice updated';
                     return response()->json(compact('status', 'message', 'invoice'));
                 } catch (Exception $e) {
                     $status = false;

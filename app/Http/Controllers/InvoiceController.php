@@ -623,7 +623,6 @@ class InvoiceController extends Controller
                                 'grand_total' => $total - $request->discountAmount,
                                 'paid_amount' => $paid,
                                 'company_id' => $companyId,
-                                'profit' => $profit - $request->discountAmount,
                             ]
                         );
                         DB::table('profits')->where('reference_no', "inv-$invoiceId")->where('company_id', $companyId)->updateOrInsert(

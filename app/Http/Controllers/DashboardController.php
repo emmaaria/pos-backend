@@ -176,7 +176,7 @@ class DashboardController extends Controller
                 ->select(DB::raw("SUM(grand_total) as total"), DB::raw("MONTHNAME(date) as month"))
                 ->whereYear('date', date('Y'))
                 ->groupBy(DB::raw("month"))
-                ->orderBy('id','ASC')
+                ->orderBy('id','DESC')
                 ->get();
 
             $status = true;

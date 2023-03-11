@@ -106,6 +106,7 @@ class SaleReturnController extends Controller
             $products = $request->productIds;
             $quantities = $request->productQuantities;
             $prices = $request->productPrices;
+            $profit = 0;
             if (count($products) > 0) {
                 try {
                     DB::transaction(function () use ($request, $companyId, $products, $quantities, $prices, $customerId) {
@@ -153,7 +154,7 @@ class SaleReturnController extends Controller
                                 'company_id' => $companyId,
                             ]
                         );
-                        if ($request->account == 'cash' && !empty($request->total)){
+                        if ($request->account == 'cash' && !empty($request->total)) {
                             $cashTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('customer_transaction');
                             DB::table('cash_books')->insert(array(
                                 'transaction_id' => $cashTxId,

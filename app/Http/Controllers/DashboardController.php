@@ -167,10 +167,10 @@ class DashboardController extends Controller
                 ->where('company_id', $companyId)
                 ->sum(DB::raw('deposit - withdraw'));
 
-            $data = DB::table('profits')
+            $data['todayTotalProfit'] = DB::table('profits')
                 ->where('company_id', $companyId)
                 ->where('date', date('Y-m-d'))
-                ->sum(DB::raw('add - deduct'));
+                ->sum(DB::raw('deposit - withdraw'));
 
             $status = true;
             return response()->json(compact('status', 'data'));

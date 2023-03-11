@@ -308,7 +308,7 @@ class ProductController extends Controller
             $name = $request->name;
             if (empty($name)) {
                 $products = DB::table('products')
-                    ->selectRaw("products.name AS name, products.product_id, products.price,(select sum(quantity) from invoice_items where product_id= `products`.`product_id`) - (select sum(quantity) from sale_return_items where product_id= `products`.`product_id`) as 'sale',(select sum(quantity) from purchase_items where product_id= `products`.`product_id`) as 'purchase'")
+                    ->selectRaw("products.name AS name, products.product_id, products.price,sum((select sum(quantity) from invoice_items where product_id= `products`.`product_id`) - (select sum(quantity) from sale_return_items where product_id= `products`.`product_id`)) as 'sale',(select sum(quantity) from purchase_items where product_id= `products`.`product_id`) as 'purchase'")
                     ->paginate(50);
                 $status = true;
                 return response()->json(compact('status', 'products'));

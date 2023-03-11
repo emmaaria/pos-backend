@@ -142,10 +142,10 @@ class ReportController extends Controller
                 ->leftJoin('suppliers', 'suppliers.id', '=', 'supplier_ledgers.supplier_id')
                 ->orderBy('supplier_ledgers.date', 'desc');
             if (!empty($request->startDate)){
-                $query->whereDate('supplier_ledgers.date', '>=', $request->startDate);
+                $query->where('supplier_ledgers.date', '>=', $request->startDate);
             }
             if (!empty($request->endDate)){
-                $query->whereDate('supplier_ledgers.date', '=<', $request->endDate);
+                $query->where('supplier_ledgers.date', '<=', $request->endDate);
             }
             $data = $query->get();
             $status = true;

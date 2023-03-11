@@ -120,4 +120,40 @@ class ReportController extends Controller
             return response()->json(compact('status', 'errors'));
         }
     }
+
+    public function supplierLedger(Request $request)
+    {
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $validator = Validator::make($request->all(),
+                [
+                    'supplier' => 'required'
+                ]
+            );
+            if ($validator->fails()) {
+                $status = false;
+                $errors = $validator->errors();
+                return response()->json(compact('status', 'errors'));
+            }
+            $query = DB::table('supplier_ledgers')
+                ->select('suppliers.name', 'supplier_ledgers.transaction_id', 'supplier_ledgers.date', 'supplier_ledgers.type', 'supplier_ledgers.due', 'supplier_ledgers.deposit', 'supplier_ledgers.reference_no', 'supplier_ledgers.comment')
+                ->where('supplier_ledgers.supplier_id', $request->supplier)
+                ->where('supplier_ledgers.company_id', $companyId)
+                ->leftJoin('suppliers', 'suppliers.id', '=', 'supplier_ledgers.supplier_id')
+                ->orderBy('supplier_ledgers.date', 'desc');
+            if (!empty($request->startDate)){
+                $query->where('supplier_ledgers.date', '>=', $request->startDate);
+            }
+            if (!empty($request->endDate)){
+                $query->where('supplier_ledgers.date', '<=', $request->endDate);
+            }
+            $data = $query->get();
+            $status = true;
+            return response()->json(compact('status', 'data'));
+        } else {
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
+    }
 }

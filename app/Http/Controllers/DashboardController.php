@@ -154,6 +154,11 @@ class DashboardController extends Controller
                 ->where('date', date('Y-m-d'))
                 ->sum(DB::raw('deposit - withdraw'));
 
+            $data['todayTotalCard'] = DB::table('card_transactions')
+                ->where('company_id', $companyId)
+                ->where('date', date('Y-m-d'))
+                ->sum(DB::raw('deposit - withdraw'));
+
             $data['totalBank'] = DB::table('bank_ledgers')
                 ->where('company_id', $companyId)
                 ->sum(DB::raw('deposit - withdraw'));

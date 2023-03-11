@@ -144,9 +144,9 @@ class ReportController extends Controller
             if (!empty($request->startDate)){
                 $query->where('supplier_ledgers.date', '>=', $request->startDate);
             }
-            if (!empty($request->endDate)){
-                $query->where('supplier_ledgers.date', '<=', $request->endDate);
-            }
+//            if (!empty($request->endDate)){
+//                $query->where('supplier_ledgers.date', '<=', $request->endDate);
+//            }
             $data = $query->get();
             $status = true;
             return response()->json(compact('status', 'data'));

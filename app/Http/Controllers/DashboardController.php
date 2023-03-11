@@ -173,11 +173,11 @@ class DashboardController extends Controller
                 ->sum(DB::raw('deposit - deduct'));
 
             $data['salesChart'] = DB::table('invoices')
-                ->select(DB::raw("COUNT(*) as count"), DB::raw("MONTHNAME(date) as month"))
+                ->select(DB::raw("SUM(grand_total) as total"), DB::raw("MONTHNAME(date) as month"))
                 ->whereYear('date', date('Y'))
                 ->groupBy(DB::raw("month"))
                 ->orderBy('id','ASC')
-                ->pluck('count', 'month');
+                ->pluck('count', 'total');
 
             $status = true;
             return response()->json(compact('status', 'data'));

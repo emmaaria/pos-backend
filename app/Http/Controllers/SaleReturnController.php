@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Exception;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -137,7 +137,7 @@ class SaleReturnController extends Controller
                         DB::table('profits')->insert(
                             [
                                 'date' => $request->date,
-                                'deduct' => 20,
+                                'deduct' => $profit,
                                 'company_id' => $companyId,
                                 'reference_no' => "ret-$returnId",
                             ]
@@ -233,7 +233,7 @@ class SaleReturnController extends Controller
                     $status = true;
                     $message = 'Return saved';
                     return response()->json(compact('status', 'message'));
-                } catch (Exception $e) {
+                } catch (\Exception $e) {
                     $status = false;
                     $errors = $e;
                     return response()->json(compact('status', 'errors'));

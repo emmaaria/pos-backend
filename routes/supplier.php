@@ -15,4 +15,5 @@ Route::group(['middleware' => 'api'], function ($router) {
     Route::post('/supplier/store', [SupplierController::class, 'storeSupplier']);
     Route::post('/supplier/update', [SupplierController::class, 'updateSupplier']);
     Route::post('/supplier/delete', [SupplierController::class, 'deleteSupplier']);
+    Route::post('/supplier/payment/store', [SupplierController::class, 'storePayment']);
 });

@@ -265,7 +265,7 @@ class CustomerController extends Controller
                     ));
 
                     if ($request->account == 'cash') {
-                        $cashTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('customer_transaction');
+                        $cashTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('cash_transaction');
                         DB::table('cash_books')->insert(array(
                             'transaction_id' => $cashTxId,
                             'company_id' => $companyId,

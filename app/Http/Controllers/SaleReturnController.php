@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -106,10 +106,10 @@ class SaleReturnController extends Controller
             $products = $request->productIds;
             $quantities = $request->productQuantities;
             $prices = $request->productPrices;
-            $profit = 0;
             if (count($products) > 0) {
                 try {
                     DB::transaction(function () use ($request, $companyId, $products, $quantities, $prices, $customerId) {
+                        $profit = 0;
                         $txGenerator = new InvoiceNumberGeneratorService();
                         $returnId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('return');
                         $txGenerator->setNextInvoiceNo();
@@ -233,7 +233,7 @@ class SaleReturnController extends Controller
                     $status = true;
                     $message = 'Return saved';
                     return response()->json(compact('status', 'message'));
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     $status = false;
                     $errors = $e;
                     return response()->json(compact('status', 'errors'));

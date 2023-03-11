@@ -177,7 +177,7 @@ class DashboardController extends Controller
                 ->whereYear('date', date('Y'))
                 ->groupBy(DB::raw("month"))
                 ->orderBy('id','ASC')
-                ->pluck('total', 'total');
+                ->pluck('total', 'month');
 
             $status = true;
             return response()->json(compact('status', 'data'));

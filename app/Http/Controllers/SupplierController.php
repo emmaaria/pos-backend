@@ -287,8 +287,8 @@ class SupplierController extends Controller
                             'transaction_id' => $cashTxId,
                             'company_id' => $companyId,
                             'reference_no' => "s-pay-$paidId",
-                            'type' => 'receive',
-                            'receive' => $request->amount,
+                            'type' => 'payment',
+                            'payment' => $request->amount,
                             'date' => $request->date,
                             'comment' => $request->note !== '' ? $request->note." (Payment ID : $paidId)" : "Due payment (Payment ID : $paidId)"
                         ));
@@ -300,8 +300,8 @@ class SupplierController extends Controller
                             'transaction_id' => $bkashTxId,
                             'company_id' => $companyId,
                             'reference_no' => "s-pay-$paidId",
-                            'type' => 'deposit',
-                            'deposit' => $request->amount,
+                            'type' => 'withdraw',
+                            'withdraw' => $request->amount,
                             'date' => $request->date,
                             'comment' => $request->note !== '' ? $request->note." (Payment ID : $paidId)" : "Due payment (Payment ID : $paidId)"
                         ));
@@ -314,8 +314,8 @@ class SupplierController extends Controller
                             'transaction_id' => $nagadTxId,
                             'company_id' => $companyId,
                             'reference_no' => "s-pay-$paidId",
-                            'type' => 'deposit',
-                            'deposit' => $request->amount,
+                            'type' => 'withdraw',
+                            'withdraw' => $request->amount,
                             'date' => $request->date,
                             'comment' => $request->note !== '' ? $request->note." (Payment ID : $paidId)" : "Due payment (Payment ID : $paidId)"
                         ));
@@ -327,8 +327,8 @@ class SupplierController extends Controller
                         DB::table('bank_ledgers')->insert(array(
                             'transaction_id' => $bankTxId,
                             'reference_no' => "s-pay-$paidId",
-                            'type' => 'deposit',
-                            'deposit' => $request->deposit,
+                            'type' => 'withdraw',
+                            'withdraw' => $request->deposit,
                             'bank_id' => $request->bankId,
                             'date' => $request->date,
                             'company_id' => $companyId,

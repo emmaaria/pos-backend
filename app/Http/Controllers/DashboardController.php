@@ -172,19 +172,39 @@ class DashboardController extends Controller
                 ->where('date', date('Y-m-d'))
                 ->sum(DB::raw('deposit - deduct'));
 
-            $data['salesChart'] = DB::table('invoices')
+            $sales = DB::table('invoices')
                 ->select(DB::raw("SUM(grand_total) as total"), DB::raw("MONTHNAME(date) as month"))
                 ->whereYear('date', date('Y'))
                 ->groupBy(DB::raw("month"))
-                ->orderBy('date','ASC')
+                ->orderBy('date', 'ASC')
                 ->get();
 
-            $data['returnChart'] = DB::table('sale_returns')
+            $returns = DB::table('sale_returns')
                 ->select(DB::raw("SUM(return_amount) as total"), DB::raw("MONTHNAME(date) as month"))
                 ->whereYear('date', date('Y'))
                 ->groupBy(DB::raw("month"))
-                ->orderBy('date','ASC')
+                ->orderBy('date', 'ASC')
                 ->get();
+
+            $salesChart = [];
+
+            foreach ($sales as $sale) {
+                foreach ($returns as $return) {
+                    if ($sale->month == $return->month) {
+                        $salesChart[] = [
+                            "month" => $sale->month,
+                            "total" => $sale->total - $return->total,
+                        ];
+                    }else{
+                        $salesChart[] = [
+                            "month" => $sale->month,
+                            "total" => $sale->total,
+                        ];
+                    }
+                }
+            }
+
+            $data["salesChart"] = $salesChart;
 
             $status = true;
             return response()->json(compact('status', 'data'));

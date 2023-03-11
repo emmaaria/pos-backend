@@ -316,7 +316,6 @@ class InvoiceController extends Controller
                                 'grand_total' => $total - $request->discountAmount,
                                 'paid_amount' => $paid,
                                 'company_id' => $companyId,
-                                'profit' => $profit - $request->discountAmount,
                             ]
                         );
                         DB::table('profits')->insert(

@@ -129,6 +129,7 @@ class SaleReturnController extends Controller
                                     'total' => $quantity * $price,
                                 ]);
                                 $purchasePrice = DB::table('average_purchase_prices')->where('product_id', $productID)->where('company_id', $companyId)->first();
+
                                 $profit += ($quantity * $price) - ($quantity * $purchasePrice->price);
                             }
                         }

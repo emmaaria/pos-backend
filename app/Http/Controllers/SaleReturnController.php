@@ -137,7 +137,7 @@ class SaleReturnController extends Controller
                         DB::table('profits')->insert(
                             [
                                 'date' => $request->date,
-                                'deduct' => $profit,
+                                'deduct' => 20,
                                 'company_id' => $companyId,
                                 'reference_no' => "ret-$returnId",
                             ]

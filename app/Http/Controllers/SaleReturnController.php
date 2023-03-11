@@ -129,19 +129,19 @@ class SaleReturnController extends Controller
                                     'date' => $request->date,
                                     'total' => $quantity * $price,
                                 ]);
-                                $purchasePrice = DB::table('average_purchase_prices')->where('product_id', $productID)->where('company_id', $companyId)->first();
-
-                                $profit += ($quantity * $price) - ($quantity * $purchasePrice->price);
+//                                $purchasePrice = DB::table('average_purchase_prices')->where('product_id', $productID)->where('company_id', $companyId)->first();
+//
+//                                $profit += ($quantity * $price) - ($quantity * $purchasePrice->price);
                             }
                         }
-                        DB::table('profits')->insert(
-                            [
-                                'date' => $request->date,
-                                'deduct' => $profit,
-                                'company_id' => $companyId,
-                                'reference_no' => "ret-$returnId",
-                            ]
-                        );
+//                        DB::table('profits')->insert(
+//                            [
+//                                'date' => $request->date,
+//                                'deduct' => $profit,
+//                                'company_id' => $companyId,
+//                                'reference_no' => "ret-$returnId",
+//                            ]
+//                        );
                         DB::table('sale_returns')->insert(
                             [
                                 'return_id' => $returnId,

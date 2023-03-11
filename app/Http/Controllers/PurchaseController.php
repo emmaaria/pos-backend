@@ -598,14 +598,14 @@ class PurchaseController extends Controller
                             }
                         }
                     });
+                    $status = true;
+                    $message = 'Purchase updated';
+                    return response()->json(compact('status', 'message'));
                 }catch (Exception $e) {
                     $status = false;
                     $errors = $e;
                     return response()->json(compact('status', 'errors'));
                 }
-                $status = true;
-                $message = 'Purchase updated';
-                return response()->json(compact('status', 'message'));
             } else {
                 $status = false;
                 $error = 'Please add at least one product';

@@ -229,14 +229,14 @@ class SaleReturnController extends Controller
                             $txGenerator->setNextInvoiceNo();
                         }
                     });
+                    $status = true;
+                    $message = 'Return saved';
+                    return response()->json(compact('status', 'message'));
                 } catch (Exception $e) {
                     $status = false;
                     $errors = $e;
                     return response()->json(compact('status', 'errors'));
                 }
-                $status = true;
-                $message = 'Return saved';
-                return response()->json(compact('status', 'message'));
             } else {
                 $status = false;
                 $error = 'Please add at least one product';

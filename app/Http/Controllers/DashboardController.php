@@ -174,6 +174,9 @@ class DashboardController extends Controller
 
             $data['salesChart'] = DB::table('invoices')
                 ->select(DB::raw("COUNT(*) as count"), DB::raw("MONTHNAME(date) as month"))
+                ->whereYear('date', date('Y'))
+                ->groupBy(DB::raw("month"))
+                ->orderBy('id','ASC')
                 ->pluck('count', 'month');
 
             $status = true;

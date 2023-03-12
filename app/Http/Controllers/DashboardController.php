@@ -198,7 +198,7 @@ class DashboardController extends Controller
                 }
                 $salesChart[] = [
                     "month" => $month,
-                    "total" => $total,
+                    "sale" => $total,
                 ];
             }
 

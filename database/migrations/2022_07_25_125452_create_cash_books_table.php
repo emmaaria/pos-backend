@@ -25,7 +25,8 @@ class CreateCashBooksTable extends Migration
             $table->string('company_id')->nullable();
             $table->string('date');
             $table->timestamps();
-            $table->index(['company_id', 'transaction_id', 'reference_no','user_id','date']);
+            $table->index(['company_id', 'transaction_id', 'reference_no']);
+            $table->index(['user_id','date']);
         });
     }
 

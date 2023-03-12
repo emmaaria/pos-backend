@@ -15,15 +15,15 @@ class CreatePurchasesTable extends Migration
     {
         Schema::create('purchases', function (Blueprint $table) {
             $table->id();
-            $table->index('supplier_id')->change();
-            $table->index('purchase_id')->change();
-            $table->index('user_id')->nullable()->change();
+            $table->index('supplier_id');
+            $table->index('purchase_id');
+            $table->index('user_id')->nullable();
             $table->string('amount');
             $table->string('paid')->default(0);
             $table->string('opening')->default(0);
             $table->string('comment')->nullable();
-            $table->index('date')->change();
-            $table->index('company_id')->nullable()->change();
+            $table->index('date');
+            $table->index('company_id')->nullable();
             $table->timestamps();
         });
     }

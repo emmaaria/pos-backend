@@ -24,7 +24,8 @@ class CreateExpensesTable extends Migration
             $table->string('date');
             $table->string('company_id');
             $table->timestamps();
-            $table->index(['company_id', 'expense_id', 'category', 'user_id', 'date']);
+            $table->index(['company_id', 'expense_id', 'category']);
+            $table->index(['user_id', 'date']);
         });
     }
 

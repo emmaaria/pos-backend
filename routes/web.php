@@ -20,7 +20,7 @@ Route::get('/migrate', function () {
 });
 Route::get('/rollback', function () {
     $output = [];
-    Artisan::call('rollback', $output);
+    Artisan::call('migrate:rollback', $output);
     dd(Artisan::output());
 });
 Route::get('/pull', function () {

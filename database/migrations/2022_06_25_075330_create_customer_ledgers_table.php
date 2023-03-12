@@ -24,9 +24,9 @@ class CreateCustomerLedgersTable extends Migration
             $table->string('deposit')->default(0);
             $table->string('date');
             $table->string('comment');
-            $table->string('company_id')->nullable();
+            $table->string('company_id');
             $table->timestamps();
-            $table->index(['company_id', 'customer_id', 'transaction_id', 'reference_no', 'date']);
+            $table->index(['company_id', 'customer_id', 'transaction_id', 'reference_no', 'date', 'user_id']);
         });
     }
 

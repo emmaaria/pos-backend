@@ -202,6 +202,18 @@ class DashboardController extends Controller
                 ];
             }
 
+            $data['todayTotalProfit'] = DB::table('profits')
+                ->where('company_id', $companyId)
+                ->where('date', date('Y-m-d'))
+                ->sum(DB::raw('deposit - deduct'));
+
+            $data["profitChart"] = DB::table('profits')
+                ->select(DB::raw("SUM(deposit - deduct) as profit"), DB::raw("MONTHNAME(date) as month"))
+                ->whereYear('date', date('Y'))
+                ->groupBy(DB::raw("month"))
+                ->orderBy('date', 'ASC')
+                ->get();
+
             $data["salesChart"] = $salesChart;
 
             $status = true;

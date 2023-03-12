@@ -25,6 +25,7 @@ class CreatePurchasesTable extends Migration
             $table->index('date');
             $table->index('company_id')->nullable();
             $table->timestamps();
+            $table->index(['company_id', 'supplier_id', 'purchase_id','user_id', 'date']);
         });
     }
 

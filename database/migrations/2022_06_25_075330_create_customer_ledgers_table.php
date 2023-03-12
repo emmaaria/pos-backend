@@ -26,6 +26,7 @@ class CreateCustomerLedgersTable extends Migration
             $table->string('comment');
             $table->string('company_id')->nullable();
             $table->timestamps();
+            $table->index(['company_id', 'customer_id', 'transaction_id', 'reference_no', 'date']);
         });
     }
 

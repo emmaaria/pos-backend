@@ -20,6 +20,7 @@ class CreateSuppliersTable extends Migration
             $table->text('address')->nullable();
             $table->string('company_id')->nullable();
             $table->timestamps();
+            $table->index(['company_id', 'name', 'mobile']);
         });
     }
 

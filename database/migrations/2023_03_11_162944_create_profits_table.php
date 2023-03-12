@@ -21,6 +21,7 @@ class CreateProfitsTable extends Migration
             $table->decimal('deduct', 10, 3)->default(0);
             $table->string('date');
             $table->timestamps();
+            $table->index(['company_id', 'reference_no', 'date']);
         });
     }
 

@@ -25,6 +25,7 @@ class CreateSaleReturnsTable extends Migration
             $table->string('type');
             $table->string('company_id');
             $table->timestamps();
+            $table->index(['company_id', 'return_id', 'invoice_id', 'user_id', 'date']);
         });
     }
 

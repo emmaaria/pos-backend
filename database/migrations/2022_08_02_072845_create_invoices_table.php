@@ -30,6 +30,7 @@ class CreateInvoicesTable extends Migration
             $table->string('discount_setting');
             $table->string('company_id')->nullable();
             $table->timestamps();
+            $table->index(['company_id', 'customer_id', 'invoice_id','date','user_id']);
         });
     }
 

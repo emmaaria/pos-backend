@@ -18,6 +18,7 @@ class CreateCategoriesTable extends Migration
             $table->string('name');
             $table->string('company_id')->nullable();
             $table->timestamps();
+            $table->index(['company_id']);
         });
     }
 

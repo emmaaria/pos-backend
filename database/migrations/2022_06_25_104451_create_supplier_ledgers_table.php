@@ -26,6 +26,7 @@ class CreateSupplierLedgersTable extends Migration
             $table->string('comment');
             $table->string('company_id')->nullable();
             $table->timestamps();
+            $table->index(['company_id', 'supplier_id', 'transaction_id','reference_no','user_id','date']);
         });
     }
 

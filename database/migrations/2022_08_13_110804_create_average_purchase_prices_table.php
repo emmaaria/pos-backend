@@ -19,6 +19,7 @@ class CreateAveragePurchasePricesTable extends Migration
             $table->string('company_id')->nullable();
             $table->string('price');
             $table->timestamps();
+            $table->index(['company_id','product_id']);
         });
     }
 

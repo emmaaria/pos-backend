@@ -29,6 +29,7 @@ class CreateCompaniesTable extends Migration
             $table->string('expiry_date')->nullable();
             $table->string('discount_type')->default('invoice');
             $table->timestamps();
+            $table->index(['company_id']);
         });
     }
 

@@ -23,6 +23,7 @@ class CreatePurchasesTable extends Migration
             $table->string('opening')->default(0);
             $table->string('comment')->nullable();
             $table->string('date');
+            $table->string('payment_method');
             $table->string('company_id')->nullable();
             $table->timestamps();
             $table->index(['company_id', 'supplier_id', 'purchase_id']);

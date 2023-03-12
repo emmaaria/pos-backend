@@ -26,7 +26,8 @@ class CreateBankLedgersTable extends Migration
             $table->string('company_id')->nullable();
             $table->string('date');
             $table->timestamps();
-            $table->index(['company_id', 'transaction_id', 'reference_no','date','user_id', 'bank_id']);
+            $table->index(['company_id', 'transaction_id', 'reference_no']);
+            $table->index(['date','user_id', 'bank_id']);
         });
     }
 

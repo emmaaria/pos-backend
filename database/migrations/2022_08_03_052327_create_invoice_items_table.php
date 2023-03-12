@@ -28,7 +28,8 @@ class CreateInvoiceItemsTable extends Migration
             $table->string('company_id')->nullable();
             $table->string('date');
             $table->timestamps();
-            $table->index(['company_id', 'invoice_id', 'user_id','product_id','date']);
+            $table->index(['company_id', 'invoice_id', 'user_id']);
+            $table->index(['product_id','date']);
         });
     }
 

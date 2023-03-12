@@ -208,7 +208,7 @@ class DashboardController extends Controller
                 ->sum(DB::raw('deposit - deduct'));
 
             $data["profitChart"] = DB::table('profits')
-                ->select(DB::raw("SUM(deposit - deduct) as profit"), DB::raw("MONTHNAME(date) as month"))
+                ->select(DB::raw("ROUND(SUM(deposit - deduct), 2) as profit"), DB::raw("MONTHNAME(date) as month"))
                 ->whereYear('date', date('Y'))
                 ->groupBy(DB::raw("month"))
                 ->orderBy('date', 'ASC')

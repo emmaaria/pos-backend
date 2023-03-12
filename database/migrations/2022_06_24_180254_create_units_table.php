@@ -18,7 +18,7 @@ class CreateUnitsTable extends Migration
             $table->string('name');
             $table->string('company_id')->nullable();
             $table->timestamps();
-            $table->index(['company_id']);
+            $table->index('company_id');
         });
     }
 

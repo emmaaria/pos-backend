@@ -17,11 +17,11 @@ class CreateProductsTable extends Migration
             $table->id();
             $table->string('name');
             $table->index('product_id')->change();
-            $table->index('category')->nullable();
+            $table->index('category')->nullable()->change();
             $table->string('unit')->nullable();
             $table->string('price')->nullable();
             $table->string('purchase_price')->nullable();
-            $table->index('company_id');
+            $table->index('company_id')->change();
             $table->string('weight')->default(0);
             $table->timestamps();
         });

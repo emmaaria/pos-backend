@@ -207,23 +207,12 @@ class DashboardController extends Controller
                 ->where('date', date('Y-m-d'))
                 ->sum(DB::raw('deposit - deduct'));
 
-//            $data["profitChart"] = DB::table('profits')
-//                ->select(DB::raw("ROUND(SUM(deposit - deduct), 2) as profit"), DB::raw("MONTHNAME(date) as month"))
-//                ->whereYear('date', date('Y'))
-//                ->groupBy(DB::raw("month"))
-//                ->orderBy('date', 'ASC')
-//                ->get();
-
-            $data["profitChart"] = array(
-                array(
-                    'month' => 'January',
-                    'profit' => 375.5,
-                ),
-                array(
-                    'month' => 'February',
-                    'profit' => 675.5,
-                )
-            );
+            $data["profitChart"] = DB::table('profits')
+                ->select(DB::raw("ROUND(SUM(deposit - deduct), 2) as profit"), DB::raw("MONTHNAME(date) as month"))
+                ->whereYear('date', date('Y'))
+                ->groupBy(DB::raw("month"))
+                ->orderBy('date', 'ASC')
+                ->get();
 
             $data["salesChart"] = $salesChart;
 

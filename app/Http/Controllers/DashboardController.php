@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use App\Models\Invoice;
 use App\Models\Product;
+use App\Models\Purchase;
+use App\Models\Supplier;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -62,20 +65,16 @@ class DashboardController extends Controller
             $data['totalCustomer'] = Customer::where('company_id', $companyId)
                 ->count();
 
-            $data['totalSupplier'] = DB::table('suppliers')
-                ->where('company_id', $companyId)
+            $data['totalSupplier'] = Supplier::where('company_id', $companyId)
                 ->count();
 
-            $data['totalPurchase'] = DB::table('purchases')
-                ->where('company_id', $companyId)
+            $data['totalPurchase'] = Purchase::where('company_id', $companyId)
                 ->count();
 
-            $data['totalInvoice'] = DB::table('invoices')
-                ->where('company_id', $companyId)
+            $data['totalInvoice'] = Invoice::where('company_id', $companyId)
                 ->count();
 
-            $data['totalPurchaseAmount'] = DB::table('purchases')
-                ->where('company_id', $companyId)
+            $data['totalPurchaseAmount'] = Purchase::where('company_id', $companyId)
                 ->sum('amount');
 
             $totalSale = DB::table('invoices')

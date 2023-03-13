@@ -11,5 +11,6 @@ class Product extends Model
     use HasFactory;
     use QueryCacheable;
     public $cacheFor = 3600;
+    public $cacheDriver = 'file';
     protected $fillable = ['name', 'product_id', 'category', 'unit', 'price', 'purchase_price', 'weight','company_id'];
 }

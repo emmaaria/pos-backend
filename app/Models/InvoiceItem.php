@@ -11,5 +11,6 @@ class InvoiceItem extends Model
     use HasFactory;
     use QueryCacheable;
     public $cacheFor = 3600;
+    public $cacheDriver = 'file';
     protected $fillable = ['invoice_id', 'product_id', 'price', 'quantity', 'total', 'date','company_id','discount_type','discount','discount_amount','grand_total', 'user_id'];
 }

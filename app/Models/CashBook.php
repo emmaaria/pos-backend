@@ -11,5 +11,6 @@ class CashBook extends Model
     use HasFactory;
     use QueryCacheable;
     public $cacheFor = 3600;
+    public $cacheDriver = 'file';
     protected $fillable = ['transaction_id','type','payment','receive','date','reference_no','comment','company_id', 'user_id'];
 }

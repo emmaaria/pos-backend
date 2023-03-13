@@ -14,6 +14,7 @@ class User extends Authenticatable implements JWTSubject
     use HasApiTokens, HasFactory, Notifiable;
     use QueryCacheable;
     public $cacheFor = 3600;
+    public $cacheDriver = 'file';
 
     /**
      * The attributes that are mass assignable.

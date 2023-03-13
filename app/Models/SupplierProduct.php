@@ -11,6 +11,7 @@ class SupplierProduct extends Model
     use HasFactory;
     use QueryCacheable;
     public $cacheFor = 3600;
+    public $cacheDriver = 'file';
 
     protected $fillable = ['supplier_id', 'product_id', 'company_id'];
 }

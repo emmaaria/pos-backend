@@ -11,6 +11,7 @@ class Company extends Model
     use HasFactory;
     use QueryCacheable;
     public $cacheFor = 3600;
+    public $cacheDriver = 'file';
     protected $fillable = [
         'company_id',
         'name',

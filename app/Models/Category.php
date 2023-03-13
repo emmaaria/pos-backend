@@ -11,5 +11,6 @@ class Category extends Model
     use HasFactory;
     use QueryCacheable;
     public $cacheFor = 3600;
+    public $cacheDriver = 'file';
     protected $fillable = ['name','company_id'];
 }

@@ -11,5 +11,6 @@ class AveragePurchasePrice extends Model
     use HasFactory;
     use QueryCacheable;
     public $cacheFor = 3600;
+    public $cacheDriver = 'file';
     protected $fillable = ['product_id', 'price', 'company_id'];
 }

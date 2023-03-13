@@ -11,5 +11,6 @@ class SaleReturnItem extends Model
     use HasFactory;
     use QueryCacheable;
     public $cacheFor = 3600;
+    public $cacheDriver = 'file';
     protected $fillable = ['return_id','invoice_id','product_id','date','price','quantity','total','company_id', 'user_id'];
 }

@@ -12,6 +12,7 @@ class Bank extends Model
     use HasFactory;
     use QueryCacheable;
     public $cacheFor = 3600;
+    public $cacheDriver = 'file';
 
     protected $fillable = ['name', 'account_name', 'account_no', 'branch', 'company_id', 'bank_type'];
 }

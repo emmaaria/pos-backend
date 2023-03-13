@@ -2,10 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BankLedger;
+use App\Models\BkashTransaction;
+use App\Models\CardTransaction;
+use App\Models\CashBook;
 use App\Models\Customer;
 use App\Models\Invoice;
+use App\Models\NagadTransaction;
 use App\Models\Product;
+use App\Models\Profit;
 use App\Models\Purchase;
+use App\Models\SaleReturn;
 use App\Models\Supplier;
 use Exception;
 use Illuminate\Http\Request;
@@ -77,110 +84,88 @@ class DashboardController extends Controller
             $data['totalPurchaseAmount'] = Purchase::where('company_id', $companyId)
                 ->sum('amount');
 
-            $totalSale = DB::table('invoices')
-                ->where('company_id', $companyId)
+            $totalSale = Invoice::where('company_id', $companyId)
                 ->sum('grand_total');
 
-            $totalReturn = DB::table('sale_returns')
-                ->where('company_id', $companyId)
+            $totalReturn = SaleReturn::where('company_id', $companyId)
                 ->sum('return_amount');
 
             $data['totalSaleAmount'] = $totalSale - $totalReturn;
 
-            $data['totalReturn'] = DB::table('sale_returns')
-                ->where('company_id', $companyId)
+            $data['totalReturn'] = SaleReturn::where('company_id', $companyId)
                 ->count();
 
-            $data['todayTotalInvoice'] = DB::table('invoices')
-                ->where('company_id', $companyId)
+            $data['todayTotalInvoice'] = Invoice::where('company_id', $companyId)
                 ->where('date', date('Y-m-d'))
                 ->count();
 
-            $data['todayTotalSaleAmount'] = DB::table('invoices')
-                ->where('company_id', $companyId)
+            $data['todayTotalSaleAmount'] = Invoice::where('company_id', $companyId)
                 ->where('date', date('Y-m-d'))
                 ->sum('grand_total');
 
-            $data['todayTotalPurchase'] = DB::table('purchases')
-                ->where('company_id', $companyId)
+            $data['todayTotalPurchase'] = Purchase::where('company_id', $companyId)
                 ->where('date', date('Y-m-d'))
                 ->count();
 
-            $data['todayTotalPurchaseAmount'] = DB::table('purchases')
-                ->where('company_id', $companyId)
+            $data['todayTotalPurchaseAmount'] = Purchase::where('company_id', $companyId)
                 ->where('date', date('Y-m-d'))
                 ->sum('amount');
 
-            $data['todayTotalReturn'] = DB::table('sale_returns')
-                ->where('company_id', $companyId)
+            $data['todayTotalReturn'] = SaleReturn::where('company_id', $companyId)
                 ->where('date', date('Y-m-d'))
                 ->count();
 
-            $data['todayTotalReturnAmount'] = DB::table('sale_returns')
-                ->where('company_id', $companyId)
+            $data['todayTotalReturnAmount'] = SaleReturn::where('company_id', $companyId)
                 ->where('date', date('Y-m-d'))
                 ->sum('return_amount');
 
-            $data['todayTotalCash'] = DB::table('cash_books')
-                ->where('company_id', $companyId)
+            $data['todayTotalCash'] = CashBook::where('company_id', $companyId)
                 ->where('date', date('Y-m-d'))
                 ->sum(DB::raw('receive - payment'));
 
-            $data['totalCash'] = DB::table('cash_books')
-                ->where('company_id', $companyId)
+            $data['totalCash'] = CashBook::where('company_id', $companyId)
                 ->sum(DB::raw('receive - payment'));
 
-            $data['todayTotalBkash'] = DB::table('bkash_transactions')
-                ->where('company_id', $companyId)
+            $data['todayTotalBkash'] = BkashTransaction::where('company_id', $companyId)
                 ->where('date', date('Y-m-d'))
                 ->sum(DB::raw('deposit - withdraw'));
 
-            $data['totalBkash'] = DB::table('bkash_transactions')
-                ->where('company_id', $companyId)
+            $data['totalBkash'] = BkashTransaction::where('company_id', $companyId)
                 ->sum(DB::raw('deposit - withdraw'));
 
-            $data['totalNagad'] = DB::table('nagad_transactions')
-                ->where('company_id', $companyId)
+            $data['totalNagad'] = NagadTransaction::where('company_id', $companyId)
                 ->sum(DB::raw('deposit - withdraw'));
 
-            $data['todayTotalNagad'] = DB::table('nagad_transactions')
-                ->where('company_id', $companyId)
+            $data['todayTotalNagad'] = NagadTransaction::where('company_id', $companyId)
                 ->where('date', date('Y-m-d'))
                 ->sum(DB::raw('deposit - withdraw'));
 
-            $data['todayTotalBank'] = DB::table('bank_ledgers')
-                ->where('company_id', $companyId)
+            $data['todayTotalBank'] = BankLedger::where('company_id', $companyId)
                 ->where('date', date('Y-m-d'))
                 ->sum(DB::raw('deposit - withdraw'));
 
-            $data['todayTotalCard'] = DB::table('card_transactions')
-                ->where('company_id', $companyId)
+            $data['todayTotalCard'] = CardTransaction::where('company_id', $companyId)
                 ->where('date', date('Y-m-d'))
                 ->sum(DB::raw('deposit - withdraw'));
 
-            $data['totalBank'] = DB::table('bank_ledgers')
-                ->where('company_id', $companyId)
+            $data['totalBank'] = BankLedger::where('company_id', $companyId)
                 ->sum(DB::raw('deposit - withdraw'));
 
-            $data['totalCard'] = DB::table('card_transactions')
-                ->where('company_id', $companyId)
+            $data['totalCard'] = CardTransaction::where('company_id', $companyId)
                 ->sum(DB::raw('deposit - withdraw'));
 
-            $data['todayTotalProfit'] = DB::table('profits')
-                ->where('company_id', $companyId)
+            $data['todayTotalProfit'] = Profit::where('company_id', $companyId)
                 ->where('date', date('Y-m-d'))
                 ->sum(DB::raw('deposit - deduct'));
 
-            $sales = DB::table('invoices')
-                ->select(DB::raw("SUM(grand_total) as total"), DB::raw("MONTHNAME(date) as month"))
+            $sales = Invoice::select(DB::raw("SUM(grand_total) as total"), DB::raw("MONTHNAME(date) as month"))
                 ->whereYear('date', date('Y'))
                 ->groupBy(DB::raw("month"))
                 ->orderBy('date', 'ASC')
                 ->where('company_id', $companyId)
                 ->get();
 
-            $returns = DB::table('sale_returns')
-                ->select(DB::raw("SUM(return_amount) as total"), DB::raw("MONTHNAME(date) as month"))
+            $returns = SaleReturn::select(DB::raw("SUM(return_amount) as total"), DB::raw("MONTHNAME(date) as month"))
                 ->whereYear('date', date('Y'))
                 ->groupBy(DB::raw("month"))
                 ->orderBy('date', 'ASC')
@@ -203,14 +188,12 @@ class DashboardController extends Controller
                 ];
             }
 
-            $data['todayTotalProfit'] = DB::table('profits')
-                ->where('company_id', $companyId)
+            $data['todayTotalProfit'] = Profit::where('company_id', $companyId)
                 ->where('date', date('Y-m-d'))
                 ->where('company_id', $companyId)
                 ->sum(DB::raw('deposit - deduct'));
 
-            $data["profitChart"] = DB::table('profits')
-                ->select(DB::raw("ROUND(SUM(deposit - deduct), 2) as profit"), DB::raw("MONTHNAME(date) as month"))
+            $data["profitChart"] = Profit::select(DB::raw("ROUND(SUM(deposit - deduct), 2) as profit"), DB::raw("MONTHNAME(date) as month"))
                 ->whereYear('date', date('Y'))
                 ->groupBy(DB::raw("month"))
                 ->where('company_id', $companyId)

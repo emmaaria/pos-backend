@@ -177,6 +177,7 @@ class DashboardController extends Controller
                 ->whereYear('date', date('Y'))
                 ->groupBy(DB::raw("month"))
                 ->orderBy('date', 'ASC')
+                ->where('company_id', $companyId)
                 ->get();
 
             $returns = DB::table('sale_returns')
@@ -184,6 +185,7 @@ class DashboardController extends Controller
                 ->whereYear('date', date('Y'))
                 ->groupBy(DB::raw("month"))
                 ->orderBy('date', 'ASC')
+                ->where('company_id', $companyId)
                 ->get();
 
             $salesChart = [];
@@ -205,12 +207,14 @@ class DashboardController extends Controller
             $data['todayTotalProfit'] = DB::table('profits')
                 ->where('company_id', $companyId)
                 ->where('date', date('Y-m-d'))
+                ->where('company_id', $companyId)
                 ->sum(DB::raw('deposit - deduct'));
 
             $data["profitChart"] = DB::table('profits')
                 ->select(DB::raw("ROUND(SUM(deposit - deduct), 2) as profit"), DB::raw("MONTHNAME(date) as month"))
                 ->whereYear('date', date('Y'))
                 ->groupBy(DB::raw("month"))
+                ->where('company_id', $companyId)
                 ->orderBy('date', 'ASC')
                 ->get();
 

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Customer;
+use App\Models\Product;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -54,12 +56,10 @@ class DashboardController extends Controller
         if ($companyId) {
             $data = [];
 
-            $data['totalProduct'] = DB::table('products')
-                ->where('company_id', $companyId)
+            $data['totalProduct'] = Product::where('company_id', $companyId)
                 ->count();
 
-            $data['totalCustomer'] = DB::table('customers')
-                ->where('company_id', $companyId)
+            $data['totalCustomer'] = Customer::where('company_id', $companyId)
                 ->count();
 
             $data['totalSupplier'] = DB::table('suppliers')

@@ -89,7 +89,6 @@ class ComposerStaticInitdf8e0732c33bb66ed26c29372ec37aaf
         ),
         'R' => 
         array (
-            'Rennokki\\QueryCache\\' => 20,
             'Ramsey\\Uuid\\' => 12,
             'Ramsey\\Collection\\' => 18,
         ),
@@ -323,10 +322,6 @@ class ComposerStaticInitdf8e0732c33bb66ed26c29372ec37aaf
         'Skycoder\\InvoiceNumberGenerator\\' => 
         array (
             0 => __DIR__ . '/..' . '/skycoder/invoice-number-generator/src',
-        ),
-        'Rennokki\\QueryCache\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/rennokki/laravel-eloquent-query-cache/src',
         ),
         'Ramsey\\Uuid\\' => 
         array (
@@ -4563,11 +4558,6 @@ class ComposerStaticInitdf8e0732c33bb66ed26c29372ec37aaf
         'Ramsey\\Uuid\\UuidInterface' => __DIR__ . '/..' . '/ramsey/uuid/src/UuidInterface.php',
         'Ramsey\\Uuid\\Validator\\GenericValidator' => __DIR__ . '/..' . '/ramsey/uuid/src/Validator/GenericValidator.php',
         'Ramsey\\Uuid\\Validator\\ValidatorInterface' => __DIR__ . '/..' . '/ramsey/uuid/src/Validator/ValidatorInterface.php',
-        'Rennokki\\QueryCache\\Contracts\\QueryCacheModuleInterface' => __DIR__ . '/..' . '/rennokki/laravel-eloquent-query-cache/src/Contracts/QueryCacheModuleInterface.php',
-        'Rennokki\\QueryCache\\FlushQueryCacheObserver' => __DIR__ . '/..' . '/rennokki/laravel-eloquent-query-cache/src/FlushQueryCacheObserver.php',
-        'Rennokki\\QueryCache\\Query\\Builder' => __DIR__ . '/..' . '/rennokki/laravel-eloquent-query-cache/src/Query/Builder.php',
-        'Rennokki\\QueryCache\\Traits\\QueryCacheModule' => __DIR__ . '/..' . '/rennokki/laravel-eloquent-query-cache/src/Traits/QueryCacheModule.php',
-        'Rennokki\\QueryCache\\Traits\\QueryCacheable' => __DIR__ . '/..' . '/rennokki/laravel-eloquent-query-cache/src/Traits/QueryCacheable.php',
         'ReturnTypeWillChange' => __DIR__ . '/..' . '/symfony/polyfill-php81/Resources/stubs/ReturnTypeWillChange.php',
         'SebastianBergmann\\CliParser\\AmbiguousOptionException' => __DIR__ . '/..' . '/sebastian/cli-parser/src/exceptions/AmbiguousOptionException.php',
         'SebastianBergmann\\CliParser\\Exception' => __DIR__ . '/..' . '/sebastian/cli-parser/src/exceptions/Exception.php',

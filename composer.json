@@ -12,7 +12,6 @@
         "laravel/sanctum": "^2.11",
         "laravel/tinker": "^2.5",
         "laravel/ui": "^3.4",
-        "rennokki/laravel-eloquent-query-cache": "^3.3",
         "skycoder/invoice-number-generator": "2.x-dev",
         "spatie/laravel-activitylog": "^4.7",
         "tymon/jwt-auth": "^1.0"

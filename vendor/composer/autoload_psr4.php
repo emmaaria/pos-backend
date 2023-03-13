@@ -41,6 +41,7 @@ return array(
     'Spatie\\LaravelPackageTools\\' => array($vendorDir . '/spatie/laravel-package-tools/src'),
     'Spatie\\Activitylog\\' => array($vendorDir . '/spatie/laravel-activitylog/src'),
     'Skycoder\\InvoiceNumberGenerator\\' => array($vendorDir . '/skycoder/invoice-number-generator/src'),
+    'Rennokki\\QueryCache\\' => array($vendorDir . '/rennokki/laravel-eloquent-query-cache/src'),
     'Ramsey\\Uuid\\' => array($vendorDir . '/ramsey/uuid/src'),
     'Ramsey\\Collection\\' => array($vendorDir . '/ramsey/collection/src'),
     'Psy\\' => array($vendorDir . '/psy/psysh/src'),

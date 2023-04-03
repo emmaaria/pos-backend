@@ -18,6 +18,7 @@ class CreateCustomersTable extends Migration
             $table->string('name');
             $table->string('mobile',20)->nullable();
             $table->text('address')->nullable();
+            $table->text('additionalInfo')->nullable();
             $table->string('company_id')->nullable();
             $table->timestamps();
             $table->index(['company_id', 'name', 'mobile']);

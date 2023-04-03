@@ -122,7 +122,13 @@ class CustomerController extends Controller
             }
             try {
                 $customer = DB::transaction(function () use ($companyId, $request) {
-                    $customerId = DB::table('customers')->insertGetId(['name' => $request->name, 'mobile' => $request->mobile, 'address' => $request->address, 'company_id' => $companyId]);
+                    $customerId = DB::table('customers')->insertGetId([
+                        'name' => $request->name,
+                        'mobile' => $request->mobile,
+                        'address' => $request->address,
+                        'company_id' => $companyId,
+                        'additionalInfo' => $request->additionalInfo,
+                    ]);
                     if (!empty($request->due)) {
                         $txIdGenerator = new InvoiceNumberGeneratorService();
                         $txId = $txIdGenerator->prefix('')->setCompanyId($companyId)->startAt(1000)->getInvoiceNumber('customer_transaction');
@@ -178,7 +184,12 @@ class CustomerController extends Controller
                 $errors = $validator->errors();
                 return response()->json(compact('status', 'errors'));
             }
-            DB::table('customers')->where('id', $request->id)->where('company_id', $companyId)->update(['name' => $request->name, 'mobile' => $request->mobile, 'address' => $request->address]);
+            DB::table('customers')->where('id', $request->id)->where('company_id', $companyId)->update([
+                'name' => $request->name,
+                'mobile' => $request->mobile,
+                'address' => $request->address,
+                'additionalInfo' => $request->additionalInfo
+            ]);
             $status = true;
             $message = 'Updated';
             return response()->json(compact('status', 'message'));

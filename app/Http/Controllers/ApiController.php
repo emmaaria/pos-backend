@@ -74,7 +74,7 @@ class ApiController extends Controller
                     'company_id' => encrypt($user->company_id),
                 );
             } else {
-                $userData = null;
+                $userData = [];
             }
             if (!$token = auth()->claims($userData)->attempt($credentials)) {
                 $status = false;

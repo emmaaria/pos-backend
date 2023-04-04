@@ -44,8 +44,10 @@ class BulkController extends Controller
 
             $suppliers = DB::table('suppliers')->select('name', 'id')->where('company_id', $companyId)->get();
 
+            $customers = DB::table('customers')->select('name', 'id')->where('company_id', $companyId)->get();
+
             $status = true;
-            return response()->json(compact('status', 'categories', 'units', 'suppliers'));
+            return response()->json(compact('status', 'categories', 'units', 'suppliers', 'customers'));
         } else {
             $status = false;
             $errors = 'You are not authorized';

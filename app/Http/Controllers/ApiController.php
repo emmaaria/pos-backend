@@ -95,6 +95,7 @@ class ApiController extends Controller
             $company = array(
                 'company_name' => $company->name,
                 'discount_type' => $company->discount_type,
+                'customer_based_price' => $company->customer_based_price,
                 'company_address' => $company->address,
                 'company_mobile' => $company->mobile,
                 'vat_number' => $company->vat_number,
@@ -168,6 +169,7 @@ class ApiController extends Controller
                         'vat_number' => $request->vat_number,
                         'mushok_number' => $request->mushok_number,
                         'discount_type' => $request->discount_type,
+                        'customer_based_price' => $request->customer_based_price,
                     ]
                 );
                 $status = true;
@@ -183,6 +185,7 @@ class ApiController extends Controller
                         'vat_number' => $request->vat_number,
                         'mushok_number' => $request->mushok_number,
                         'discount_type' => $request->discount_type,
+                        'customer_based_price' => $request->customer_based_price,
                     ]
                 );
                 $status = true;

@@ -21,6 +21,7 @@ class Company extends Model
         'status',
         'payment_term',
         'expiry_date',
+        'customer_based_price',
         'discount_type'
     ];
 }

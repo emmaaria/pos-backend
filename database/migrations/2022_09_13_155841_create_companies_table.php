@@ -28,6 +28,7 @@ class CreateCompaniesTable extends Migration
             $table->string('payment_term')->nullable();
             $table->string('expiry_date')->nullable();
             $table->string('discount_type')->default('invoice');
+            $table->string('customer_based_price')->default('no');
             $table->timestamps();
             $table->index(['company_id']);
         });

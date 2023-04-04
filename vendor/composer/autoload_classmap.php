@@ -49,6 +49,7 @@ return array(
     'App\\Models\\Company' => $baseDir . '/app/Models/Company.php',
     'App\\Models\\Customer' => $baseDir . '/app/Models/Customer.php',
     'App\\Models\\CustomerLedger' => $baseDir . '/app/Models/CustomerLedger.php',
+    'App\\Models\\CustomerProduct' => $baseDir . '/app/Models/CustomerProduct.php',
     'App\\Models\\Expense' => $baseDir . '/app/Models/Expense.php',
     'App\\Models\\ExpenseCategory' => $baseDir . '/app/Models/ExpenseCategory.php',
     'App\\Models\\Invoice' => $baseDir . '/app/Models/Invoice.php',

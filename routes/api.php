@@ -20,6 +20,7 @@ require_once('sale-return.php');
 require_once ('report.php');
 require_once ('expense.php');
 require_once ('dahsboard.php');
+require_once ('bulk.php');
 Route::group(['middleware' => 'api'], function ($router) {
     Route::post('/login', [ApiController::class, 'login']);
     Route::post('/logout', [ApiController::class, 'logout']);

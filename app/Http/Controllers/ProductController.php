@@ -94,10 +94,9 @@ class ProductController extends Controller
                 ->where('supplier_products.company_id', $companyId)
                 ->get();
             $prices = DB::table('customer_products')
-                ->select('customers.id', 'customers.name')
-                ->leftJoin('customers', 'customers.id', '=', 'customer_products.customer_id')
-                ->where('customer_products.product_id', $product->product_id)
-                ->where('customer_products.company_id', $companyId)
+                ->select('customer_id as customerId', 'price')
+                ->where('product_id', $product->product_id)
+                ->where('company_id', $companyId)
                 ->get();
             $status = true;
             return response()->json(compact('status', 'product', 'suppliers', 'prices'));

@@ -18,6 +18,7 @@ class ProductController extends Controller
     {
         $this->middleware('auth.custom:api', ['except' => []]);
     }
+
     protected function guard()
     {
         return Auth::guard();
@@ -169,6 +170,19 @@ class ProductController extends Controller
                     if (!empty($suppliers) && count($suppliers) > 0) {
                         foreach ($suppliers as $supplier) {
                             DB::table('supplier_products')->insert(['supplier_id' => $supplier['id'], 'product_id' => $productId, 'company_id' => $companyId]);
+                        }
+                    }
+                    $prices = $request->customerPrices;
+                    if (!empty($prices) && count($prices) > 0) {
+                        foreach ($prices as $price) {
+                            if ($price['customerId'] !== '' && $price['price'] !== '') {
+                                DB::table('customer_products')->insert([
+                                    'customer_id' => $price['customerId'],
+                                    'product_id' => $productId,
+                                    'price' => $price['price'],
+                                    'company_id' => $companyId
+                                ]);
+                            }
                         }
                     }
                 });

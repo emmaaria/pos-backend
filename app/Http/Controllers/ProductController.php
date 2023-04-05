@@ -82,8 +82,7 @@ class ProductController extends Controller
         }
     }
 
-    public
-    function getProduct($id)
+    public function getProduct($id)
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
@@ -94,8 +93,14 @@ class ProductController extends Controller
                 ->where('supplier_products.product_id', $product->product_id)
                 ->where('supplier_products.company_id', $companyId)
                 ->get();
+            $prices = DB::table('customer_products')
+                ->select('customers.id', 'customers.name')
+                ->leftJoin('customers', 'customers.id', '=', 'customer_products.customer_id')
+                ->where('customer_products.product_id', $product->product_id)
+                ->where('customer_products.company_id', $companyId)
+                ->get();
             $status = true;
-            return response()->json(compact('status', 'product', 'suppliers'));
+            return response()->json(compact('status', 'product', 'suppliers', 'prices'));
         } else {
             $status = false;
             $errors = 'You are not authorized';
@@ -103,8 +108,7 @@ class ProductController extends Controller
         }
     }
 
-    public
-    function getProductByBarcode(Request $request)
+    public function getProductByBarcode(Request $request)
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
@@ -124,8 +128,7 @@ class ProductController extends Controller
         }
     }
 
-    public
-    function storeProduct(Request $request)
+    public function storeProduct(Request $request)
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {

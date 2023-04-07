@@ -236,6 +236,20 @@ class ProductController extends Controller
                             DB::table('supplier_products')->insert(['supplier_id' => $supplier['id'], 'product_id' => $product->product_id, 'company_id' => $companyId]);
                         }
                     }
+                    DB::table('customer_products')->where('product_id', $product->product_id)->where('company_id', $companyId)->delete();
+                    $prices = $request->customerPrices;
+                    if (!empty($prices) && count($prices) > 0) {
+                        foreach ($prices as $price) {
+                            if ($price['customerId'] !== '' && $price['price'] !== '') {
+                                DB::table('customer_products')->insert([
+                                    'customer_id' => $price['customerId'],
+                                    'product_id' => $product->product_id,
+                                    'price' => $price['price'],
+                                    'company_id' => $companyId
+                                ]);
+                            }
+                        }
+                    }
                 });
             } catch (Exception $e) {
                 $status = false;

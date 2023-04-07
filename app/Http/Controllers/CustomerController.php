@@ -80,6 +80,7 @@ class CustomerController extends Controller
                     ->where('customers.name', 'like', '%' . $name . '%')
                     ->orWhere('customers.mobile', 'like', '%' . $name . '%')
                     ->orWhere('customers.address', 'like', '%' . $name . '%')
+                    ->where('customers.company_id', $companyId)
                     ->groupBy('customers.id', 'customers.name', 'customers.mobile', 'customers.address')
                     ->paginate(50);
                 $status = true;

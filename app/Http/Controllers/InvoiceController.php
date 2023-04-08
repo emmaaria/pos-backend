@@ -470,7 +470,8 @@ class InvoiceController extends Controller
                     $status = true;
                     $message = 'Invoice saved';
                     return response()->json(compact('status', 'message', 'invoice'));
-                } catch (Exception $e) {
+                } catch (\Throwable $e) {
+                    \Log::error($e);
                     $status = false;
                     $errors = $e;
                     return response()->json(compact('status', 'errors'));

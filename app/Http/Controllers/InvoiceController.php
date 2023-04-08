@@ -248,13 +248,13 @@ class InvoiceController extends Controller
                             $prDisType = '';
                             $prDis = '';
                             $prDisAmount = 0;
-                            if (!empty($discountTypes) && $discountTypes[$i]) {
+                            if (!empty($discountTypes) && isset($discountTypes[$i])) {
                                 $prDisType = $discountTypes[$i];
                             }
-                            if (!empty($productDiscounts) && $productDiscounts[$i] && $productDiscounts[$i] !== '') {
+                            if (!empty($productDiscounts) && isset($productDiscounts[$i]) && $productDiscounts[$i] !== '') {
                                 $prDis = $productDiscounts[$i];
                             }
-                            if (!empty($productDiscountedAmounts) && $productDiscountedAmounts[$i] && $productDiscountedAmounts[$i] !== '') {
+                            if (!empty($productDiscountedAmounts) && isset($productDiscountedAmounts[$i]) && $productDiscountedAmounts[$i] !== '') {
                                 $prDisAmount = $productDiscountedAmounts[$i];
                             }
 

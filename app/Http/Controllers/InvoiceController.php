@@ -248,13 +248,13 @@ class InvoiceController extends Controller
                             $prDisType = '';
                             $prDis = '';
                             $prDisAmount = 0;
-                            if ($discountTypes[$i]) {
+                            if (!empty($discountTypes) && $discountTypes[$i]) {
                                 $prDisType = $discountTypes[$i];
                             }
-                            if ($productDiscounts[$i] && $productDiscounts[$i] !== '') {
+                            if (!empty($productDiscounts) && $productDiscounts[$i] && $productDiscounts[$i] !== '') {
                                 $prDis = $productDiscounts[$i];
                             }
-                            if ($productDiscountedAmounts[$i] && $productDiscountedAmounts[$i] !== '') {
+                            if (!empty($productDiscountedAmounts) && $productDiscountedAmounts[$i] && $productDiscountedAmounts[$i] !== '') {
                                 $prDisAmount = $productDiscountedAmounts[$i];
                             }
 
@@ -470,8 +470,7 @@ class InvoiceController extends Controller
                     $status = true;
                     $message = 'Invoice saved';
                     return response()->json(compact('status', 'message', 'invoice'));
-                } catch (\Throwable $e) {
-                    \Log::error($e);
+                } catch (Exception $e) {
                     $status = false;
                     $errors = $e;
                     return response()->json(compact('status', 'errors'));

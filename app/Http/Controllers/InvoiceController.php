@@ -80,8 +80,7 @@ class InvoiceController extends Controller
         }
     }
 
-    public
-    function getTodayInvoices(Request $request)
+    public function getTodayInvoices(Request $request)
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {

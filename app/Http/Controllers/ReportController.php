@@ -173,8 +173,16 @@ class ReportController extends Controller
                 ->leftJoin('products', 'products.product_id', '=', 'invoice_items.product_id')
                 ->orderBy('invoice_items.date', 'desc')
                 ->get();
+            $totalQuantity = 0;
+            $totalAmount = 0;
+            $totalWeight = 0;
+            foreach ($data as $row){
+                $totalQuantity += $row->quantity;
+                $totalAmount += $row->grand_total;
+                $totalWeight += $row->weight;
+            }
             $status = true;
-            return response()->json(compact('status', 'data'));
+            return response()->json(compact('status', 'data', 'totalQuantity', 'totalAmount', 'totalWeight'));
         } else {
             $status = false;
             $errors = 'You are not authorized';

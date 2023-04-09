@@ -195,7 +195,7 @@ class ReportController extends Controller
         $companyId = $this->getCompanyId();
         if ($companyId) {
             $data = DB::table('purchase_items')
-                ->select('suppliers.name AS supplierName', 'purchase_items.purchase_id', 'purchase_items.date', 'purchase_items.quantity', 'invoice_items.total', 'products.weight')
+                ->select('suppliers.name AS supplierName', 'purchase_items.purchase_id', 'purchase_items.date', 'purchase_items.quantity', 'purchase_items.total', 'products.weight')
                 ->where('purchase_items.company_id', $companyId)
                 ->where('purchase_items.product_id', $request->productId)
                 ->where('purchase_items.date', '>=', $request->startDate)

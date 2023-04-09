@@ -167,7 +167,7 @@ class ReportController extends Controller
                 ->where('product_id', $request->productID)
                 ->where('invoice_items.date', '>=', $request->startDate)
                 ->where('invoice_items.date', '<=', $request->endDate)
-                ->join('invoices', 'invoices.invoice_id', '=', 'invoice_items.invoice_id')
+                ->leftJoin('invoices', 'invoices.invoice_id', '=', 'invoice_items.invoice_id')
                 ->leftJoin('customers', 'customers.id', '=', 'invoices.customer_id')
                 ->orderBy('date', 'desc')
                 ->get();

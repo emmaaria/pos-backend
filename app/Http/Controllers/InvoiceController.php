@@ -258,7 +258,7 @@ class InvoiceController extends Controller
                             if (isset($productDiscountedAmounts[$i]) && $productDiscountedAmounts[$i] !== '') {
                                 $prDisAmount = $productDiscountedAmounts[$i];
                             }
-                            Log::debug($productDiscountedAmounts[$i]);
+                            Log::debug($productDiscountedAmounts);
 
                             if ($quantity > 0) {
                                 $ttl = $quantity * $price;

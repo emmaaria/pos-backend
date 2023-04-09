@@ -161,7 +161,6 @@ class ReportController extends Controller
     public function salesByProduct(Request $request)
     {
         $companyId = $this->getCompanyId();
-        Log::debug($request->productId);
         if ($companyId) {
             $data = DB::table('invoice_items')
                 ->select('customers.name AS customer_name', 'invoice_items.invoice_id', 'invoice_items.date', 'invoice_items.quantity')

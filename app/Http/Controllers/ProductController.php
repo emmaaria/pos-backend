@@ -357,6 +357,35 @@ class ProductController extends Controller
         }
     }
 
+    public function getProductPriceByCustomer(Request $request)
+    {
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $validator = Validator::make($request->all(),
+                [
+                    'customer' => 'required',
+                    'productID' => 'required',
+                ]
+            );
+            if ($validator->fails()) {
+                $status = false;
+                $errors = $validator->errors();
+                return response()->json(compact('status', 'errors'));
+            }
+            $product = DB::table('customer_products')
+                ->where('company_id', $companyId)
+                ->where('customer_id',$request->customer)
+                ->where('product_id',$request->productID)
+                ->first();
+            $status = true;
+            return response()->json(compact('status', 'product'));
+        } else {
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
+    }
+
     /*
     |--------------------------------------------------------------------------
     | Product End

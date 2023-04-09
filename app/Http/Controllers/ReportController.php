@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Exception;
@@ -160,15 +161,16 @@ class ReportController extends Controller
     public function salesByProduct(Request $request)
     {
         $companyId = $this->getCompanyId();
+        Log::log($request->all());
         if ($companyId) {
             $data = DB::table('invoice_items')
-                ->select( 'invoice_items.invoice_id', 'invoice_items.date')
+                ->select('customers.name AS customer_name', 'invoice_items.invoice_id', 'invoice_items.date')
                 ->where('invoice_items.company_id', $companyId)
                 ->where('invoice_items.product_id', $request->productID)
                 ->where('invoice_items.date', '>=', $request->startDate)
                 ->where('invoice_items.date', '<=', $request->endDate)
-//                ->leftJoin('invoices', 'invoices.invoice_id', '=', 'invoice_items.invoice_id')
-//                ->leftJoin('customers', 'customers.id', '=', 'invoices.customer_id')
+                ->leftJoin('invoices', 'invoices.invoice_id', '=', 'invoice_items.invoice_id')
+                ->leftJoin('customers', 'customers.id', '=', 'invoices.customer_id')
                 ->orderBy('invoice_items.date', 'desc')
                 ->get();
             $status = true;

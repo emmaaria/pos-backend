@@ -6,6 +6,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Skycoder\InvoiceNumberGenerator\InvoiceNumberGeneratorService;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -257,6 +258,7 @@ class InvoiceController extends Controller
                             if (isset($productDiscountedAmounts[$i]) && $productDiscountedAmounts[$i] !== '') {
                                 $prDisAmount = $productDiscountedAmounts[$i];
                             }
+                            Log::debug($productDiscountedAmounts[$i]);
 
                             if ($quantity > 0) {
                                 $ttl = $quantity * $price;

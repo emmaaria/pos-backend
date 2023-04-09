@@ -8,6 +8,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Skycoder\InvoiceNumberGenerator\InvoiceNumberGeneratorService;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -237,6 +238,7 @@ class ProductController extends Controller
                     }
                     DB::table('customer_products')->where('product_id', $product->product_id)->where('company_id', $companyId)->delete();
                     $prices = $request->customerPrices;
+                    Log::debug($prices);
                     if (isset($prices) && is_array($prices) && count($prices) > 0) {
                         foreach ($prices as $price) {
                             if ($price['customerId'] !== '' && $price['price'] !== '') {

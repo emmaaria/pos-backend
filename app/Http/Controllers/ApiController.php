@@ -18,9 +18,10 @@ class ApiController extends Controller
         $this->middleware('auth.custom:api', ['except' => ['login', 'makeUser']]);
     }
 
-    public function makeUser(){
+    public function makeUser()
+    {
         DB::table('users')->insert([
-            'company_id'=> 101,
+            'company_id' => 101,
             'name' => 'admin',
             'email' => '01748254814',
             'role' => 'admin',
@@ -110,7 +111,8 @@ class ApiController extends Controller
         }
     }
 
-    public function logout() {
+    public function logout()
+    {
         Auth::logout();
         $status = true;
         $message = 'Successfully logged out';
@@ -143,8 +145,7 @@ class ApiController extends Controller
         }
     }
 
-    public
-    function updateCompany(Request $request)
+    public function updateCompany(Request $request)
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
@@ -168,8 +169,6 @@ class ApiController extends Controller
                         'logo' => $request->logo,
                         'vat_number' => $request->vat_number,
                         'mushok_number' => $request->mushok_number,
-                        'discount_type' => $request->discount_type,
-                        'customer_based_price' => $request->customer_based_price,
                     ]
                 );
                 $status = true;
@@ -184,14 +183,32 @@ class ApiController extends Controller
                         'mobile' => $request->mobile,
                         'vat_number' => $request->vat_number,
                         'mushok_number' => $request->mushok_number,
-                        'discount_type' => $request->discount_type,
-                        'customer_based_price' => $request->customer_based_price,
                     ]
                 );
                 $status = true;
                 $message = 'Updated';
                 return response()->json(compact('status', 'message'));
             }
+        } else {
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
+    }
+
+    public function updateSoftware(Request $request)
+    {
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            DB::table('companies')->where('company_id', $companyId)->update(
+                [
+                    'discount_type' => $request->discount_type,
+                    'customer_based_price' => $request->customer_based_price,
+                ]
+            );
+            $status = true;
+            $message = 'Updated';
+            return response()->json(compact('status', 'message'));
         } else {
             $status = false;
             $errors = 'You are not authorized';

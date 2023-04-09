@@ -28,5 +28,7 @@ Route::group(['middleware' => 'api'], function ($router) {
 
     Route::get('/company', [ApiController::class, 'getCompany']);
     Route::post('/company/update', [ApiController::class, 'updateCompany']);
+
+    Route::post('/software/update', [ApiController::class, 'updateSoftware']);
 });
 //Route::get('/make-user', [ApiController::class, 'makeUser']);

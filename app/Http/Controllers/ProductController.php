@@ -176,7 +176,6 @@ class ProductController extends Controller
                         }
                     }
                     $prices = $request->customerPrices;
-                    Log::debug($prices);
                     if (isset($prices) && is_array($prices) && count($prices) > 0) {
                         foreach ($prices as $price) {
                             if (!empty($price['customerId']) && !empty($price['price'])) {
@@ -241,7 +240,7 @@ class ProductController extends Controller
                     $prices = $request->customerPrices;
                     if (isset($prices) && is_array($prices) && count($prices) > 0) {
                         foreach ($prices as $price) {
-                            if ($price['customerId'] !== '' && $price['price'] !== '') {
+                            if (!empty($price['customerId']) && !empty($price['price'])) {
                                 DB::table('customer_products')->insert([
                                     'customer_id' => $price['customerId'],
                                     'product_id' => $product->product_id,

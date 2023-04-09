@@ -168,7 +168,8 @@ class ReportController extends Controller
                 ->where('invoices.date', '<=', $request->endDate)
                 ->leftJoin('customers', 'customers.id', '=', 'invoices.customer_id')
                 ->leftJoin('invoices', 'invoices.invoice_id', '=', 'invoice_items.invoice_id')
-                ->orderBy('id', 'desc')
+                ->where('product_id', $request->productID)
+                ->orderBy('date', 'desc')
                 ->get();
             $status = true;
             return response()->json(compact('status', 'data'));

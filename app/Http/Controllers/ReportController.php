@@ -162,13 +162,13 @@ class ReportController extends Controller
         $companyId = $this->getCompanyId();
         if ($companyId) {
             $data = DB::table('invoice_items')
-                ->select('customers.name AS customer_name', 'invoice_items.invoice_id', 'invoices.date')
-                ->where('invoices.company_id', $companyId)
-                ->where('invoices.date', '>=', $request->startDate)
-                ->where('invoices.date', '<=', $request->endDate)
-                ->leftJoin('customers', 'customers.id', '=', 'invoices.customer_id')
-                ->leftJoin('invoices', 'invoices.invoice_id', '=', 'invoice_items.invoice_id')
+                ->select('customers.name AS customer_name', 'invoice_items.invoice_id', 'invoice_items.date')
+                ->where('invoice_items.company_id', $companyId)
                 ->where('product_id', $request->productID)
+                ->where('invoice_items.date', '>=', $request->startDate)
+                ->where('invoice_items.date', '<=', $request->endDate)
+                ->join('invoices', 'invoices.invoice_id', '=', 'invoice_items.invoice_id')
+                ->leftJoin('customers', 'customers.id', '=', 'invoices.customer_id')
                 ->orderBy('date', 'desc')
                 ->get();
             $status = true;

@@ -179,7 +179,7 @@ class ProductController extends Controller
                     Log::debug($prices);
                     if (isset($prices) && is_array($prices) && count($prices) > 0) {
                         foreach ($prices as $price) {
-                            if ($price['customerId'] !== '' && $price['price'] !== '') {
+                            if (!empty($price['customerId']) && !empty($price['price'])) {
                                 DB::table('customer_products')->insert([
                                     'customer_id' => $price['customerId'],
                                     'product_id' => $productId,

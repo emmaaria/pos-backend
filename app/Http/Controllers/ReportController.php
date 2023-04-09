@@ -156,4 +156,26 @@ class ReportController extends Controller
             return response()->json(compact('status', 'errors'));
         }
     }
+
+    public function salesByProduct(Request $request)
+    {
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $data = DB::table('invoice_items')
+                ->select('customers.name AS customer_name', 'invoice_items.invoice_id', 'invoices.date')
+                ->where('invoices.company_id', $companyId)
+                ->where('invoices.date', '>=', $request->startDate)
+                ->where('invoices.date', '<=', $request->endDate)
+                ->leftJoin('customers', 'customers.id', '=', 'invoices.customer_id')
+                ->leftJoin('invoices', 'invoices.invoice_id', '=', 'invoice_items.invoice_id')
+                ->orderBy('id', 'desc')
+                ->get();
+            $status = true;
+            return response()->json(compact('status', 'data'));
+        } else {
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
+    }
 }

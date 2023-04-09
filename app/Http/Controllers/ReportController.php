@@ -164,7 +164,7 @@ class ReportController extends Controller
         Log::debug($request->productId);
         if ($companyId) {
             $data = DB::table('invoice_items')
-                ->select('customers.name AS customer_name', 'invoice_items.invoice_id', 'invoice_items.date')
+                ->select('customers.name AS customer_name', 'invoice_items.invoice_id', 'invoice_items.date', 'invoice_items.quantity')
                 ->where('invoice_items.company_id', $companyId)
                 ->where('invoice_items.product_id', $request->productId)
                 ->where('invoice_items.date', '>=', $request->startDate)

@@ -114,9 +114,14 @@ class PurchaseController extends Controller
                 ->join('products', 'products.product_id', '=', 'purchase_items.product_id')
                 ->where('purchase_items.purchase_id', $purchaseData->purchase_id)
                 ->get();
+            $totalQty = 0;
+            foreach ($purchaseItems as $purchaseItem){
+                $totalQty += $purchaseItem->quantity;
+            }
             $purchase = array(
                 'purchaseData' => $purchaseData,
                 'purchaseItems' => $purchaseItems,
+                'totalQty' => $totalQty,
                 'paymentData' => $paymentData
             );
             $status = true;

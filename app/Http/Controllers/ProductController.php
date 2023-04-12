@@ -334,13 +334,22 @@ class ProductController extends Controller
         $companyId = $this->getCompanyId();
         if ($companyId) {
             $name = $request->name;
+            $totalPurchase = 0;
+            $totalSale = 0;
+            $totalSale = 0;
+            $stock = 0;
             if (empty($name)) {
                 $products = DB::table('products')
                     ->selectRaw("products.name AS name, products.product_id, products.price,(select sum(quantity) from invoice_items where product_id= `products`.`product_id`) as 'sale', (select sum(quantity) from sale_return_items where product_id= `products`.`product_id`) as 'return',(select sum(quantity) from purchase_items where product_id= `products`.`product_id`) as 'purchase'")
                     ->where('products.company_id', $companyId)
                     ->paginate(50);
+                foreach ($products as $product){
+                    $totalPurchase += $product->purchase;
+                    $totalSale += $product->sale - $product->return;
+                    $stock += $product->purchase ($product->sale - $product->return);
+                }
                 $status = true;
-                return response()->json(compact('status', 'products'));
+                return response()->json(compact('status', 'products', 'totalSale', 'totalPurchase', 'stock'));
             } else {
                 $products = DB::table('products')
                     ->selectRaw("products.name AS name, products.product_id, products.price,(select sum(quantity) from invoice_items where product_id= `products`.`product_id`) as 'sale', (select sum(quantity) from sale_return_items where product_id= `products`.`product_id`) as 'return',(select sum(quantity) from purchase_items where product_id= `products`.`product_id`) as 'purchase'")
@@ -349,7 +358,12 @@ class ProductController extends Controller
                     ->orWhere('products.product_id', 'like', '%' . $name . '%')
                     ->paginate(50);
                 $status = true;
-                return response()->json(compact('status', 'products'));
+                foreach ($products as $product){
+                    $totalPurchase += $product->purchase;
+                    $totalSale += $product->sale - $product->return;
+                    $stock += $product->purchase ($product->sale - $product->return);
+                }
+                return response()->json(compact('status', 'products', 'totalSale', 'totalPurchase', 'stock'));
             }
         } else {
             $status = false;

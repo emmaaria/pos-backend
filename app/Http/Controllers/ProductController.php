@@ -346,7 +346,7 @@ class ProductController extends Controller
                 foreach ($products as $product){
                     $totalPurchase += $product->purchase;
                     $totalSale += $product->sale - $product->return;
-                    $stock += $product->purchase ($product->sale - $product->return);
+                    $stock += $product->purchase - ($product->sale - $product->return);
                 }
                 $status = true;
                 return response()->json(compact('status', 'products', 'totalSale', 'totalPurchase', 'stock'));
@@ -361,7 +361,7 @@ class ProductController extends Controller
                 foreach ($products as $product){
                     $totalPurchase += $product->purchase;
                     $totalSale += $product->sale - $product->return;
-                    $stock += $product->purchase ($product->sale - $product->return);
+                    $stock += $product->purchase - ($product->sale - $product->return);
                 }
                 return response()->json(compact('status', 'products', 'totalSale', 'totalPurchase', 'stock'));
             }

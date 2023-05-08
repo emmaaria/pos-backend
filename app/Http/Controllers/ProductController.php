@@ -336,7 +336,6 @@ class ProductController extends Controller
             $name = $request->name;
             $totalPurchase = 0;
             $totalSale = 0;
-            $totalSale = 0;
             $stock = 0;
             if (empty($name)) {
                 $products = DB::table('products')

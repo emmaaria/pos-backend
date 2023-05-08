@@ -273,7 +273,7 @@ class CustomerController extends Controller
                         'due' => 0,
                         'deposit' => $request->amount,
                         'date' => $request->date,
-                        'comment' => $request->note !== '' ? $request->note." (Paid ID : $paidId)" : "Due paid (Paid ID : $paidId)"
+                        'comment' => $request->note !== '' ? $request->note . " (Paid ID : $paidId)" : "Due paid (Paid ID : $paidId)"
                     ));
 
                     if ($request->account == 'cash') {
@@ -285,7 +285,7 @@ class CustomerController extends Controller
                             'type' => 'receive',
                             'receive' => $request->amount,
                             'date' => $request->date,
-                            'comment' => $request->note !== '' ? $request->note." (Paid ID : $paidId)" : "Due paid (Paid ID : $paidId)"
+                            'comment' => $request->note !== '' ? $request->note . " (Paid ID : $paidId)" : "Due paid (Paid ID : $paidId)"
                         ));
                     }
 
@@ -298,7 +298,7 @@ class CustomerController extends Controller
                             'type' => 'deposit',
                             'deposit' => $request->amount,
                             'date' => $request->date,
-                            'comment' => $request->note !== '' ? $request->note." (Paid ID : $paidId)" : "Due paid (Paid ID : $paidId)"
+                            'comment' => $request->note !== '' ? $request->note . " (Paid ID : $paidId)" : "Due paid (Paid ID : $paidId)"
                         ));
                         $txGenerator->setNextInvoiceNo();
                     }
@@ -312,7 +312,7 @@ class CustomerController extends Controller
                             'type' => 'deposit',
                             'deposit' => $request->amount,
                             'date' => $request->date,
-                            'comment' => $request->note !== '' ? $request->note." (Paid ID : $paidId)" : "Due paid (Paid ID : $paidId)"
+                            'comment' => $request->note !== '' ? $request->note . " (Paid ID : $paidId)" : "Due paid (Paid ID : $paidId)"
                         ));
                         $txGenerator->setNextInvoiceNo();
                     }
@@ -327,7 +327,7 @@ class CustomerController extends Controller
                             'bank_id' => $request->bankId,
                             'date' => $request->date,
                             'company_id' => $companyId,
-                            'comment' => $request->note !== '' ? $request->note." (Paid ID : $paidId)" : "Due paid (Paid ID : $paidId)"
+                            'comment' => $request->note !== '' ? $request->note . " (Paid ID : $paidId)" : "Due paid (Paid ID : $paidId)"
                         ));
                         $txGenerator->setNextInvoiceNo();
                     }
@@ -371,6 +371,16 @@ class CustomerController extends Controller
             $errors = 'You are not authorized';
             return response()->json(compact('status', 'errors'));
         }
+    }
+
+    public function customerPaymentList(Request $request)
+    {
+        $data = DB::table('customer_ledgers')
+            ->where('type', 'deposit')
+            ->where('reference_no', 'like', "c-rec%")
+            ->get();
+        $status = true;
+        return response()->json(compact('status', 'data'));
     }
     /*
     |--------------------------------------------------------------------------

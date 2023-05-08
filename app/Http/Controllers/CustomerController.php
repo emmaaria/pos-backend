@@ -375,12 +375,19 @@ class CustomerController extends Controller
 
     public function customerPaymentList(Request $request)
     {
-        $data = DB::table('customer_ledgers')
-            ->where('type', 'deposit')
-            ->where('reference_no', 'like', "c-rec%")
-            ->paginate(50);
-        $status = true;
-        return response()->json(compact('status', 'data'));
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $data = DB::table('customer_ledgers')
+                ->where('type', 'deposit')
+                ->where('reference_no', 'like', "c-rec%")
+                ->paginate(50);
+            $status = true;
+            return response()->json(compact('status', 'data'));
+        } else {
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
     }
     /*
     |--------------------------------------------------------------------------

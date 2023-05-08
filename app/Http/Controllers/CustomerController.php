@@ -485,6 +485,28 @@ class CustomerController extends Controller
             return response()->json(compact('status', 'errors'));
         }
     }
+
+    public function deleteDue(Request $request)
+    {
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $id = $request->id;
+            if (!empty($id)) {
+                DB::table('customer_ledgers')->where('reference_no', "m-due-$id")->where('company_id', $companyId)->delete();
+                $status = true;
+                $message = 'Customer due deleted';
+                return response()->json(compact('status', 'message'));
+            } else {
+                $status = false;
+                $error = 'Customer due not found';
+                return response()->json(compact('status', 'error'));
+            }
+        } else {
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
+    }
     /*
     |--------------------------------------------------------------------------
     | Customer End

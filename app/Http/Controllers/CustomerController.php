@@ -379,10 +379,10 @@ class CustomerController extends Controller
         if ($companyId) {
             $data = DB::table('customer_ledgers')
                 ->select('customer_ledgers.transaction_id, customer_ledgers.deposit', 'customer_ledgers.date', 'customers.name')
-                ->where('company_id', $companyId)
+                ->where('customer_ledgers.company_id', $companyId)
                 ->leftJoin('customers', 'customers.id', '=', 'customer_ledgers.customer_id')
-                ->where('type', 'deposit')
-                ->where('reference_no', 'like', "c-rec%")
+                ->where('customer_ledgers.type', 'deposit')
+                ->where('customer_ledgers.reference_no', 'like', "c-rec%")
                 ->paginate(50);
             $status = true;
             return response()->json(compact('status', 'data'));

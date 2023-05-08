@@ -401,6 +401,35 @@ class CustomerController extends Controller
             return response()->json(compact('status', 'errors'));
         }
     }
+
+    public function customerDueList(Request $request)
+    {
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $data = DB::table('customer_ledgers')
+                ->select('customer_ledgers.transaction_id', 'customer_ledgers.deposit', 'customer_ledgers.date', 'customer_ledgers.comment', 'customers.name')
+                ->where('customer_ledgers.company_id', $companyId)
+                ->leftJoin('customers', 'customers.id', '=', 'customer_ledgers.customer_id')
+                ->where('customer_ledgers.type', 'deposit')
+                ->where('customer_ledgers.reference_no', 'like', "m-due%");
+            if (!empty($request->customer)) {
+                $data = $data->where('customer_ledgers.customer_id', $request->customer);
+            }
+            if (!empty($request->startDate)) {
+                $data = $data->where('customer_ledgers.date', '>=', $request->startDate);
+            }
+            if (!empty($request->endDate)) {
+                $data = $data->where('customer_ledgers.date', '<=', $request->endDate);
+            }
+            $data = $data->paginate(50);
+            $status = true;
+            return response()->json(compact('status', 'data'));
+        } else {
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
+    }
     /*
     |--------------------------------------------------------------------------
     | Customer End

@@ -378,7 +378,7 @@ class CustomerController extends Controller
         $companyId = $this->getCompanyId();
         if ($companyId) {
             $data = DB::table('customer_ledgers')
-                ->select('customer_ledgers.transaction_id, customer_ledgers.deposit', 'customer_ledgers.date', 'customers.name')
+                ->select('customer_ledgers.transaction_id', 'customer_ledgers.deposit', 'customer_ledgers.date', 'customers.name')
                 ->where('customer_ledgers.company_id', $companyId)
                 ->leftJoin('customers', 'customers.id', '=', 'customer_ledgers.customer_id')
                 ->where('customer_ledgers.type', 'deposit')

@@ -272,6 +272,7 @@ class CustomerController extends Controller
                         'company_id' => $companyId,
                         'due' => 0,
                         'deposit' => $request->amount,
+                        'user_id' => Auth::id(),
                         'date' => $request->date,
                         'comment' => $request->note !== '' ? $request->note . " (Paid ID : $paidId)" : "Due paid (Paid ID : $paidId)"
                     ));
@@ -283,6 +284,7 @@ class CustomerController extends Controller
                             'company_id' => $companyId,
                             'reference_no' => "c-rec-$paidId",
                             'type' => 'receive',
+                            'user_id' => Auth::id(),
                             'receive' => $request->amount,
                             'date' => $request->date,
                             'comment' => $request->note !== '' ? $request->note . " (Paid ID : $paidId)" : "Due paid (Paid ID : $paidId)"
@@ -296,6 +298,7 @@ class CustomerController extends Controller
                             'company_id' => $companyId,
                             'reference_no' => "c-rec-$paidId",
                             'type' => 'deposit',
+                            'user_id' => Auth::id(),
                             'deposit' => $request->amount,
                             'date' => $request->date,
                             'comment' => $request->note !== '' ? $request->note . " (Paid ID : $paidId)" : "Due paid (Paid ID : $paidId)"
@@ -310,6 +313,7 @@ class CustomerController extends Controller
                             'company_id' => $companyId,
                             'reference_no' => "c-rec-$paidId",
                             'type' => 'deposit',
+                            'user_id' => Auth::id(),
                             'deposit' => $request->amount,
                             'date' => $request->date,
                             'comment' => $request->note !== '' ? $request->note . " (Paid ID : $paidId)" : "Due paid (Paid ID : $paidId)"
@@ -323,6 +327,7 @@ class CustomerController extends Controller
                             'transaction_id' => $bankTxId,
                             'reference_no' => "c-rec-$paidId",
                             'type' => 'deposit',
+                            'user_id' => Auth::id(),
                             'deposit' => $request->deposit,
                             'bank_id' => $request->bankId,
                             'date' => $request->date,
@@ -410,7 +415,7 @@ class CustomerController extends Controller
                 ->select('customer_ledgers.transaction_id', 'customer_ledgers.deposit', 'customer_ledgers.date', 'customer_ledgers.comment', 'customers.name')
                 ->where('customer_ledgers.company_id', $companyId)
                 ->leftJoin('customers', 'customers.id', '=', 'customer_ledgers.customer_id')
-                ->where('customer_ledgers.type', 'deposit')
+                ->where('customer_ledgers.type', 'due')
                 ->where('customer_ledgers.reference_no', 'like', "m-due%");
             if (!empty($request->customer)) {
                 $data = $data->where('customer_ledgers.customer_id', $request->customer);
@@ -460,6 +465,7 @@ class CustomerController extends Controller
                         'company_id' => $companyId,
                         'due' => $request->amount,
                         'deposit' => 0,
+                        'user_id' => Auth::id(),
                         'date' => $request->date,
                         'comment' => $request->note !== '' ? $request->note . " (Due ID : $paidId)" : "Manual due (Due ID : $paidId)"
                     ));

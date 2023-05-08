@@ -378,7 +378,7 @@ class CustomerController extends Controller
         $data = DB::table('customer_ledgers')
             ->where('type', 'deposit')
             ->where('reference_no', 'like', "c-rec%")
-            ->get();
+            ->paginate(50);
         $status = true;
         return response()->json(compact('status', 'data'));
     }

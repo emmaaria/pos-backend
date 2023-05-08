@@ -19,4 +19,5 @@ Route::group(['middleware' => 'api'], function ($router) {
     Route::post('/customer/payment/delete', [CustomerController::class, 'deletePayment']);
     Route::post('/customer/payments', [CustomerController::class, 'customerPaymentList']);
     Route::post('/customer/dues', [CustomerController::class, 'customerDueList']);
+    Route::post('/customer/due/store', [CustomerController::class, 'storeDue']);
 });

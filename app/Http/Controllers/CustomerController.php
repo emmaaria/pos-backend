@@ -430,6 +430,55 @@ class CustomerController extends Controller
             return response()->json(compact('status', 'errors'));
         }
     }
+
+    public function storeDue(Request $request)
+    {
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $validator = Validator::make($request->all(),
+                [
+                    'customer' => 'required',
+                    'date' => 'required',
+                    'amount' => 'required',
+                ]
+            );
+            if ($validator->fails()) {
+                $status = false;
+                $errors = $validator->errors();
+                return response()->json(compact('status', 'errors'));
+            }
+            try {
+                DB::transaction(function () use ($request, $companyId) {
+                    $txGenerator = new InvoiceNumberGeneratorService();
+                    $paidId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('customer_transaction');
+                    $txGenerator->setNextInvoiceNo();
+                    DB::table('customer_ledgers')->insert(array(
+                        'customer_id' => $request->customer,
+                        'transaction_id' => $paidId,
+                        'reference_no' => "m-due-$paidId",
+                        'type' => 'due',
+                        'company_id' => $companyId,
+                        'due' => $request->amount,
+                        'deposit' => 0,
+                        'date' => $request->date,
+                        'comment' => $request->note !== '' ? $request->note . " (Due ID : $paidId)" : "Manual due (Due ID : $paidId)"
+                    ));
+
+                });
+                $status = true;
+                $message = 'Customer due saved';
+                return response()->json(compact('status', 'message'));
+            } catch (Exception $e) {
+                $status = false;
+                $errors = $e;
+                return response()->json(compact('status', 'errors'));
+            }
+        } else {
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
+    }
     /*
     |--------------------------------------------------------------------------
     | Customer End

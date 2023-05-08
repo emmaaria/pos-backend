@@ -378,6 +378,7 @@ class CustomerController extends Controller
         $companyId = $this->getCompanyId();
         if ($companyId) {
             $data = DB::table('customer_ledgers')
+                ->where('company_id', $companyId)
                 ->where('type', 'deposit')
                 ->where('reference_no', 'like', "c-rec%")
                 ->paginate(50);

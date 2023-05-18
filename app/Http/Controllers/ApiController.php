@@ -130,8 +130,7 @@ class ApiController extends Controller
     |--------------------------------------------------------------------------
     */
 
-    public
-    function getCompany()
+    public function getCompany()
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {

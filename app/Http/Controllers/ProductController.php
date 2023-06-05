@@ -71,6 +71,7 @@ class ProductController extends Controller
                     ->select('products.*')
                     ->leftJoin('products', 'products.product_id', '=', 'supplier_products.product_id')
                     ->where('supplier_products.company_id', $companyId)
+                    ->where('supplier_products.supplier_id', $request->supplier)
                     ->orderBy('name', 'asc')
                     ->get();
                 $status = true;

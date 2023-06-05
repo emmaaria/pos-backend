@@ -66,6 +66,15 @@ class ProductController extends Controller
                 $products = DB::table('products')->select('*')->where('company_id', $companyId)->orderBy('id', 'desc')->get();
                 $status = true;
                 return response()->json(compact('status', 'products'));
+            }elseif (!empty($request->supplier)){
+                $products = DB::table('supplier_products')
+                    ->select('products.*')
+                    ->leftJoin('products', 'products.product_id', '=', 'supplier_products.product_id')
+                    ->where('supplier_products.company_id', $companyId)
+                    ->orderBy('name', 'asc')
+                    ->get();
+                $status = true;
+                return response()->json(compact('status', 'products'));
             } else {
                 $products = DB::table('products')
                     ->select('*')

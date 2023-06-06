@@ -200,8 +200,8 @@ class ReportController extends Controller
             $data = DB::table('products')
                 ->select(
                     'products.name',
+                    'products.product_id',
                     'products.weight',
-                    'invoice_items.invoice_id',
                     'invoice_items.date',
                     'invoice_items.grand_total',
                     'products.weight',

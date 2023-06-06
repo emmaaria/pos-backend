@@ -205,7 +205,8 @@ class ReportController extends Controller
                     'invoice_items.date',
                     'invoice_items.grand_total',
                     'products.weight',
-                    DB::raw('SUM(quantity) as qty')
+                    DB::raw('SUM(quantity) as qty'),
+                    DB::raw('SUM(weight) as weight'),
                 )
                 ->where('products.company_id', $companyId)
                 ->where('products.category', $request->category)

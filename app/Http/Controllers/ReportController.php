@@ -197,7 +197,7 @@ class ReportController extends Controller
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
-            $data = DB::table('products')
+            $query = DB::table('products')
                 ->select(
                     'products.name',
                     'products.product_id',
@@ -211,12 +211,17 @@ class ReportController extends Controller
                 ->where('products.company_id', $companyId)
                 ->where('products.category', $request->category)
                 ->where('invoice_items.company_id', $companyId)
-                ->where('invoice_items.date', '>=', $request->startDate)
-                ->where('invoice_items.date', '<=', $request->endDate)
                 ->leftJoin('invoice_items', 'invoice_items.product_id', '=', 'products.product_id')
                 ->orderBy('invoice_items.date', 'desc')
-                ->groupBy('products.product_id')
-                ->get();
+                ->groupBy('products.product_id');
+            if (!empty($request->startDate)){
+                $query->where('invoice_items.date', '>=', $request->startDate);
+            }
+            if (!empty($request->endDate)){
+                $query->where('invoice_items.date', '<=', $request->endDate);
+            }
+
+            $data = $query->get();
             $totalQuantity = 0;
             $totalAmount = 0;
             $totalWeight = 0;

@@ -268,4 +268,45 @@ class ReportController extends Controller
             return response()->json(compact('status', 'errors'));
         }
     }
+
+    public function purchaseByCategory(Request $request)
+    {
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $data = DB::table('products')
+                ->select(
+                    'products.name',
+                    'products.product_id',
+                    'products.weight',
+                    'purchase_items.date',
+                    'purchase_items.total',
+                    'products.weight',
+                    DB::raw('SUM(quantity) as qty'),
+                    DB::raw('SUM(weight) as weight'),
+                )
+                ->where('products.company_id', $companyId)
+                ->where('products.category', $request->category)
+                ->where('purchase_items.company_id', $companyId)
+                ->where('purchase_items.date', '>=', $request->startDate)
+                ->where('purchase_items.date', '<=', $request->endDate)
+                ->leftJoin('purchase_items', 'purchase_items.product_id', '=', 'products.product_id')
+                ->orderBy('purchase_items.date', 'desc')
+                ->groupBy('products.product_id')
+                ->get();
+            $totalQuantity = 0;
+            $totalAmount = 0;
+            $totalWeight = 0;
+            foreach ($data as $row){
+                $totalQuantity += $row->qty;
+                $totalAmount += $row->total;
+                $totalWeight += $row->weight;
+            }
+            $status = true;
+            return response()->json(compact('status', 'data', 'totalQuantity', 'totalAmount', 'totalWeight'));
+        } else {
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
+    }
 }

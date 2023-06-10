@@ -322,4 +322,49 @@ class ReportController extends Controller
             return response()->json(compact('status', 'errors'));
         }
     }
+
+    public function salesByCustomer(Request $request)
+    {
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $validator = Validator::make($request->all(),
+                [
+                    'customer' => 'required',
+                ]
+            );
+            if ($validator->fails()) {
+                $status = false;
+                $errors = $validator->errors();
+                return response()->json(compact('status', 'errors'));
+            }
+            $query = DB::table('invoices')
+                ->select('invoices.invoice_id',
+                    'invoices.grand_total',
+                    'invoices.discountAmount',
+                    'invoices.comment',
+                    'invoices.id',
+                    'invoices.date',
+                    'products.name',
+                )
+                ->where('invoices.company_id', $companyId)
+                ->where('invoices.customer_id', $request->customer)
+                ->leftJoin('invoice_items', 'invoice_items.invoice_id', '=', 'invoices.invoice_id')
+                ->leftJoin('products', 'products.product_id', '=', 'invoice_items.product_id')
+                ->orderBy('id', 'desc')
+                ->groupBy('invoice_items.product_id');
+            if (!empty($request->startDate)){
+                $query->where('invoices.date', '>=', $request->startDate);
+            }
+            if (!empty($request->endDate)){
+                $query->where('invoices.date', '<=', $request->endDate);
+            }
+            $data = $query->get();
+            $status = true;
+            return response()->json(compact('status', 'data'));
+        } else {
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
+    }
 }

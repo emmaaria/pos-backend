@@ -360,6 +360,9 @@ class ReportController extends Controller
             if (!empty($request->category) && empty($request->product)) {
                 $query->where('products.category', $request->category);
             }
+            if (!empty($request->product)) {
+                $query->where('invoice_items.product_id', $request->product);
+            }
             $data = $query->get();
             $totalAmount = 0;
             $totalQuantity = 0;

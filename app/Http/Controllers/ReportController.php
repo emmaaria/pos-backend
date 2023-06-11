@@ -106,10 +106,10 @@ class ReportController extends Controller
                 ->where('customer_ledgers.company_id', $companyId)
                 ->leftJoin('customers', 'customers.id', '=', 'customer_ledgers.customer_id')
                 ->orderBy('customer_ledgers.date', 'desc');
-            if (!empty($request->startDate)){
+            if (!empty($request->startDate)) {
                 $query->where('customer_ledgers.date', '>=', $request->startDate);
             }
-            if (!empty($request->endDate)){
+            if (!empty($request->endDate)) {
                 $query->where('customer_ledgers.date', '<=', $request->endDate);
             }
             $data = $query->get();
@@ -142,10 +142,10 @@ class ReportController extends Controller
                 ->where('supplier_ledgers.company_id', $companyId)
                 ->leftJoin('suppliers', 'suppliers.id', '=', 'supplier_ledgers.supplier_id')
                 ->orderBy('supplier_ledgers.date', 'desc');
-            if (!empty($request->startDate)){
+            if (!empty($request->startDate)) {
                 $query->where('supplier_ledgers.date', '>=', $request->startDate);
             }
-            if (!empty($request->endDate)){
+            if (!empty($request->endDate)) {
                 $query->where('supplier_ledgers.date', '<=', $request->endDate);
             }
             $data = $query->get();
@@ -173,17 +173,17 @@ class ReportController extends Controller
                 ->leftJoin('customers', 'customers.id', '=', 'invoices.customer_id')
                 ->leftJoin('products', 'products.product_id', '=', 'invoice_items.product_id')
                 ->orderBy('invoice_items.date', 'desc');
-            if (!empty($request->startDate)){
+            if (!empty($request->startDate)) {
                 $query->where('invoice_items.date', '>=', $request->startDate);
             }
-            if (!empty($request->endDate)){
+            if (!empty($request->endDate)) {
                 $query->where('invoice_items.date', '<=', $request->endDate);
             }
             $data = $query->get();
             $totalQuantity = 0;
             $totalAmount = 0;
             $totalWeight = 0;
-            foreach ($data as $row){
+            foreach ($data as $row) {
                 $totalQuantity += $row->quantity;
                 $totalAmount += $row->grand_total;
                 $totalWeight += $row->weight;
@@ -218,10 +218,10 @@ class ReportController extends Controller
                 ->leftJoin('invoice_items', 'invoice_items.product_id', '=', 'products.product_id')
                 ->orderBy('invoice_items.date', 'desc')
                 ->groupBy('products.product_id');
-            if (!empty($request->startDate)){
+            if (!empty($request->startDate)) {
                 $query->where('invoice_items.date', '>=', $request->startDate);
             }
-            if (!empty($request->endDate)){
+            if (!empty($request->endDate)) {
                 $query->where('invoice_items.date', '<=', $request->endDate);
             }
 
@@ -229,7 +229,7 @@ class ReportController extends Controller
             $totalQuantity = 0;
             $totalAmount = 0;
             $totalWeight = 0;
-            foreach ($data as $row){
+            foreach ($data as $row) {
                 $totalQuantity += $row->qty;
                 $totalAmount += $row->grand_total;
                 $totalWeight += $row->weight;
@@ -264,7 +264,7 @@ class ReportController extends Controller
             $totalQuantity = 0;
             $totalAmount = 0;
             $totalWeight = 0;
-            foreach ($data as $row){
+            foreach ($data as $row) {
                 $totalQuantity += $row->quantity;
                 $totalAmount += $row->total;
                 $totalWeight += $row->weight;
@@ -290,8 +290,7 @@ class ReportController extends Controller
                     'purchase_items.date',
                     'purchase_items.total',
                     'products.weight',
-                    DB::raw('SUM(quantity) as qty'),
-                    DB::raw('SUM(weight) as weight'),
+                    DB::raw('SUM(purchase_items.quantity) as qty'),
                 )
                 ->where('products.company_id', $companyId)
                 ->where('products.category', $request->category)
@@ -299,20 +298,20 @@ class ReportController extends Controller
                 ->leftJoin('purchase_items', 'purchase_items.product_id', '=', 'products.product_id')
                 ->orderBy('purchase_items.date', 'desc')
                 ->groupBy('products.product_id');
-            if (!empty($request->startDate)){
+            if (!empty($request->startDate)) {
                 $query->where('purchase_items.date', '>=', $request->startDate);
             }
-            if (!empty($request->endDate)){
+            if (!empty($request->endDate)) {
                 $query->where('purchase_items.date', '<=', $request->endDate);
             }
             $data = $query->get();
             $totalQuantity = 0;
             $totalAmount = 0;
             $totalWeight = 0;
-            foreach ($data as $row){
+            foreach ($data as $row) {
                 $totalQuantity += $row->qty;
                 $totalAmount += $row->total;
-                $totalWeight += $row->weight;
+                $totalWeight += $row->weight * $row->qty;
             }
             $status = true;
             return response()->json(compact('status', 'data', 'totalQuantity', 'totalAmount', 'totalWeight'));
@@ -339,12 +338,12 @@ class ReportController extends Controller
             }
             $query = DB::table('invoices')
                 ->select('invoices.invoice_id',
-                    'invoices.grand_total',
-                    'invoices.discountAmount',
+                    'invoice_items.grand_total',
                     'invoices.comment',
                     'invoices.id',
                     'invoices.date',
                     'products.name',
+                    DB::raw('SUM(invoice_items.quantity) as qty'),
                 )
                 ->where('invoices.company_id', $companyId)
                 ->where('invoices.customer_id', $request->customer)
@@ -352,13 +351,24 @@ class ReportController extends Controller
                 ->leftJoin('products', 'products.product_id', '=', 'invoice_items.product_id')
                 ->orderBy('id', 'desc')
                 ->groupBy('invoice_items.product_id');
-            if (!empty($request->startDate)){
+            if (!empty($request->startDate)) {
                 $query->where('invoices.date', '>=', $request->startDate);
             }
-            if (!empty($request->endDate)){
+            if (!empty($request->endDate)) {
+                $query->where('invoices.date', '<=', $request->endDate);
+            }
+            if (!empty($request->endDate)) {
                 $query->where('invoices.date', '<=', $request->endDate);
             }
             $data = $query->get();
+            $totalAmount = 0;
+            $totalQuantity = 0;
+            $totalWeight = 0;
+            foreach ($data as $row) {
+                $totalAmount += $row->grand_total;
+                $totalQuantity += $row->qty;
+                $totalWeight += $row->qty;
+            }
             $status = true;
             return response()->json(compact('status', 'data'));
         } else {

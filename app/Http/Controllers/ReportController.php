@@ -355,8 +355,8 @@ class ReportController extends Controller
             if (!empty($request->endDate)) {
                 $query->where('invoices.date', '<=', $request->endDate);
             }
-            if (!empty($request->endDate)) {
-                $query->where('invoices.date', '<=', $request->endDate);
+            if (!empty($request->category) && empty($request->product)) {
+                $query->where('products.category', $request->category);
             }
             $data = $query->get();
             $totalAmount = 0;

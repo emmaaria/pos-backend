@@ -337,11 +337,9 @@ class ReportController extends Controller
                 return response()->json(compact('status', 'errors'));
             }
             $query = DB::table('invoices')
-                ->select('invoices.invoice_id',
+                ->select(
+                    'invoices.invoice_id',
                     'invoice_items.grand_total',
-                    'invoices.comment',
-                    'invoices.id',
-                    'invoices.date',
                     'products.name',
                     'products.weight',
                     DB::raw('SUM(invoice_items.quantity) as qty'),
@@ -350,7 +348,7 @@ class ReportController extends Controller
                 ->where('invoices.customer_id', $request->customer)
                 ->leftJoin('invoice_items', 'invoice_items.invoice_id', '=', 'invoices.invoice_id')
                 ->leftJoin('products', 'products.product_id', '=', 'invoice_items.product_id')
-                ->orderBy('id', 'desc')
+                ->orderBy('invoices.date', 'desc')
                 ->groupBy('invoice_items.product_id');
             if (!empty($request->startDate)) {
                 $query->where('invoices.date', '>=', $request->startDate);

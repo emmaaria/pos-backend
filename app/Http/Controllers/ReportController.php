@@ -368,7 +368,9 @@ class ReportController extends Controller
             foreach ($data as $row) {
                 $totalAmount += $row->grand_total;
                 $totalQuantity += $row->qty;
-                $totalWeight += $row->qty * $row->weight;
+                if (!empty($row->weight)){
+                    $totalWeight += $row->qty * $row->weight;
+                }
             }
             $status = true;
             return response()->json(compact('status', 'data', 'totalQuantity', 'totalAmount', 'totalWeight'));

@@ -342,6 +342,7 @@ class ReportController extends Controller
                     'products.name',
                     'products.weight',
                     DB::raw('SUM(invoice_items.quantity) as qty'),
+                    DB::raw('(SUM(invoice_items.quantity) * SUM(invoice_items.weight)) as total_weight'),
                 )
                 ->where('invoices.company_id', $companyId)
                 ->where('invoices.customer_id', $request->customer)

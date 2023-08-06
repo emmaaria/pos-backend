@@ -57,7 +57,7 @@ class SaleReturnController extends Controller
             if (empty($name)) {
                 $returns = DB::table('sale_returns')
                     ->select('sale_returns.*', 'customers.name')
-                    ->leftJoin('customers', 'customers.id', '=', 'sale_returns.customer_id')
+                    ->leftJoin('sale_returns', 'sale_returns.customer_id', '=', 'customers.id')
                     ->where('sale_returns.company_id', $companyId)
                     ->where('customers.company_id', $companyId)
                     ->orderBy('id', 'desc')
@@ -67,7 +67,7 @@ class SaleReturnController extends Controller
             } else {
                 $returns = DB::table('sale_returns')
                     ->select('sale_returns.*', 'customers.name')
-                    ->leftJoin('customers', 'customers.id', '=', 'sale_returns.customer_id')
+                    ->leftJoin('sale_returns', 'sale_returns.customer_id', '=', 'customers.id')
                     ->where('sale_returns.company_id', $companyId)
                     ->where('customers.company_id', $companyId)
                     ->where('sale_returns.return_id', 'like', '%' . $name . '%')

@@ -56,6 +56,8 @@ class SaleReturnController extends Controller
             $name = $request->keyword;
             if (empty($name)) {
                 $returns = DB::table('sale_returns')
+                    ->select('sale_return.*', 'customers.name')
+                    ->leftJoin('customers', 'customers.id', '=', 'sale_returns.id')
                     ->where('sale_returns.company_id', $companyId)
                     ->orderBy('id', 'desc')
                     ->paginate(50);
@@ -63,6 +65,8 @@ class SaleReturnController extends Controller
                 return response()->json(compact('status', 'returns'));
             } else {
                 $returns = DB::table('sale_returns')
+                    ->select('sale_return.*', 'customers.name')
+                    ->leftJoin('customers', 'customers.id', '=', 'sale_returns.id')
                     ->where('sale_returns.company_id', $companyId)
                     ->where('sale_returns.return_id', 'like', '%' . $name . '%')
                     ->paginate(50);

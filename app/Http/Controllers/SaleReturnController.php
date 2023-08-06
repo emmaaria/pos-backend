@@ -87,6 +87,7 @@ class SaleReturnController extends Controller
                     'productQuantities' => 'required',
                     'productPrices' => 'required',
                     'total' => 'required',
+                    'customerId' => 'required',
                     'account' => 'required',
                 ]
             );
@@ -127,6 +128,7 @@ class SaleReturnController extends Controller
                                     'company_id' => $companyId,
                                     'quantity' => $quantity,
                                     'date' => $request->date,
+                                    'customer_id' => $customerId,
                                     'total' => $quantity * $price,
                                 ]);
                                 $purchasePrice = DB::table('average_purchase_prices')->select('price')->where('product_id', $productID)->where('company_id', $companyId)->first();
@@ -150,6 +152,7 @@ class SaleReturnController extends Controller
                                 'user_id' => Auth::id(),
                                 'date' => $request->date,
                                 'account' => $request->account,
+                                'customer_id' => $customerId,
                                 'type' => 'dsr',
                                 'company_id' => $companyId,
                             ]

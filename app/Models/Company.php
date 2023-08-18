@@ -23,6 +23,10 @@ class Company extends Model
         'expiry_date',
         'customer_based_price',
         'stock_over_selling',
+        'paddingLeft',
+        'paddingRight',
+        'paddingTop',
+        'perRow',
         'discount_type'
     ];
 }

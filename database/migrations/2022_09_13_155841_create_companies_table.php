@@ -20,6 +20,10 @@ class CreateCompaniesTable extends Migration
             $table->string('address')->nullable();
             $table->string('mobile')->nullable();
             $table->string('email')->nullable();
+            $table->string('paddingLeft')->default(0);
+            $table->string('paddingRight')->default(0);
+            $table->string('paddingTop')->default(0);
+            $table->string('perRow')->default(4);
             $table->text('logo')->nullable();
             $table->tinyInteger('stock_over_selling')->default(0);
             $table->string('vat_number')->nullable();

@@ -22,6 +22,7 @@ class Company extends Model
         'payment_term',
         'expiry_date',
         'customer_based_price',
+        'stock_over_selling',
         'discount_type'
     ];
 }

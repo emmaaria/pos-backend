@@ -21,6 +21,7 @@ class CreateCompaniesTable extends Migration
             $table->string('mobile')->nullable();
             $table->string('email')->nullable();
             $table->text('logo')->nullable();
+            $table->tinyInteger('stock_over_selling')->default(0);
             $table->string('vat_number')->nullable();
             $table->string('mushok_number')->nullable();
             $table->string('contact_mobile')->nullable();

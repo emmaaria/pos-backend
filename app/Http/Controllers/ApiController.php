@@ -101,6 +101,7 @@ class ApiController extends Controller
                 'company_mobile' => $company->mobile,
                 'vat_number' => $company->vat_number,
                 'mushok_number' => $company->mushok_number,
+                'stock_over_selling' => $company->stock_over_selling,
             );
             $status = true;
             return response()->json(compact('status', 'user', 'token', 'company'));
@@ -168,6 +169,7 @@ class ApiController extends Controller
                         'logo' => $request->logo,
                         'vat_number' => $request->vat_number,
                         'mushok_number' => $request->mushok_number,
+                        'stock_over_selling' => $request->stock_over_selling,
                     ]
                 );
                 $status = true;
@@ -182,6 +184,7 @@ class ApiController extends Controller
                         'mobile' => $request->mobile,
                         'vat_number' => $request->vat_number,
                         'mushok_number' => $request->mushok_number,
+                        'stock_over_selling' => $request->stock_over_selling,
                     ]
                 );
                 $status = true;
@@ -203,6 +206,7 @@ class ApiController extends Controller
                 [
                     'discount_type' => $request->discount_type,
                     'customer_based_price' => $request->customer_based_price,
+                    'stock_over_selling' => $request->stock_over_selling,
                 ]
             );
             $status = true;

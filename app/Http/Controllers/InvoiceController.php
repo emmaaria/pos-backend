@@ -3,11 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\AveragePurchasePrice;
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Skycoder\InvoiceNumberGenerator\InvoiceNumberGeneratorService;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -40,7 +38,7 @@ class InvoiceController extends Controller
                 return null;
             }
 
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return null;
         }
     }
@@ -483,7 +481,7 @@ class InvoiceController extends Controller
                     $status = true;
                     $message = 'Invoice saved';
                     return response()->json(compact('status', 'message', 'invoice'));
-                } catch (Exception $e) {
+                } catch (\Exception $e) {
                     $status = false;
                     $errors = $e;
                     return response()->json(compact('status', 'errors'));
@@ -801,7 +799,7 @@ class InvoiceController extends Controller
                     $status = true;
                     $message = 'Invoice updated';
                     return response()->json(compact('status', 'message', 'invoice'));
-                } catch (Exception $e) {
+                } catch (\Exception $e) {
                     $status = false;
                     $errors = $e;
                     return response()->json(compact('status', 'errors'));

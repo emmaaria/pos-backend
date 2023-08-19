@@ -83,6 +83,7 @@ class ProductController extends Controller
                     ->where('name', 'like', '%' . $name . '%')
                     ->orderBy('id', 'desc')
                     ->paginate(50);
+
                 $status = true;
                 return response()->json(compact('status', 'products'));
             }

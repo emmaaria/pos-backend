@@ -233,6 +233,9 @@ class ProductController extends Controller
                 DB::transaction(function () use ($companyId, $request) {
                     $product = Product::where('id', $request->id)->where('company_id', $companyId)->first();
                     $product->name = $request->name;
+                    if ($request->product_id && !empty($request->product_id)){
+                        $product->product_id = $request->product_id;
+                    }
                     $product->category = $request->category;
                     $product->unit = $request->unit;
                     $product->price = $request->price;

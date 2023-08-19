@@ -485,6 +485,7 @@ class InvoiceController extends Controller
                 } catch (\Exception $e) {
                     $status = false;
                     $errors = $e;
+                    Log::error($e);
                     return response()->json(compact('status', 'errors'));
                 }
             } else {

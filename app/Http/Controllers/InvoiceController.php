@@ -243,7 +243,7 @@ class InvoiceController extends Controller
                         $profit = 0;
                         for ($i = 0, $n = count($products); $i < $n; $i++) {
                             $productID = $products[$i];
-                            $product = DB::table('products')->select('name')->where('product_id', $productID)->first();
+                            $product = DB::table('products')->select('name', 'purchase_price')->where('product_id', $productID)->first();
                             $quantity = $quantities[$i];
                             $price = $prices[$i];
                             $total += $quantity * $price;
@@ -284,7 +284,7 @@ class InvoiceController extends Controller
                                     'grand_total' => $ttl - $prDisAmount,
                                 ]);
                                 $purchasePrice = DB::table('average_purchase_prices')->select('price')->where('product_id', $productID)->where('company_id', $companyId)->first();
-                                if (!empty($purchasePrice)){
+                                if ($purchasePrice){
                                     $profit += ($quantity * $price) - ($quantity * $purchasePrice->price) - $prDisAmount;
                                 }else{
                                     AveragePurchasePrice::create(array(

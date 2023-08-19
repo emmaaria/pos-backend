@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AveragePurchasePrice;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -284,7 +285,17 @@ class InvoiceController extends Controller
                                     'grand_total' => $ttl - $prDisAmount,
                                 ]);
                                 $purchasePrice = DB::table('average_purchase_prices')->select('price')->where('product_id', $productID)->where('company_id', $companyId)->first();
-                                $profit += ($quantity * $price) - ($quantity * $purchasePrice->price) - $prDisAmount;
+                                if (!empty($purchasePrice)){
+                                    $profit += ($quantity * $price) - ($quantity * $purchasePrice->price) - $prDisAmount;
+                                }else{
+                                    AveragePurchasePrice::create(array(
+                                        'product_id' => $productID,
+                                        'price' => $product->purchase_price,
+                                        'company_id' => $companyId,
+                                    ));
+                                    $profit += ($quantity * $price) - ($quantity * $product->purchase_price) - $prDisAmount;
+                                }
+
                             }
                         }
                         $invoice['cash'] = $request->cash;

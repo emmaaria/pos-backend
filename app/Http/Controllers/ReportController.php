@@ -407,7 +407,7 @@ class ReportController extends Controller
                     DB::raw('SUM(sale_return_items.total) as returnAmount'),
                 )
                 ->where('supplier_products.company_id', $companyId)
-                ->where('supplier_products.customer_id', $request->supplier)
+                ->where('supplier_products.supplier_id', $request->supplier)
                 ->leftJoin('invoice_items', 'invoice_items.product_id', '=', 'supplier_products.product_id')
                 ->leftJoin('products', 'products.product_id', '=', 'supplier_products.product_id')
                 ->leftJoin('sale_return_items', 'sale_return_items.product_id', '=', 'supplier_products.product_id')

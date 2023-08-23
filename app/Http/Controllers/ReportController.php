@@ -381,4 +381,67 @@ class ReportController extends Controller
             return response()->json(compact('status', 'errors'));
         }
     }
+
+    public function salesBySupplier(Request $request)
+    {
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $validator = Validator::make($request->all(),
+                [
+                    'customer' => 'required',
+                ]
+            );
+            if ($validator->fails()) {
+                $status = false;
+                $errors = $validator->errors();
+                return response()->json(compact('status', 'errors'));
+            }
+            $query = DB::table('supplier_products')
+                ->select(
+                    'invoice_items.grand_total',
+                    'invoice_items.product_id',
+                    'products.name',
+                    'products.weight',
+                    DB::raw('SUM(invoice_items.quantity) as qty'),
+                    DB::raw('SUM(sale_return_items.quantity) as returnQty'),
+                    DB::raw('SUM(sale_return_items.total) as returnAmount'),
+                )
+                ->where('supplier_products.company_id', $companyId)
+                ->where('supplier_products.customer_id', $request->supplier)
+                ->leftJoin('invoice_items', 'invoice_items.product_id', '=', 'supplier_products.product_id')
+                ->leftJoin('products', 'products.product_id', '=', 'supplier_products.product_id')
+                ->leftJoin('sale_return_items', 'sale_return_items.product_id', '=', 'supplier_products.product_id')
+                ->orderBy('invoice_items.date', 'desc')
+                ->groupBy('invoice_items.product_id');
+            if (!empty($request->startDate)) {
+                $query->where('invoice_items.date', '>=', $request->startDate);
+            }
+            if (!empty($request->endDate)) {
+                $query->where('invoice_items.date', '<=', $request->endDate);
+            }
+            if (!empty($request->category) && empty($request->product)) {
+                $query->where('products.category', $request->category);
+            }
+            if (!empty($request->product)) {
+                $query->where('supplier_products.product_id', $request->product);
+            }
+            $data = $query->get();
+            $totalAmount = 0;
+            $totalQuantity = 0;
+            $totalWeight = 0;
+            foreach ($data as $row) {
+                $totalAmount += $row->grand_total - $row->returnAmount;
+                $totalQuantity += $row->qty - $row->returnQty;
+                if (!empty($row->weight)){
+                    $totalWeight += (int)$row->qty * (int)$row->weight;
+                }
+            }
+            $status = true;
+            return response()->json(compact('status', 'data', 'totalQuantity', 'totalAmount', 'totalWeight'));
+        } else {
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
+    }
 }

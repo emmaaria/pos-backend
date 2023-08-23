@@ -107,25 +107,25 @@ class DashboardController extends Controller
                 ->where('date', date('Y-m-d'))
                 ->count();
 
-            $data['todayTotalPurchaseAmount'] = DB::table('purchases')
+            $data['todayTotalPurchaseAmount'] = number_format(DB::table('purchases')
                 ->where('company_id', $companyId)
                 ->where('date', date('Y-m-d'))
-                ->sum('amount');
+                ->sum('amount'), 2);
 
             $data['todayTotalReturn'] = DB::table('sale_returns')
                 ->where('company_id', $companyId)
                 ->where('date', date('Y-m-d'))
                 ->count();
 
-            $data['todayTotalReturnAmount'] = DB::table('sale_returns')
+            $data['todayTotalReturnAmount'] = number_format(DB::table('sale_returns')
                 ->where('company_id', $companyId)
                 ->where('date', date('Y-m-d'))
-                ->sum('return_amount');
+                ->sum('return_amount'), 2);
 
-            $data['todayTotalCash'] = DB::table('cash_books')
+            $data['todayTotalCash'] = number_format(DB::table('cash_books')
                 ->where('company_id', $companyId)
                 ->where('date', date('Y-m-d'))
-                ->sum(DB::raw('receive - payment'));
+                ->sum(DB::raw('receive - payment')), 2);
 
             $data['totalCash'] = DB::table('cash_books')
                 ->where('company_id', $companyId)

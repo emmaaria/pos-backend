@@ -97,10 +97,10 @@ class DashboardController extends Controller
                 ->where('date', date('Y-m-d'))
                 ->count();
 
-            $data['todayTotalSaleAmount'] = DB::table('invoices')
+            $data['todayTotalSaleAmount'] = number_format(DB::table('invoices')
                 ->where('company_id', $companyId)
                 ->where('date', date('Y-m-d'))
-                ->sum('grand_total');
+                ->sum('grand_total'), 2);
 
             $data['todayTotalPurchase'] = DB::table('purchases')
                 ->where('company_id', $companyId)

@@ -76,7 +76,7 @@ class DashboardController extends Controller
 
             $data['totalPurchaseAmount'] = number_format(DB::table('purchases')
                 ->where('company_id', $companyId)
-                ->sum('amount'). 2);
+                ->sum('amount'), 2);
 
             $totalSale = number_format(DB::table('invoices')
                 ->where('company_id', $companyId)

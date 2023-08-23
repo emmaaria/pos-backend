@@ -369,7 +369,7 @@ class ReportController extends Controller
             foreach ($data as $row) {
                 $totalAmount += $row->grand_total;
                 $totalQuantity += $row->qty;
-                if (!empty($row->weight)){
+                if (!empty($row->weight)) {
                     $totalWeight += (int)$row->qty * (int)$row->weight;
                 }
             }
@@ -408,6 +408,7 @@ class ReportController extends Controller
                 )
                 ->where('supplier_products.company_id', $companyId)
                 ->where('supplier_products.supplier_id', $request->supplier)
+                ->where('invoice_items.quantity', '>', 0)
                 ->leftJoin('invoice_items', 'invoice_items.product_id', '=', 'supplier_products.product_id')
                 ->leftJoin('products', 'products.product_id', '=', 'supplier_products.product_id')
                 ->leftJoin('sale_return_items', 'sale_return_items.product_id', '=', 'supplier_products.product_id')
@@ -432,7 +433,7 @@ class ReportController extends Controller
             foreach ($data as $row) {
                 $totalAmount += $row->grand_total - $row->returnAmount;
                 $totalQuantity += $row->qty - $row->returnQty;
-                if (!empty($row->weight)){
+                if (!empty($row->weight)) {
                     $totalWeight += (int)$row->qty * (int)$row->weight;
                 }
             }

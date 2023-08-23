@@ -78,15 +78,15 @@ class DashboardController extends Controller
                 ->where('company_id', $companyId)
                 ->sum('amount'), 2);
 
-            $totalSale = number_format(DB::table('invoices')
+            $totalSale = DB::table('invoices')
                 ->where('company_id', $companyId)
-                ->sum('grand_total'), 2);
+                ->sum('grand_total');
 
             $totalReturn = DB::table('sale_returns')
                 ->where('company_id', $companyId)
                 ->sum('return_amount');
 
-            $data['totalSaleAmount'] = $totalSale - $totalReturn;
+            $data['totalSaleAmount'] = number_format($totalSale - $totalReturn, 2);
 
             $data['totalReturn'] = DB::table('sale_returns')
                 ->where('company_id', $companyId)

@@ -361,7 +361,7 @@ class SupplierController extends Controller
                 ->where('supplier_ledgers.company_id', $companyId)
                 ->leftJoin('suppliers', 'suppliers.id', '=', 'supplier_ledgers.supplier_id')
                 ->where('supplier_ledgers.type', 'deposit')
-                ->where('supplier_ledgers.reference_no', 'like', "s-rec%");
+                ->where('supplier_ledgers.reference_no', 'like', "s-pay%");
             if (!empty($request->supplier)) {
                 $data = $data->where('supplier_ledgers.supplier_id', $request->supplier);
             }

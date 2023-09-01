@@ -380,6 +380,32 @@ class SupplierController extends Controller
             return response()->json(compact('status', 'errors'));
         }
     }
+
+    public function deletePayment(Request $request)
+    {
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $id = $request->id;
+            if (!empty($id)) {
+                DB::table('supplier_ledgers')->where('reference_no', "s-pay-$id")->where('company_id', $companyId)->delete();
+                DB::table('nagad_transactions')->where('reference_no', "s-pay-$id")->where('company_id', $companyId)->delete();
+                DB::table('bkash_transactions')->where('reference_no', "s-pay-$id")->where('company_id', $companyId)->delete();
+                DB::table('cash_books')->where('reference_no', "s-pay-$id")->where('company_id', $companyId)->delete();
+                DB::table('bank_ledgers')->where('reference_no', "s-pay-$id")->where('company_id', $companyId)->delete();
+                $status = true;
+                $message = 'Supplier payment deleted';
+                return response()->json(compact('status', 'message'));
+            } else {
+                $status = false;
+                $error = 'Customer payment not found';
+                return response()->json(compact('status', 'error'));
+            }
+        } else {
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
+    }
     /*
     |--------------------------------------------------------------------------
     | Supplier End

@@ -17,4 +17,5 @@ Route::group(['middleware' => 'api'], function ($router) {
     Route::post('/supplier/delete', [SupplierController::class, 'deleteSupplier']);
     Route::post('/supplier/payments', [SupplierController::class, 'paymentList']);
     Route::post('/supplier/payment/store', [SupplierController::class, 'storePayment']);
+    Route::post('/supplier/payment/delete', [SupplierController::class, 'deletePayment']);
 });

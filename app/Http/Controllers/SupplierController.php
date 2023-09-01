@@ -351,6 +351,35 @@ class SupplierController extends Controller
             return response()->json(compact('status', 'errors'));
         }
     }
+
+    public function paymentList(Request $request)
+    {
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $data = DB::table('supplier_ledgers')
+                ->select('supplier_ledgers.transaction_id', 'supplier_ledgers.deposit', 'supplier_ledgers.date', 'supplier_ledgers.comment', 'suppliers.name')
+                ->where('supplier_ledgers.company_id', $companyId)
+                ->leftJoin('suppliers', 'suppliers.id', '=', 'supplier_ledgers.supplier_id')
+                ->where('supplier_ledgers.type', 'deposit')
+                ->where('supplier_ledgers.reference_no', 'like', "s-rec%");
+            if (!empty($request->supplier)) {
+                $data = $data->where('supplier_ledgers.supplier_id', $request->supplier);
+            }
+            if (!empty($request->startDate)) {
+                $data = $data->where('supplier_ledgers.date', '>=', $request->startDate);
+            }
+            if (!empty($request->endDate)) {
+                $data = $data->where('supplier_ledgers.date', '<=', $request->endDate);
+            }
+            $data = $data->paginate(50);
+            $status = true;
+            return response()->json(compact('status', 'data'));
+        } else {
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
+    }
     /*
     |--------------------------------------------------------------------------
     | Supplier End

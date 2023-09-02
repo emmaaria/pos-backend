@@ -354,7 +354,7 @@ class ReportController extends Controller
                 $query->where('invoices.date', '>=', $request->startDate);
             }
             if (!empty($request->supplier)) {
-                $query->join('supplier_products', 'supplier_products.product_id = invoice_items.product_id')
+                $query->join('supplier_products', 'supplier_products.product_id', '=', 'invoice_items.product_id')
                     ->where('supplier_products.supplier_id', '=', $request->supplier);
             }
             if (!empty($request->endDate)) {

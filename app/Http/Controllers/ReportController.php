@@ -344,7 +344,6 @@ class ReportController extends Controller
                     'products.weight',
                     DB::raw('SUM(invoice_items.quantity) as qty'),
                 )
-                ->join('supplier_products','supplier_products.product_id = invoice_items.product_id')
                 ->where('invoices.company_id', $companyId)
                 ->where('invoices.customer_id', $request->customer)
                 ->leftJoin('invoice_items', 'invoice_items.invoice_id', '=', 'invoices.invoice_id')
@@ -355,7 +354,8 @@ class ReportController extends Controller
                 $query->where('invoices.date', '>=', $request->startDate);
             }
             if (!empty($request->supplier)) {
-                $query->where('supplier_products.supplier_id', '=', $request->supplier);
+                $query->join('supplier_products', 'supplier_products.product_id = invoice_items.product_id')
+                    ->where('supplier_products.supplier_id', '=', $request->supplier);
             }
             if (!empty($request->endDate)) {
                 $query->where('invoices.date', '<=', $request->endDate);

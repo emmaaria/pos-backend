@@ -191,7 +191,7 @@ class ExpenseController extends Controller
             $all = $request->allData;
             if (empty($name) && empty($all)) {
                 $expenses = DB::table('expenses')
-                    ->select('expenses.expense_id', 'expenses.note', 'expenses.amount', 'expense_categories.name as title')
+                    ->select('expenses.expense_id', 'expenses.note', 'expenses.date', 'expenses.amount', 'expense_categories.name as title')
                     ->leftJoin('expense_categories', 'expense_categories.id', '=', 'expenses.category')
                     ->where('expenses.company_id', $companyId)
                     ->orderBy('expenses.id', 'desc')

@@ -213,6 +213,7 @@ class ExpenseController extends Controller
                     ->leftJoin('expense_categories', 'expense_categories.id', '=', 'expenses.category')
                     ->where('expenses.expense_id', 'like', '%' . $name . '%')
                     ->orWhere('expense_categories.name', 'like', '%' . $name . '%')
+                    ->orWhere('expenses.date', 'like', '%' . $name . '%')
                     ->orderBy('expenses.id', 'desc')
                     ->where('name', 'like', '%' . $name . '%')
                     ->where('expenses.company_id', $companyId)

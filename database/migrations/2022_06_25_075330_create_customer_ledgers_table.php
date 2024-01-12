@@ -15,7 +15,7 @@ class CreateCustomerLedgersTable extends Migration
     {
         Schema::create('customer_ledgers', function (Blueprint $table) {
             $table->id();
-            $table->string('customer_id');
+            $table->string('customer_id')->index();
             $table->index('customer_id');
             $table->string('transaction_id');
             $table->index('transaction_id');

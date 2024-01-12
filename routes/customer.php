@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::group(['middleware' => 'api'], function ($router) {
     Route::get('/customer', [CustomerController::class, 'getCustomers']);
+    Route::get('/customer/old', [CustomerController::class, 'getOldCustomers']);
     Route::get('/customer/{id}', [CustomerController::class, 'getCustomer']);
     Route::post('/customer/store', [CustomerController::class, 'storeCustomer']);
     Route::post('/customer/update', [CustomerController::class, 'updateCustomer']);

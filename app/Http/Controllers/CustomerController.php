@@ -93,6 +93,79 @@ class CustomerController extends Controller
         }
     }
 
+    public function getOldCustomers(Request $request)
+    {
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $name = $request->name;
+            $all = $request->allData;
+            if (empty($name) && empty($all)) {
+                $customers = DB::table('customers')
+                    ->select(
+                        'customers.id',
+                        'customers.name',
+                        'customers.mobile',
+                        'customers.address',
+                        DB::raw('SUM(due) as due'),
+                        DB::raw('SUM(deposit) as deposit'),
+                        DB::raw('SUM(due - deposit) as balance')
+                    )
+                    ->leftJoin('customer_ledgers', 'customer_ledgers.customer_id', '=', 'customers.id')
+                    ->leftJoin('invoices', function ($join) {
+                        $join->on('customers.id', '=', 'invoices.customer_id')
+                            ->where('invoices.date', '>=', now()->subDays(90)->toDateString()); // Assuming 'date' is the name of your date column
+                    })
+                    ->where('customers.company_id', $companyId)
+                    ->whereNull('invoices.id')
+                    ->orWhere('invoices.date', '<', now()->subDays(90)->toDateString())
+                    ->groupBy('customers.id', 'customers.name', 'customers.mobile', 'customers.address')
+                    ->paginate(50);
+                $status = true;
+                return response()->json(compact('status', 'customers'));
+            } elseif ($all) {
+                $customers = DB::table('customers')
+                    ->select(
+                        'customers.id',
+                        'customers.name',
+                        'customers.mobile',
+                        'customers.address',
+                        DB::raw('SUM(due) as due'),
+                        DB::raw('SUM(deposit) as deposit'),
+                        DB::raw('SUM(due - deposit) as balance')
+                    )
+                    ->leftJoin('customer_ledgers', 'customer_ledgers.customer_id', '=', 'customers.id')
+                    ->leftJoin('invoices', function ($join) {
+                        $join->on('customers.id', '=', 'invoices.customer_id')
+                            ->where('invoices.date', '>=', now()->subDays(90)->toDateString()); // Assuming 'date' is the name of your date column
+                    })
+                    ->where('customers.company_id', $companyId)
+                    ->whereNull('invoices.id')
+                    ->orWhere('invoices.date', '<', now()->subDays(90)->toDateString())
+                    ->groupBy('customers.id', 'customers.name', 'customers.mobile', 'customers.address')
+                    ->get();
+                $status = true;
+                return response()->json(compact('status', 'customers'));
+            } else {
+                $customers = DB::table('customers')
+                    ->select('customers.id', 'customers.name', 'customers.mobile', 'customers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
+                    ->leftJoin('customer_ledgers', 'customer_ledgers.customer_id', '=', 'customers.id')
+                    ->where('customers.company_id', $companyId)
+                    ->where('customers.name', 'like', '%' . $name . '%')
+                    ->orWhere('customers.mobile', 'like', '%' . $name . '%')
+                    ->orWhere('customers.address', 'like', '%' . $name . '%')
+                    ->where('customers.company_id', $companyId)
+                    ->groupBy('customers.id', 'customers.name', 'customers.mobile', 'customers.address')
+                    ->paginate(50);
+                $status = true;
+                return response()->json(compact('status', 'customers'));
+            }
+        } else {
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
+    }
+
     public function getCustomer($id)
     {
         $companyId = $this->getCompanyId();

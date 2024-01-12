@@ -98,73 +98,31 @@ class CustomerController extends Controller
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
-            $name = $request->name;
-            $all = $request->allData;
             $cacheKey = 'customers_without_invoices_' . $companyId;
-            if (empty($name) && empty($all)) {
-                $customers = Cache::remember($cacheKey, 60, function () use ($companyId) {
-                    return DB::table('customers')
-                        ->select(
-                            'customers.id',
-                            'customers.name',
-                            'customers.mobile',
-                            'customers.address',
-                            DB::raw('SUM(due) as due'),
-                            DB::raw('SUM(deposit) as deposit'),
-                            DB::raw('SUM(due - deposit) as balance')
-                        )
-                        ->leftJoin('customer_ledgers', 'customer_ledgers.customer_id', '=', 'customers.id')
-                        ->leftJoin('invoices', function ($join) {
-                            $join->on('customers.id', '=', 'invoices.customer_id')
-                                ->where('invoices.date', '>=', now()->subDays(90)->toDateString());
-                        })
-                        ->where('customers.company_id', $companyId)
-                        ->whereNull('invoices.id')
-                        ->orWhere('invoices.date', '<', now()->subDays(90)->toDateString())
-                        ->groupBy('customers.id', 'customers.name', 'customers.mobile', 'customers.address')
-                        ->paginate(50);
-                });
-                $status = true;
-                return response()->json(compact('status', 'customers'));
-            } elseif ($all) {
-                $customers = Cache::remember($cacheKey, 60, function () use ($companyId) {
-                    return DB::table('customers')
-                        ->select(
-                            'customers.id',
-                            'customers.name',
-                            'customers.mobile',
-                            'customers.address',
-                            DB::raw('SUM(due) as due'),
-                            DB::raw('SUM(deposit) as deposit'),
-                            DB::raw('SUM(due - deposit) as balance')
-                        )
-                        ->leftJoin('customer_ledgers', 'customer_ledgers.customer_id', '=', 'customers.id')
-                        ->leftJoin('invoices', function ($join) {
-                            $join->on('customers.id', '=', 'invoices.customer_id')
-                                ->where('invoices.date', '>=', now()->subDays(90)->toDateString());
-                        })
-                        ->where('customers.company_id', $companyId)
-                        ->whereNull('invoices.id')
-                        ->orWhere('invoices.date', '<', now()->subDays(90)->toDateString())
-                        ->groupBy('customers.id', 'customers.name', 'customers.mobile', 'customers.address')
-                        ->get(50);
-                });
-                $status = true;
-                return response()->json(compact('status', 'customers'));
-            } else {
-                $customers = DB::table('customers')
-                    ->select('customers.id', 'customers.name', 'customers.mobile', 'customers.address', DB::raw('SUM(due) as due'), DB::raw('SUM(deposit) as deposit'), DB::raw('SUM(due - deposit) as balance'))
+            $customers = Cache::remember($cacheKey, 60, function () use ($companyId) {
+                return DB::table('customers')
+                    ->select(
+                        'customers.id',
+                        'customers.name',
+                        'customers.mobile',
+                        'customers.address',
+                        DB::raw('SUM(due) as due'),
+                        DB::raw('SUM(deposit) as deposit'),
+                        DB::raw('SUM(due - deposit) as balance')
+                    )
                     ->leftJoin('customer_ledgers', 'customer_ledgers.customer_id', '=', 'customers.id')
+                    ->leftJoin('invoices', function ($join) {
+                        $join->on('customers.id', '=', 'invoices.customer_id')
+                            ->where('invoices.date', '>=', now()->subDays(90)->toDateString());
+                    })
                     ->where('customers.company_id', $companyId)
-                    ->where('customers.name', 'like', '%' . $name . '%')
-                    ->orWhere('customers.mobile', 'like', '%' . $name . '%')
-                    ->orWhere('customers.address', 'like', '%' . $name . '%')
-                    ->where('customers.company_id', $companyId)
+                    ->whereNull('invoices.id')
+                    ->orWhere('invoices.date', '<', now()->subDays(90)->toDateString())
                     ->groupBy('customers.id', 'customers.name', 'customers.mobile', 'customers.address')
                     ->paginate(50);
-                $status = true;
-                return response()->json(compact('status', 'customers'));
-            }
+            });
+            $status = true;
+            return response()->json(compact('status', 'customers'));
         } else {
             $status = false;
             $errors = 'You are not authorized';

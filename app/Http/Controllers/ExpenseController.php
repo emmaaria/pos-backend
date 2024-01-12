@@ -201,7 +201,7 @@ class ExpenseController extends Controller
             } elseif (!empty($all)) {
                 $expenses = DB::table('expenses')
                     ->where('expenses.company_id', $companyId)
-                    ->select('expenses.expense_id', 'expenses.note', 'expenses.amount', 'expense_categories.name as title')
+                    ->select('expenses.expense_id', 'expenses.date', 'expenses.note', 'expenses.amount', 'expense_categories.name as title')
                     ->leftJoin('expense_categories', 'expense_categories.id', '=', 'expenses.category')
                     ->orderBy('expenses.id', 'desc')
                     ->get();

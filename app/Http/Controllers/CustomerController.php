@@ -111,12 +111,10 @@ class CustomerController extends Controller
                         DB::raw('SUM(due - deposit) as balance')
                     )
                     ->leftJoin('customer_ledgers', 'customer_ledgers.customer_id', '=', 'customers.id')
-                    ->leftJoin('invoices', function ($join) {
-                        $join->on('customers.id', '=', 'invoices.customer_id')
-                            ->where('invoices.date', '>=', now()->subDays(90)->toDateString());
-                    })
+                    ->leftJoin('invoices', 'customers.id', '=', 'invoices.customer_id')
                     ->where('customers.company_id', $companyId)
                     ->whereNull('invoices.id')
+                    ->where('invoices.date', '>=', now()->subDays(90)->toDateString())
                     ->orWhere('invoices.date', '<', now()->subDays(90)->toDateString())
                     ->groupBy('customers.id', 'customers.name', 'customers.mobile', 'customers.address')
                     ->get();

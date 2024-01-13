@@ -94,11 +94,12 @@ class CustomerController extends Controller
         }
     }
 
-    public function getOldCustomers(Request $request)
+    public function getOldCustomers()
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
-            $cacheKey = 'customers_without_invoices_' . $companyId;
+            $page = request()->input('page', 1);
+            $cacheKey = 'customers_without_invoices_' . $companyId . '_page_' . $page;
             $customers = Cache::remember($cacheKey, 60, function () use ($companyId) {
                 return DB::table('customers')
                     ->select(

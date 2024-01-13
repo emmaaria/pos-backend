@@ -98,8 +98,7 @@ class CustomerController extends Controller
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
-            $page = request()->input('page', 1);
-            $cacheKey = 'customers_without_invoices_' . $companyId . '_page_' . $page;
+            $cacheKey = 'customers_without_invoices_' . $companyId;
             $customers = Cache::remember($cacheKey, 60, function () use ($companyId) {
                 return DB::table('customers')
                     ->select(
@@ -120,7 +119,7 @@ class CustomerController extends Controller
                     ->whereNull('invoices.id')
                     ->orWhere('invoices.date', '<', now()->subDays(90)->toDateString())
                     ->groupBy('customers.id', 'customers.name', 'customers.mobile', 'customers.address')
-                    ->paginate(50);
+                    ->get();
             });
             $status = true;
             return response()->json(compact('status', 'customers'));

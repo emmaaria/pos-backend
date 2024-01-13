@@ -98,7 +98,8 @@ class CustomerController extends Controller
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
-            $cacheKey = 'customers_without_invoices_' . $companyId;
+            $page = request()->input('page', 1);
+            $cacheKey = 'customers_without_invoices_' . $companyId . '_page_' . $page;
             $customers = Cache::remember($cacheKey, 60, function () use ($companyId) {
                 return DB::table('customers')
                     ->select(
@@ -111,13 +112,15 @@ class CustomerController extends Controller
                         DB::raw('SUM(due - deposit) as balance')
                     )
                     ->leftJoin('customer_ledgers', 'customer_ledgers.customer_id', '=', 'customers.id')
-                    ->leftJoin('invoices', 'customers.id', '=', 'invoices.customer_id')
                     ->where('customers.company_id', $companyId)
-                    ->whereNull('invoices.id')
-                    ->where('invoices.date', '>=', now()->subDays(90)->toDateString())
-                    ->orWhere('invoices.date', '<', now()->subDays(90)->toDateString())
+                    ->whereNotExists(function ($query) {
+                        $query->select(DB::raw(1))
+                            ->from('invoices')
+                            ->whereRaw('invoices.customer_id = customers.id')
+                            ->where('invoices.date', '>=', now()->subDays(90)->toDateString());
+                    })
                     ->groupBy('customers.id', 'customers.name', 'customers.mobile', 'customers.address')
-                    ->get();
+                    ->paginate(50);
             });
             $status = true;
             return response()->json(compact('status', 'customers'));

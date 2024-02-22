@@ -94,7 +94,6 @@ class SaleReturnController extends Controller
             $returnItems = DB::table('sale_return_items')
                 ->select('sale_return_items.*', 'products.name')
                 ->leftJoin('products', 'products.product_id', '=', 'sale_return_items.product_id')
-                ->where('sale_returns.company_id', $companyId)
                 ->where('sale_return_items.return_id', $id)
                 ->get();
             $status = true;

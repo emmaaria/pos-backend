@@ -85,7 +85,7 @@ class SaleReturnController extends Controller
         $companyId = $this->getCompanyId();
         if ($companyId) {
             $return = DB::table('sale_returns')
-                ->select('sale_returns.*', 'customers.name')
+                ->select('sale_returns.*', 'customers.name AS customerName')
                 ->leftJoin('customers', 'customers.id', '=', 'sale_returns.customer_id')
                 ->where('sale_returns.company_id', $companyId)
                 ->where('sale_returns.return_id', $id)

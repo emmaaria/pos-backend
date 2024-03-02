@@ -338,7 +338,6 @@ class ReportController extends Controller
             }
             $query = DB::table('invoices')
                 ->select(
-                    'invoice_items.grand_total',
                     'invoice_items.product_id',
                     'products.name',
                     'products.weight',

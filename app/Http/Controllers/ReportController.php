@@ -343,7 +343,8 @@ class ReportController extends Controller
                     'products.weight',
                     DB::raw('SUM(invoice_items.quantity) as qty'),
                     DB::raw('COALESCE(SUM(sale_return_items.quantity), 0) as returnQty'),
-                    DB::raw('SUM(invoice_items.grand_total) - SUM(sale_return_items.total) as grand_total')
+                    DB::raw('COALESCE(SUM(sale_return_items.total), 0) as returnTotal'),
+                    DB::raw('SUM(invoice_items.grand_total) as grand_total')
                 )
                 ->where('invoices.company_id', $companyId)
                 ->where('invoices.customer_id', $request->customer)
@@ -376,7 +377,8 @@ class ReportController extends Controller
             $totalQuantity = 0;
             $totalWeight = 0;
             foreach ($data as $row) {
-                $totalAmount += $row->grand_total;
+                $total = $row->grand_total - $row->returnTotal;
+                $totalAmount += $total;
                 $qty = $row->qty - $row->returnQty;
                 $totalQuantity += $qty;
                 if (!empty($row->weight)) {

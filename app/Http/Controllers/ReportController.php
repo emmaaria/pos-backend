@@ -374,7 +374,8 @@ class ReportController extends Controller
             $totalWeight = 0;
             foreach ($data as $row) {
                 $totalAmount += $row->grand_total;
-                $totalQuantity += $row->qty - $row->returnQty;
+                $qty = $row->qty - $row->returnQty;
+                $totalQuantity += $qty;
                 if (!empty($row->weight)) {
                     $totalWeight += (int)$row->qty * (int)$row->weight;
                 }

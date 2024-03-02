@@ -343,7 +343,7 @@ class ReportController extends Controller
                     'products.name',
                     'products.weight',
                     DB::raw('SUM(invoice_items.quantity) as qty'),
-                    DB::raw('COALESCE(SUM(return_items.quantity), 0) as returnQty'),
+                    DB::raw('COALESCE(SUM(sale_return_items.quantity), 0) as returnQty'),
                 )
                 ->where('invoices.company_id', $companyId)
                 ->where('invoices.customer_id', $request->customer)

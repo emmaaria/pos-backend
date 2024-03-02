@@ -59,7 +59,7 @@ class InvoiceController extends Controller
                     ->select('customers.name AS customer_name', 'invoices.invoice_id', 'invoices.grand_total', 'invoices.discountAmount', 'invoices.comment', 'invoices.id', 'invoices.date')
                     ->where('invoices.company_id', $companyId)
                     ->leftJoin('customers', 'customers.id', '=', 'invoices.customer_id')
-                    ->orderBy('date', 'desc')
+                    ->orderBy('invoices.date', 'desc')
                     ->paginate(50);
                 $status = true;
                 return response()->json(compact('status', 'invoices'));
@@ -70,7 +70,7 @@ class InvoiceController extends Controller
                     ->leftJoin('customers', 'customers.id', '=', 'invoices.customer_id')
                     ->where('invoices.invoice_id', 'like', '%' . $name . '%')
                     ->orWhere('customers.name', 'like', '%' . $name . '%')
-                    ->orderBy('date', 'desc')
+                    ->orderBy('invoices.date', 'desc')
                     ->paginate(50);
                 $status = true;
                 return response()->json(compact('status', 'invoices'));

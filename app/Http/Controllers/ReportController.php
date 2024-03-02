@@ -348,9 +348,11 @@ class ReportController extends Controller
                 )
                 ->where('invoices.company_id', $companyId)
                 ->where('invoices.customer_id', $request->customer)
-                ->where('sale_return_items.customer_id', $request->customer)
                 ->leftJoin('invoice_items', 'invoice_items.invoice_id', '=', 'invoices.invoice_id')
-                ->leftJoin('sale_return_items', 'sale_return_items.product_id', '=', 'invoice_items.product_id')
+                ->leftJoin('sale_return_items', function($join) use ($request) {
+                    $join->on('sale_return_items.product_id', '=', 'invoice_items.product_id')
+                        ->where('sale_return_items.customer_id', $request->customer);
+                })
                 ->leftJoin('products', 'products.product_id', '=', 'invoice_items.product_id')
                 ->orderBy('invoices.date', 'desc')
                 ->groupBy('invoice_items.product_id');

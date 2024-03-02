@@ -343,12 +343,18 @@ class ReportController extends Controller
                     'products.name',
                     'products.weight',
                     DB::raw('SUM(invoice_items.quantity) as qty'),
-                    DB::raw('COALESCE(SUM(sale_return_items.quantity), 0) as returnQty'),
+                    DB::raw('COALESCE(SUM(return_items.quantity), 0) as returnQty'),
+                    DB::raw('SUM(invoice_items.grand_total) as grand_total')
                 )
                 ->where('invoices.company_id', $companyId)
                 ->where('invoices.customer_id', $request->customer)
                 ->leftJoin('invoice_items', 'invoice_items.invoice_id', '=', 'invoices.invoice_id')
-                ->leftJoin('sale_return_items', 'sale_return_items.product_id', '=', 'invoice_items.product_id')
+                ->leftJoin('sale_return_items as return_items', function ($join) use ($companyId) {
+                    $join->on('return_items.product_id', '=', 'invoice_items.product_id')
+                        ->where('return_items.company_id', '=', $companyId)
+                        ->where('return_items.date', '>=', DB::raw('invoices.date'))
+                        ->where('return_items.date', '<=', DB::raw('NOW()'));
+                })
                 ->leftJoin('products', 'products.product_id', '=', 'invoice_items.product_id')
                 ->orderBy('invoices.date', 'desc')
                 ->groupBy('invoice_items.product_id');

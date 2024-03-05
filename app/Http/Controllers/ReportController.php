@@ -352,6 +352,12 @@ class ReportController extends Controller
                 ->leftJoin('sale_return_items', function($join) use ($request) {
                     $join->on('sale_return_items.product_id', '=', 'invoice_items.product_id')
                         ->where('sale_return_items.customer_id', $request->customer);
+                    if (!empty($request->startDate)) {
+                        $join->where('sale_return_items.date', '>=', $request->startDate);
+                    }
+                    if (!empty($request->endDate)) {
+                        $join->where('sale_return_items.date', '<=', $request->endDate);
+                    }
                 })
                 ->leftJoin('products', 'products.product_id', '=', 'invoice_items.product_id')
                 ->orderBy('invoices.date', 'desc')

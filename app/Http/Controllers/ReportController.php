@@ -388,7 +388,7 @@ class ReportController extends Controller
                 $qty = $row->qty - $row->returnQty;
                 $totalQuantity += $qty;
                 if (!empty($row->weight)) {
-                    $totalWeight += (int)$row->qty * (int)$row->weight;
+                    $totalWeight += (int)$qty * (int)$row->weight;
                 }
             }
             $status = true;

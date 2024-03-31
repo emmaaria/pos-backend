@@ -393,15 +393,15 @@ class ReportController extends Controller
                 $returnedQuery->where('date', '<=', $request->endDate);
             }
 
-            // Get the results of total returned quantity
             $returnedResults = $returnedQuery->groupBy('product_id')->get();
 
             $totalAmount = 0;
-            $totalQuantity = 0;
+            $totalNetQuantity = 0;
             $totalWeight = 0;
+            $totalSaleQty = 0;
+            $totalReturnQty = 0;
 
-// Join the sold and returned results to calculate final quantities
-            $data = collect($soldResults)->map(function ($item) use ($returnedResults, &$totalAmount, &$totalQuantity, &$totalWeight) {
+            $data = collect($soldResults)->map(function ($item) use ($returnedResults, &$totalAmount, &$totalNetQuantity, &$totalWeight, &$totalSaleQty, &$totalReturnQty) {
                 $returnedItem = $returnedResults->where('product_id', $item->product_id)->first();
                 $returnedQty = $returnedItem ? $returnedItem->returned_qty : 0;
                 $returnedAmt = $returnedItem ? $returnedItem->returned_amt : 0;
@@ -410,7 +410,9 @@ class ReportController extends Controller
                 $finalAmount = $item->sold_amount - $returnedAmt;
 
                 $totalAmount += $finalAmount;
-                $totalQuantity += $finalQty;
+                $totalNetQuantity += $finalQty;
+                $totalSaleQty += $item->sold_qty;
+                $totalReturnQty += $returnedQty;
                 $totalWeight += $item->weight * $finalQty;
 
                 return [
@@ -426,7 +428,7 @@ class ReportController extends Controller
 
 
             $status = true;
-            return response()->json(compact('status', 'data', 'totalQuantity', 'totalAmount', 'totalWeight'));
+            return response()->json(compact('status', 'data', 'totalAmount', 'totalNetQuantity', 'totalWeight', 'totalSaleQty', 'totalReturnQty'));
         } else {
             $status = false;
             $errors = 'You are not authorized';

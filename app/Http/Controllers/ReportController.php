@@ -373,40 +373,7 @@ class ReportController extends Controller
             }
 
             // Get the results of total sold quantity
-            $soldResults = $soldQuery->get();
-
-
-            $saleQuery = DB::table('invoices')
-                ->select(
-                    'invoice_items.product_id',
-                    'products.name',
-                    'products.weight',
-                    DB::raw('SUM(invoice_items.quantity) as qty'),
-                    DB::raw('SUM(invoice_items.grand_total) as grand_total')
-                )
-                ->where('invoices.company_id', $companyId)
-                ->where('invoices.customer_id', $request->customer)
-                ->leftJoin('invoice_items', 'invoice_items.invoice_id', '=', 'invoices.invoice_id')
-                ->leftJoin('products', 'products.product_id', '=', 'invoice_items.product_id')
-                ->orderBy('invoices.date', 'desc')
-                ->groupBy('invoice_items.product_id');
-            if (!empty($request->startDate)) {
-                $saleQuery->where('invoices.date', '>=', $request->startDate);
-            }
-            if (!empty($request->supplier)) {
-                $saleQuery->join('supplier_products', 'supplier_products.product_id', '=', 'invoice_items.product_id')
-                    ->where('supplier_products.supplier_id', '=', $request->supplier);
-            }
-            if (!empty($request->endDate)) {
-                $saleQuery->where('invoices.date', '<=', $request->endDate);
-            }
-            if (!empty($request->category) && empty($request->product)) {
-                $saleQuery->where('products.category', $request->category);
-            }
-            if (!empty($request->product)) {
-                $saleQuery->where('invoice_items.product_id', $request->product);
-            }
-            $data = $saleQuery->get();
+            $data = $soldQuery->get();
             $totalAmount = 0;
             $totalQuantity = 0;
             $totalWeight = 0;

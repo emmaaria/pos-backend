@@ -400,34 +400,36 @@ class ReportController extends Controller
             $totalQuantity = 0;
             $totalWeight = 0;
 
-            // Join the sold and returned results to calculate final quantities
-            $data = collect($soldResults)->map(function ($item) use ($totalWeight, $totalQuantity, $totalAmount, $returnedResults) {
+// Join the sold and returned results to calculate final quantities
+            $data = collect($soldResults)->map(function ($item) use ($returnedResults, &$totalAmount, &$totalQuantity, &$totalWeight) {
                 $returnedItem = $returnedResults->where('product_id', $item->product_id)->first();
                 $returnedQty = $returnedItem ? $returnedItem->returned_qty : 0;
                 $returnedAmt = $returnedItem ? $returnedItem->returned_amt : 0;
 
-                $totalAmount += $item->sold_amount - $returnedAmt;
-                $totalQuantity += $item->sold_qty - $returnedQty;
-                $totalWeight += $item->weight * ($item->sold_qty - $returnedQty);
+                $finalQty = $item->sold_qty - $returnedQty;
+                $finalAmount = $item->sold_amount - $returnedAmt;
 
-                return array(
-                    'totalAmount' => $totalAmount,
-                    'returnedQty' => $totalQuantity,
-                    'totalWeight' => $totalWeight,
-                    'data'=> [
-                        'name' => $item->name,
-                        'weight' => $item->weight,
-                        'product_id' => $item->product_id,
-                        'sold_qty' => $item->sold_qty,
-                        'returned_qty' => $returnedQty,
-                        'final_qty' => $item->sold_qty - $returnedQty,
-                        'final_sale_amount' => $item->sold_amount - $returnedAmt,
-                    ]
-                );
+                $totalAmount += $finalAmount;
+                $totalQuantity += $finalQty;
+                $totalWeight += $item->weight * $finalQty;
+
+                return [
+                    'name' => $item->name,
+                    'weight' => $item->weight,
+                    'product_id' => $item->product_id,
+                    'sold_qty' => $item->sold_qty,
+                    'returned_qty' => $returnedQty,
+                    'final_qty' => $finalQty,
+                    'final_sale_amount' => $finalAmount,
+                ];
             });
+            $totalAmount; // Total amount
+            $totalQuantity; // Total quantity
+            $totalWeight; // Total weight
+
 
             $status = true;
-            return response()->json(compact('status', 'data'));
+            return response()->json(compact('status', 'data', 'totalQuantity', 'totalAmount', 'totalWeight'));
         } else {
             $status = false;
             $errors = 'You are not authorized';

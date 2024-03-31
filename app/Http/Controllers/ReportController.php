@@ -344,7 +344,8 @@ class ReportController extends Controller
                     'invoice_items.product_id',
                     'products.name',
                     'products.weight',
-                    DB::raw('SUM(invoice_items.quantity) as sold_qty')
+                    DB::raw('SUM(invoice_items.quantity) as sold_qty'),
+                    DB::raw('SUM(invoice_items.grand_total) as sold_amount'),
                 )
                 ->where('invoices.company_id', $companyId)
                 ->where('invoices.customer_id', $request->customer)
@@ -379,7 +380,8 @@ class ReportController extends Controller
             $returnedQuery = DB::table('sale_return_items')
                 ->select(
                     'product_id',
-                    DB::raw('SUM(quantity) as returned_qty')
+                    DB::raw('SUM(quantity) as returned_qty'),
+                    DB::raw('SUM(total) as returned_amt')
                 )
                 ->where('customer_id', $request->customer);
 
@@ -398,6 +400,7 @@ class ReportController extends Controller
             $data = collect($soldResults)->map(function ($item) use ($returnedResults) {
                 $returnedItem = $returnedResults->where('product_id', $item->product_id)->first();
                 $returnedQty = $returnedItem ? $returnedItem->returned_qty : 0;
+                $returnedAmt = $returnedItem ? $returnedItem->returned_amt : 0;
 
                 return [
                     'name' => $item->name,
@@ -406,6 +409,7 @@ class ReportController extends Controller
                     'sold_qty' => $item->sold_qty,
                     'returned_qty' => $returnedQty,
                     'final_qty' => $item->sold_qty - $returnedQty,
+                    'final_sale_amount' => $item->sold_amount - $returnedAmt,
                 ];
             });
 

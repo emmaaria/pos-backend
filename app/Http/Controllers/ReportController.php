@@ -400,6 +400,7 @@ class ReportController extends Controller
                 $returnedQty = $returnedItem ? $returnedItem->returned_qty : 0;
 
                 return [
+                    'name' => $item->name,
                     'product_id' => $item->product_id,
                     'sold_qty' => $item->sold_qty,
                     'returned_qty' => $returnedQty,

@@ -410,19 +410,24 @@ class ReportController extends Controller
                 $totalQuantity += $item->sold_qty - $returnedQty;
                 $totalWeight += $item->weight * ($item->sold_qty - $returnedQty);
 
-                return [
-                    'name' => $item->name,
-                    'weight' => $item->weight,
-                    'product_id' => $item->product_id,
-                    'sold_qty' => $item->sold_qty,
-                    'returned_qty' => $returnedQty,
-                    'final_qty' => $item->sold_qty - $returnedQty,
-                    'final_sale_amount' => $item->sold_amount - $returnedAmt,
-                ];
+                return array(
+                    'totalAmount' => $totalAmount,
+                    'returnedQty' => $totalQuantity,
+                    'totalWeight' => $totalWeight,
+                    'data'=> [
+                        'name' => $item->name,
+                        'weight' => $item->weight,
+                        'product_id' => $item->product_id,
+                        'sold_qty' => $item->sold_qty,
+                        'returned_qty' => $returnedQty,
+                        'final_qty' => $item->sold_qty - $returnedQty,
+                        'final_sale_amount' => $item->sold_amount - $returnedAmt,
+                    ]
+                );
             });
 
             $status = true;
-            return response()->json(compact('status', 'data', 'totalQuantity', 'totalAmount', 'totalWeight'));
+            return response()->json(compact('status', 'data'));
         } else {
             $status = false;
             $errors = 'You are not authorized';

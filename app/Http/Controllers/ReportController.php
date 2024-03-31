@@ -401,6 +401,7 @@ class ReportController extends Controller
 
                 return [
                     'name' => $item->name,
+                    'weight' => $item->weight,
                     'product_id' => $item->product_id,
                     'sold_qty' => $item->sold_qty,
                     'returned_qty' => $returnedQty,

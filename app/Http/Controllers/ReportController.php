@@ -349,6 +349,7 @@ class ReportController extends Controller
                 ->where('invoices.company_id', $companyId)
                 ->where('invoices.customer_id', $request->customer)
                 ->leftJoin('invoice_items', 'invoice_items.invoice_id', '=', 'invoices.invoice_id')
+                ->leftJoin('products', 'products.product_id', '=', 'invoice_items.product_id')
                 ->leftJoin('sale_return_items', function($join) use ($request) {
                     $join->on('sale_return_items.product_id', '=', 'invoice_items.product_id')
                         ->where('sale_return_items.customer_id', $request->customer);
@@ -359,9 +360,9 @@ class ReportController extends Controller
                         $join->where('sale_return_items.date', '<=', $request->endDate);
                     }
                 })
-                ->leftJoin('products', 'products.product_id', '=', 'invoice_items.product_id')
                 ->orderBy('invoices.date', 'desc')
-                ->groupBy('products.product_id');
+                ->groupBy('invoice_items.product_id');
+
             if (!empty($request->startDate)) {
                 $query->where('invoices.date', '>=', $request->startDate);
             }

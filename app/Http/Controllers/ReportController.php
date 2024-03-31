@@ -396,11 +396,19 @@ class ReportController extends Controller
             // Get the results of total returned quantity
             $returnedResults = $returnedQuery->groupBy('product_id')->get();
 
+            $totalAmount = 0;
+            $totalQuantity = 0;
+            $totalWeight = 0;
+
             // Join the sold and returned results to calculate final quantities
-            $data = collect($soldResults)->map(function ($item) use ($returnedResults) {
+            $data = collect($soldResults)->map(function ($item) use ($totalWeight, $totalQuantity, $totalAmount, $returnedResults) {
                 $returnedItem = $returnedResults->where('product_id', $item->product_id)->first();
                 $returnedQty = $returnedItem ? $returnedItem->returned_qty : 0;
                 $returnedAmt = $returnedItem ? $returnedItem->returned_amt : 0;
+
+                $totalAmount += $item->sold_amount - $returnedAmt;
+                $totalQuantity += $item->sold_qty - $returnedQty;
+                $totalWeight += $item->weight * ($item->sold_qty - $returnedQty);
 
                 return [
                     'name' => $item->name,
@@ -413,9 +421,6 @@ class ReportController extends Controller
                 ];
             });
 
-            $totalAmount = 0;
-            $totalQuantity = 0;
-            $totalWeight = 0;
             $status = true;
             return response()->json(compact('status', 'data', 'totalQuantity', 'totalAmount', 'totalWeight'));
         } else {

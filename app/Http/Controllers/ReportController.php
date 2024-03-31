@@ -349,6 +349,7 @@ class ReportController extends Controller
                 ->leftJoin('invoice_items', 'invoice_items.invoice_id', '=', 'invoices.invoice_id')
                 ->leftJoin('products', 'products.product_id', '=', 'invoice_items.product_id')
                 ->leftJoin('sale_return_items', 'sale_return_items.product_id', '=', 'invoice_items.product_id')
+                ->where('invoices.customer_id', $request->customer)
                 ->groupBy('invoice_items.product_id');
 
             $data = $query->get();

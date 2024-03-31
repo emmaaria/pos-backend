@@ -361,7 +361,7 @@ class ReportController extends Controller
                 })
                 ->leftJoin('products', 'products.product_id', '=', 'invoice_items.product_id')
                 ->orderBy('invoices.date', 'desc')
-                ->groupBy('invoice_items.product_id');
+                ->groupBy('products.product_id');
             if (!empty($request->startDate)) {
                 $query->where('invoices.date', '>=', $request->startDate);
             }

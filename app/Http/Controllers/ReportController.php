@@ -423,9 +423,6 @@ class ReportController extends Controller
                     'final_sale_amount' => $finalAmount,
                 ];
             });
-            $totalAmount; // Total amount
-            $totalQuantity; // Total quantity
-            $totalWeight; // Total weight
 
 
             $status = true;

@@ -373,7 +373,40 @@ class ReportController extends Controller
             }
 
             // Get the results of total sold quantity
-            $data = $soldQuery->get();
+            $soldResults = $soldQuery->get();
+
+            // Query to calculate total returned quantity
+            $returnedQuery = DB::table('sale_return_items')
+                ->select(
+                    'product_id',
+                    DB::raw('SUM(quantity) as returned_qty')
+                )
+                ->where('customer_id', $request->customer);
+
+            // Add additional filters if needed
+            if (!empty($request->startDate)) {
+                $returnedQuery->where('date', '>=', $request->startDate);
+            }
+            if (!empty($request->endDate)) {
+                $returnedQuery->where('date', '<=', $request->endDate);
+            }
+
+            // Get the results of total returned quantity
+            $returnedResults = $returnedQuery->groupBy('product_id')->get();
+
+            // Join the sold and returned results to calculate final quantities
+            $data = collect($soldResults)->map(function ($item) use ($returnedResults) {
+                $returnedItem = $returnedResults->where('product_id', $item->product_id)->first();
+                $returnedQty = $returnedItem ? $returnedItem->returned_qty : 0;
+
+                return [
+                    'product_id' => $item->product_id,
+                    'sold_qty' => $item->sold_qty,
+                    'returned_qty' => $returnedQty,
+                    'final_qty' => $item->sold_qty - $returnedQty,
+                ];
+            });
+
             $totalAmount = 0;
             $totalQuantity = 0;
             $totalWeight = 0;

@@ -346,40 +346,13 @@ class ReportController extends Controller
                     DB::raw('COALESCE(SUM(sale_return_items.total), 0) as returnTotal'),
                     DB::raw('SUM(invoice_items.grand_total) as grand_total')
                 )
-                ->where('invoices.company_id', $companyId)
-                ->where('invoices.customer_id', $request->customer)
                 ->leftJoin('invoice_items', 'invoice_items.invoice_id', '=', 'invoices.invoice_id')
                 ->leftJoin('products', 'products.product_id', '=', 'invoice_items.product_id')
-                ->leftJoin('sale_return_items', function($join) use ($request) {
-                    $join->on('sale_return_items.product_id', '=', 'invoice_items.product_id')
-                        ->where('sale_return_items.customer_id', $request->customer);
-                    if (!empty($request->startDate)) {
-                        $join->where('sale_return_items.date', '>=', $request->startDate);
-                    }
-                    if (!empty($request->endDate)) {
-                        $join->where('sale_return_items.date', '<=', $request->endDate);
-                    }
-                })
-                ->orderBy('invoices.date', 'desc')
+                ->leftJoin('sale_return_items', 'sale_return_items.product_id', '=', 'invoice_items.product_id')
                 ->groupBy('invoice_items.product_id');
 
-            if (!empty($request->startDate)) {
-                $query->where('invoices.date', '>=', $request->startDate);
-            }
-            if (!empty($request->supplier)) {
-                $query->join('supplier_products', 'supplier_products.product_id', '=', 'invoice_items.product_id')
-                    ->where('supplier_products.supplier_id', '=', $request->supplier);
-            }
-            if (!empty($request->endDate)) {
-                $query->where('invoices.date', '<=', $request->endDate);
-            }
-            if (!empty($request->category) && empty($request->product)) {
-                $query->where('products.category', $request->category);
-            }
-            if (!empty($request->product)) {
-                $query->where('invoice_items.product_id', $request->product);
-            }
             $data = $query->get();
+
             $totalAmount = 0;
             $totalQuantity = 0;
             $totalWeight = 0;

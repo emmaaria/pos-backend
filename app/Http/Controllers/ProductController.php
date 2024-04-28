@@ -357,7 +357,7 @@ class ProductController extends Controller
                     ->where('products.company_id', $companyId)
                     ->paginate(50);
                 foreach ($products as $product){
-                    $totalPurchase += $product->purchase;
+                    $totalPurchase += $product->purchase - $product->purchaseReturn;
                     $totalSale += $product->sale - $product->return;
                     $stock += $product->purchase - ($product->sale - $product->return - $product->purchaseReturn);
                 }
@@ -372,9 +372,9 @@ class ProductController extends Controller
                     ->paginate(50);
                 $status = true;
                 foreach ($products as $product){
-                    $totalPurchase += $product->purchase;
+                    $totalPurchase += $product->purchase - $product->purchaseReturn;
                     $totalSale += $product->sale - $product->return;
-                    $stock += $product->purchase - ($product->sale - $product->return - $product->purchaseReturn);
+                    $stock += ($product->purchase - $product->purchaseReturn) - ($product->sale - $product->return);
                 }
                 return response()->json(compact('status', 'products', 'totalSale', 'totalPurchase', 'stock'));
             }

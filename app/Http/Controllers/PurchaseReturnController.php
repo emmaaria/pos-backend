@@ -54,20 +54,21 @@ class PurchaseReturnController extends Controller
         if ($companyId) {
             $name = $request->keyword;
             if (empty($name)) {
-                $returns = DB::table('sale_returns')
-                    ->select('sale_returns.*', 'customers.name')
-                    ->leftJoin('customers', 'customers.id', '=', 'sale_returns.customer_id')
-                    ->where('sale_returns.company_id', $companyId)
+                $returns = DB::table('purchase_returns')
+                    ->select('purchase_returns.*', 'suppliers.name')
+                    ->leftJoin('suppliers', 'suppliers.id', '=', 'purchase_returns.supplier_id')
+                    ->where('purchase_returns.company_id', $companyId)
                     ->orderBy('id', 'desc')
                     ->paginate(50);
                 $status = true;
                 return response()->json(compact('status', 'returns'));
             } else {
-                $returns = DB::table('sale_returns')
-                    ->select('sale_returns.*', 'customers.name')
-                    ->leftJoin('customers', 'customers.id', '=', 'sale_returns.customer_id')
-                    ->where('sale_returns.company_id', $companyId)
-                    ->where('sale_returns.return_id', 'like', '%' . $name . '%')
+                $returns = DB::table('purchase_returns')
+                    ->select('purchase_returns.*', 'suppliers.name')
+                    ->leftJoin('suppliers', 'suppliers.id', '=', 'purchase_returns.supplier_id')
+                    ->where('purchase_returns.company_id', $companyId)
+                    ->where('purchase_returns.return_id', 'like', '%' . $name . '%')
+                    ->orWhere('suppliers.name', 'like', '%' . $name . '%')
                     ->paginate(50);
                 $status = true;
                 return response()->json(compact('status', 'returns'));

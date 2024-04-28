@@ -499,4 +499,41 @@ class ReportController extends Controller
             return response()->json(compact('status', 'errors'));
         }
     }
+
+    public function generateExpenseReport(Request $request)
+    {
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $validator = Validator::make($request->all(),
+                [
+                    'startDate' => 'required',
+                    'endDate' => 'required',
+                ]
+            );
+            if ($validator->fails()) {
+                $status = false;
+                $errors = $validator->errors();
+                return response()->json(compact('status', 'errors'));
+            }
+            $data = DB::table('expenses')
+                ->select('expenses.id', 'expenses.amount', 'expenses.date', 'expenses.comment', 'expense_categories.name AS category_name', DB::raw('COALESCE(SUM(expenses.amount), 0) as total'))
+                ->where('expenses.company_id', $companyId)
+                ->where('expenses.date', '>=', $request->startDate)
+                ->where('expenses.date', '<=', $request->endDate)
+                ->leftJoin('expense_categories', 'expense_categories.id', '=', 'expenses.category')
+                ->orderBy('expenses.date', 'desc')
+                ->groupBy('expense_categories.id')
+                ->get();
+            $totalAmount = 0;
+            foreach ($data as $row) {
+                $totalAmount += $row->total;
+            }
+            $status = true;
+            return response()->json(compact('status', 'data', 'totalAmount'));
+        } else {
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
+    }
 }

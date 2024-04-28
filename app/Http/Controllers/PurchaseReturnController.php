@@ -239,7 +239,7 @@ class PurchaseReturnController extends Controller
                         if ($request->account == 'supplier' && !empty($request->total)) {
                             $customerTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('supplier_transaction');
                             DB::table('supplier_ledgers')->insert(array(
-                                'customer_id' => $supplierId,
+                                'supplier_id' => $supplierId,
                                 'transaction_id' => $customerTxId,
                                 'reference_no' => "ret-$returnId",
                                 'type' => 'deposit',

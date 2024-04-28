@@ -516,7 +516,7 @@ class ReportController extends Controller
                 return response()->json(compact('status', 'errors'));
             }
             $query = DB::table('expenses')
-                ->select('expenses.id', 'expenses.amount', 'expenses.date', 'expenses.comment', 'expense_categories.name AS category_name', DB::raw('COALESCE(SUM(expenses.amount), 0) as total'))
+                ->select('expenses.amount', 'expense_categories.name AS category_name', DB::raw('COALESCE(SUM(expenses.amount), 0) as total'))
                 ->where('expenses.company_id', $companyId)
                 ->where('expenses.date', '>=', $request->startDate)
                 ->where('expenses.date', '<=', $request->endDate)

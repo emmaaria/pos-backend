@@ -94,8 +94,8 @@ class PurchaseReturnController extends Controller
                 ->first();
             $returnItems = DB::table('purchase_return_items')
                 ->select('purchase_return_items.*', 'products.name')
-                ->leftJoin('products', 'products.product_id', '=', 'sale_return_items.product_id')
-                ->where('sale_return_items.return_id', $id)
+                ->leftJoin('products', 'products.product_id', '=', 'purchase_return_items.product_id')
+                ->where('purchase_return_items.return_id', $id)
                 ->get();
             $status = true;
             return response()->json(compact('status', 'return', 'returnItems'));

@@ -515,13 +515,16 @@ class ReportController extends Controller
                 $errors = $validator->errors();
                 return response()->json(compact('status', 'errors'));
             }
-            $data = DB::table('expenses')
+            $query = DB::table('expenses')
                 ->select('expenses.id', 'expenses.amount', 'expenses.date', 'expenses.comment', 'expense_categories.name AS category_name', DB::raw('COALESCE(SUM(expenses.amount), 0) as total'))
                 ->where('expenses.company_id', $companyId)
                 ->where('expenses.date', '>=', $request->startDate)
                 ->where('expenses.date', '<=', $request->endDate)
-                ->leftJoin('expense_categories', 'expense_categories.id', '=', 'expenses.category')
-                ->orderBy('expenses.date', 'desc')
+                ->leftJoin('expense_categories', 'expense_categories.id', '=', 'expenses.category');
+            if ($request->expenseCategory) {
+                $query = $query->where('expenses.category', $request->expenseCategory);
+            }
+            $data = $query->orderBy('expenses.date', 'desc')
                 ->groupBy('expense_categories.id')
                 ->get();
             $totalAmount = 0;

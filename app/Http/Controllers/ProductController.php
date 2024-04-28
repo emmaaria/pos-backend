@@ -358,7 +358,7 @@ class ProductController extends Controller
                     ->paginate(50);
                 foreach ($products as $product){
                     $totalPurchase += $product->purchase;
-                    $totalSale += $product->sale - $product->return;
+                    $totalSale += $product->sale - $product->return - $product->purchaseReturn;
                     $stock += $product->purchase - ($product->sale - $product->return);
                 }
                 $status = true;
@@ -373,7 +373,7 @@ class ProductController extends Controller
                 $status = true;
                 foreach ($products as $product){
                     $totalPurchase += $product->purchase;
-                    $totalSale += $product->sale - $product->return;
+                    $totalSale += $product->sale - $product->return - $product->purchaseReturn;
                     $stock += $product->purchase - ($product->sale - $product->return);
                 }
                 return response()->json(compact('status', 'products', 'totalSale', 'totalPurchase', 'stock'));

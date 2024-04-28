@@ -24,7 +24,7 @@ class CreatePurchaseReturnItemsTable extends Migration
             $table->string('quantity');
             $table->string('total');
             $table->string('company_id');
-            $table->string('customer_id');
+            $table->string('supplier_id');
             $table->timestamps();
             $table->index(['company_id', 'return_id', 'invoice_id']);
             $table->index(['user_id', 'date', 'product_id']);

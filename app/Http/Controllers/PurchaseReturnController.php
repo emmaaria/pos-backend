@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -84,15 +85,15 @@ class PurchaseReturnController extends Controller
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
-            $return = DB::table('sale_returns')
-                ->select('sale_returns.*', 'customers.name AS customerName')
-                ->leftJoin('customers', 'customers.id', '=', 'sale_returns.customer_id')
-                ->where('sale_returns.company_id', $companyId)
-                ->where('sale_returns.return_id', $id)
+            $return = DB::table('purchase_returns')
+                ->select('purchase_returns.*', 'suppliers.name AS supplierName')
+                ->leftJoin('suppliers', 'suppliers.id', '=', 'purchase_returns.supplier_id')
+                ->where('purchase_returns.company_id', $companyId)
+                ->where('purchase_returns.return_id', $id)
                 ->orderBy('id', 'desc')
                 ->first();
-            $returnItems = DB::table('sale_return_items')
-                ->select('sale_return_items.*', 'products.name')
+            $returnItems = DB::table('purchase_return_items')
+                ->select('purchase_return_items.*', 'products.name')
                 ->leftJoin('products', 'products.product_id', '=', 'sale_return_items.product_id')
                 ->where('sale_return_items.return_id', $id)
                 ->get();
@@ -116,7 +117,7 @@ class PurchaseReturnController extends Controller
                     'productQuantities' => 'required',
                     'productPrices' => 'required',
                     'total' => 'required',
-                    'customerId' => 'required',
+                    'supplierId' => 'required',
                     'account' => 'required',
                 ]
             );
@@ -132,13 +133,13 @@ class PurchaseReturnController extends Controller
                     return response()->json(compact('status', 'errors'));
                 }
             }
-            $customerId = $request->customerId;
+            $supplierId = $request->supplierId;
             $products = $request->productIds;
             $quantities = $request->productQuantities;
             $prices = $request->productPrices;
             if (count($products) > 0) {
                 try {
-                    DB::transaction(function () use ($request, $companyId, $products, $quantities, $prices, $customerId) {
+                    DB::transaction(function () use ($request, $companyId, $products, $quantities, $prices, $supplierId) {
                         $profit = 0;
                         $txGenerator = new InvoiceNumberGeneratorService();
                         $returnId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('return');
@@ -149,7 +150,7 @@ class PurchaseReturnController extends Controller
                             $price = $prices[$i];
 
                             if ($quantity > 0) {
-                                DB::table('sale_return_items')->insert([
+                                DB::table('purchase_return_items')->insert([
                                     'return_id' => $returnId,
                                     'product_id' => $productID,
                                     'price' => $price,
@@ -157,23 +158,12 @@ class PurchaseReturnController extends Controller
                                     'company_id' => $companyId,
                                     'quantity' => $quantity,
                                     'date' => $request->date,
-                                    'customer_id' => $customerId,
+                                    'supplier_id' => $supplierId,
                                     'total' => $quantity * $price,
                                 ]);
-                                $purchasePrice = DB::table('average_purchase_prices')->select('price')->where('product_id', $productID)->where('company_id', $companyId)->first();
-
-                                $profit += ($quantity * $price) - ($quantity * $purchasePrice->price);
                             }
                         }
-                        DB::table('profits')->insert(
-                            [
-                                'date' => $request->date,
-                                'deduct' => $profit,
-                                'company_id' => $companyId,
-                                'reference_no' => "ret-$returnId",
-                            ]
-                        );
-                        DB::table('sale_returns')->insert(
+                        DB::table('purchase_returns')->insert(
                             [
                                 'return_id' => $returnId,
                                 'return_amount' => $request->total,
@@ -181,22 +171,22 @@ class PurchaseReturnController extends Controller
                                 'user_id' => Auth::id(),
                                 'date' => $request->date,
                                 'account' => $request->account,
-                                'customer_id' => $customerId,
+                                'supplier_id' => $supplierId,
                                 'type' => 'dsr',
                                 'company_id' => $companyId,
                             ]
                         );
                         if ($request->account == 'cash' && !empty($request->total)) {
-                            $cashTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('customer_transaction');
+                            $cashTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('cash_transaction');
                             DB::table('cash_books')->insert(array(
                                 'transaction_id' => $cashTxId,
                                 'company_id' => $companyId,
                                 'user_id' => Auth::id(),
                                 'reference_no' => "ret-$returnId",
-                                'type' => 'payment',
-                                'payment' => $request->total,
+                                'type' => 'receive',
+                                'receive' => $request->total,
                                 'date' => $request->date,
-                                'comment' => "Cash deduct for Return No ($returnId)"
+                                'comment' => "Cash Deposit for Return No ($returnId)"
                             ));
                         }
 
@@ -206,11 +196,11 @@ class PurchaseReturnController extends Controller
                                 'transaction_id' => $bkashTxId,
                                 'company_id' => $companyId,
                                 'reference_no' => "ret-$returnId",
-                                'type' => 'withdraw',
+                                'type' => 'deposit',
                                 'user_id' => Auth::id(),
-                                'withdraw' => $request->total,
+                                'deposit' => $request->total,
                                 'date' => $request->date,
-                                'comment' => "Deduct for Return No ($returnId)"
+                                'comment' => "Deposit for Return No ($returnId)"
                             ));
                             $txGenerator->setNextInvoiceNo();
                         }
@@ -221,11 +211,11 @@ class PurchaseReturnController extends Controller
                                 'transaction_id' => $nagadTxId,
                                 'company_id' => $companyId,
                                 'reference_no' => "ret-$returnId",
-                                'type' => 'withdraw',
+                                'type' => 'deposit',
                                 'user_id' => Auth::id(),
-                                'withdraw' => $request->total,
+                                'deposit' => $request->total,
                                 'date' => $request->date,
-                                'comment' => "Deduct for Return No ($returnId)"
+                                'comment' => "Deposit for Return No ($returnId)"
                             ));
                             $txGenerator->setNextInvoiceNo();
                         }
@@ -235,21 +225,21 @@ class PurchaseReturnController extends Controller
                             DB::table('bank_ledgers')->insert(array(
                                 'transaction_id' => $bankTxId,
                                 'reference_no' => 'ret-' . $returnId,
-                                'type' => 'withdraw',
+                                'type' => 'deposit',
                                 'user_id' => Auth::id(),
-                                'withdraw' => $request->total,
+                                'deposit' => $request->total,
                                 'bank_id' => $request->bankId,
                                 'date' => $request->date,
                                 'company_id' => $companyId,
-                                'comment' => "Deduct for Return No ($returnId)"
+                                'comment' => "Deposit for Return No ($returnId)"
                             ));
                             $txGenerator->setNextInvoiceNo();
                         }
 
-                        if ($request->account == 'customer' && !empty($request->total)) {
-                            $customerTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('customer_transaction');
-                            DB::table('customer_ledgers')->insert(array(
-                                'customer_id' => $customerId,
+                        if ($request->account == 'supplier' && !empty($request->total)) {
+                            $customerTxId = $txGenerator->prefix('')->setCompanyId($companyId)->startAt(10000)->getInvoiceNumber('supplier_transaction');
+                            DB::table('supplier_ledgers')->insert(array(
+                                'customer_id' => $supplierId,
                                 'transaction_id' => $customerTxId,
                                 'reference_no' => "ret-$returnId",
                                 'type' => 'deposit',
@@ -288,10 +278,9 @@ class PurchaseReturnController extends Controller
         if ($companyId) {
             $id = $request->id;
             if (!empty($id)) {
-                DB::table('sale_returns')->where('return_id', $id)->where('company_id', $companyId)->delete();
-                DB::table('profits')->where('reference_no', "ret-$id")->where('company_id', $companyId)->delete();
-                DB::table('sale_return_items')->where('return_id', $id)->where('company_id', $companyId)->delete();
-                DB::table('customer_ledgers')->where('reference_no', "ret-$id")->where('company_id', $companyId)->delete();
+                DB::table('purchase_returns')->where('return_id', $id)->where('company_id', $companyId)->delete();
+                DB::table('purchase_return_items')->where('return_id', $id)->where('company_id', $companyId)->delete();
+                DB::table('supplier_ledgers')->where('reference_no', "ret-$id")->where('company_id', $companyId)->delete();
                 DB::table('nagad_transactions')->where('reference_no', "ret-$id")->where('company_id', $companyId)->delete();
                 DB::table('bkash_transactions')->where('reference_no', "ret-$id")->where('company_id', $companyId)->delete();
                 DB::table('cash_books')->where('reference_no', "ret-$id")->where('company_id', $companyId)->delete();

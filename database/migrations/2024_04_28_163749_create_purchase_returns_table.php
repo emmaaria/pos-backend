@@ -15,7 +15,19 @@ class CreatePurchaseReturnsTable extends Migration
     {
         Schema::create('purchase_returns', function (Blueprint $table) {
             $table->id();
+            $table->string('return_id');
+            $table->string('invoice_id')->nullable();
+            $table->string('return_amount')->default(0);
+            $table->string('note')->nullable();
+            $table->string('user_id')->nullable();
+            $table->string('supplier_id');
+            $table->string('date');
+            $table->string('account');
+            $table->string('type');
+            $table->string('company_id');
             $table->timestamps();
+            $table->index(['company_id', 'return_id', 'invoice_id']);
+            $table->index(['user_id', 'date']);
         });
     }
 

@@ -59,7 +59,12 @@ class ProductController extends Controller
             $name = $request->name;
             $all = $request->all;
             if (empty($name) && empty($all) && empty($request->supplier)) {
-                $products = DB::table('products')->select('*')->orderBy('id', 'desc')->where('company_id', $companyId)->paginate(50);
+                $products = DB::table('products.*', 'suppliers.name as supplierName')
+                    ->select('*')->orderBy('id', 'desc')
+                    ->leftJoin('supplier_products', 'products.product_id', '=', 'supplier_products.product_id')
+                    ->leftJoin('suppliers', 'suppliers.id', '=', 'supplier_products.supplier_id')
+                    ->where('company_id', $companyId)
+                    ->paginate(50);
                 $status = true;
                 return response()->json(compact('status', 'products', 'companyId'));
             } elseif (!empty($all)) {

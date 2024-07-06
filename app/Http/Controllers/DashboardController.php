@@ -172,6 +172,10 @@ class DashboardController extends Controller
                 ->where('date', date('Y-m-d'))
                 ->sum(DB::raw('deposit - deduct'));
 
+            $data['totalDue'] = DB::table('customer_ledgers')
+                ->where('company_id', $companyId)
+                ->sum(DB::raw('due - deposit'));
+
             $sales = DB::table('invoices')
                 ->select(DB::raw("SUM(grand_total) as total"), DB::raw("MONTHNAME(date) as month"))
                 ->whereYear('date', date('Y'))

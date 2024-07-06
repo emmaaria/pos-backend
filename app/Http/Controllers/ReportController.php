@@ -68,15 +68,29 @@ class ReportController extends Controller
     {
         $companyId = $this->getCompanyId();
         if ($companyId) {
-            $data = DB::table('purchases')
-                ->select('suppliers.name AS supplier_name', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id', 'purchases.date')
-                ->where('purchases.company_id', $companyId)
-                ->where('suppliers.company_id', $companyId)
-                ->leftJoin('suppliers', 'suppliers.id', '=', 'purchases.supplier_id')
-                ->where('purchases.date', '>=', $request->startDate)
-                ->where('purchases.date', '<=', $request->endDate)
-                ->orderBy('purchases.id', 'desc')
-                ->get();
+            if (!empty($request->supplier)){
+                $data = DB::table('purchases')
+                    ->select('suppliers.name AS supplier_name', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id', 'purchases.date')
+                    ->where('purchases.company_id', $companyId)
+                    ->where('purchases.supplier_id', $request->supplier)
+                    ->where('suppliers.company_id', $companyId)
+                    ->leftJoin('suppliers', 'suppliers.id', '=', 'purchases.supplier_id')
+                    ->where('purchases.date', '>=', $request->startDate)
+                    ->where('purchases.date', '<=', $request->endDate)
+                    ->orderBy('purchases.id', 'desc')
+                    ->get();
+            }else{
+                $data = DB::table('purchases')
+                    ->select('suppliers.name AS supplier_name', 'purchases.purchase_id', 'purchases.amount', 'purchases.comment', 'purchases.id', 'purchases.date')
+                    ->where('purchases.company_id', $companyId)
+                    ->where('suppliers.company_id', $companyId)
+                    ->leftJoin('suppliers', 'suppliers.id', '=', 'purchases.supplier_id')
+                    ->where('purchases.date', '>=', $request->startDate)
+                    ->where('purchases.date', '<=', $request->endDate)
+                    ->orderBy('purchases.id', 'desc')
+                    ->get();
+            }
+
             $status = true;
             return response()->json(compact('status', 'data'));
         } else {

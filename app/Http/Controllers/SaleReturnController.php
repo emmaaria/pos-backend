@@ -69,6 +69,7 @@ class SaleReturnController extends Controller
                     ->leftJoin('customers', 'customers.id', '=', 'sale_returns.customer_id')
                     ->where('sale_returns.company_id', $companyId)
                     ->where('sale_returns.return_id', 'like', '%' . $name . '%')
+                    ->orWhere('customers.name', 'like', '%' . $name . '%')
                     ->paginate(50);
                 $status = true;
                 return response()->json(compact('status', 'returns'));

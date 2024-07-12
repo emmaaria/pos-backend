@@ -336,6 +336,51 @@ class ReportController extends Controller
         }
     }
 
+    public function purchaseBySupplier(Request $request)
+    {
+        $companyId = $this->getCompanyId();
+        if ($companyId) {
+            $query = DB::table('supplier_products')
+                ->select(
+                    'products.name',
+                    'products.product_id',
+                    'products.weight',
+                    'purchase_items.date',
+                    'purchase_items.total',
+                    'products.weight',
+                    DB::raw('SUM(purchase_items.quantity) as qty'),
+                )
+                ->where('supplier_products.company_id', $companyId)
+                ->where('supplier_products.supplier_id', $request->supplier)
+                ->where('purchase_items.company_id', $companyId)
+                ->leftJoin('purchase_items', 'purchase_items.product_id', '=', 'supplier_products.product_id')
+                ->leftJoin('products', 'products.product_id', '=', 'supplier_products.product_id')
+                ->orderBy('purchase_items.date', 'desc')
+                ->groupBy('purchase_items.product_id');
+            if (!empty($request->startDate)) {
+                $query->where('purchase_items.date', '>=', $request->startDate);
+            }
+            if (!empty($request->endDate)) {
+                $query->where('purchase_items.date', '<=', $request->endDate);
+            }
+            $data = $query->get();
+            $totalQuantity = 0;
+            $totalAmount = 0;
+            $totalWeight = 0;
+            foreach ($data as $row) {
+                $totalQuantity += $row->qty;
+                $totalAmount += $row->total;
+                $totalWeight += $row->weight * $row->qty;
+            }
+            $status = true;
+            return response()->json(compact('status', 'data', 'totalQuantity', 'totalAmount', 'totalWeight'));
+        } else {
+            $status = false;
+            $errors = 'You are not authorized';
+            return response()->json(compact('status', 'errors'));
+        }
+    }
+
     public function salesByCustomer(Request $request)
     {
         $companyId = $this->getCompanyId();

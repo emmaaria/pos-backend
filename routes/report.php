@@ -18,6 +18,7 @@ Route::group(['middleware' => 'api'], function ($router) {
     Route::post('/report/sales/by-category', [ReportController::class, 'salesByCategory']);
     Route::post('/report/purchase/by-product', [ReportController::class, 'purchaseByProduct']);
     Route::post('/report/purchase/by-category', [ReportController::class, 'purchaseByCategory']);
+    Route::post('/report/purchase/by-supplier', [ReportController::class, 'purchaseBySupplier']);
     Route::post('/report/sales/by-customer', [ReportController::class, 'salesByCustomer']);
     Route::post('/report/sales/by-supplier', [ReportController::class, 'salesBySupplier']);
     Route::post('/report/expense', [ReportController::class, 'generateExpenseReport']);
